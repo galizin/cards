@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <title>cards</title>
+    <link rel="stylesheet" href="./style.css">
+    <script src="./script.js"></script>
+  </head>
+  <body>
+    <!-- page content -->
+<script>
+
+  function dragstart_handler(ev) {
+    // Add the target element's id to the data transfer object
+    ev.dataTransfer.setData("application/my-app", ev.target.id);
+    ev.dataTransfer.effectAllowed = "move";
+  }
+  function dragover_handler(ev) {
+    ev.preventDefault();
+    ev.dataTransfer.dropEffect = "move";
+  }
+  function drop_handler(ev) {
+    ev.preventDefault();
+    // Get the id of the target and add the moved element to the target's DOM
+    const data = ev.dataTransfer.getData("application/my-app");
+    ev.target.prepend(document.getElementById(data));
+  }
+
+
+
+var num = 0x1f0a0;
+
+cardString = function (cardNum,suit) {
+  var red = suit == 0x10 || suit == 0x20 ? 1 : 0; 
+  //console.log(red);
+  //console.log( '<span draggable="true">' + ((red)?'<mark class="red">':''));// + '&#x' + (num+cardNum+suit).toString(16) + ';' + red?'</mark>':''+'</span>';
+  return '<span draggable="true" class="outerspan" id="' + (num+cardNum+suit).toString()  +  '" ondragstart="dragstart_handler(event)" >' 
+    + ((red)?'<mark class="red">':'') 
+    + '<span class="innerspan">&#x' 
+    + (num+cardNum+suit).toString(16) 
+    + ';</span>' 
+    + ((red)?'</mark>':'') 
+    + '</span>';
+};
+
+window.addEventListener('load', function() {
+  //var strnum = '&#x' + num.toString(16) + ';';
+  var strnum = cardString(0,0);
+  for(var i=1; i<0xf; i++) {
+    //strnum += '&#x' + (num+i).toString(16) + ';';
+    //strnum += '<mark class="red">&#x' + (num+i+0x10).toString(16) + ';</mark>';
+    //strnum += '<mark class="red">&#x' + (num+i+0x20).toString(16) + ';</mark>';
+    //strnum += '&#x' + (num+i+0x30).toString(16) + ';';
+    //console.log(cardString(i, 0));
+    strnum += cardString(i, 0);
+    strnum += cardString(i, 0x10);
+    strnum += cardString(i, 0x20);
+    strnum += cardString(i, 0x30);
+  }
+  document.getElementById("main").innerHTML = strnum;
+});
+</script>
+<div id="main" ondrop="drop_handler(event)" ondragover="dragover_handler(event)" />
+  </body>
+</html>
