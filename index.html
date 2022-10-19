@@ -14,10 +14,12 @@
     // Add the target element's id to the data transfer object
     ev.dataTransfer.setData("application/my-app", ev.target.id);
     ev.dataTransfer.effectAllowed = "move";
+    console.log('start');
   }
   function dragover_handler(ev) {
     ev.preventDefault();
     ev.dataTransfer.dropEffect = "move";
+    console.log('move');
   }
   function drop_handler(ev) {
     ev.preventDefault();
@@ -34,7 +36,9 @@ cardString = function (cardNum,suit) {
   var red = suit == 0x10 || suit == 0x20 ? 1 : 0; 
   //console.log(red);
   //console.log( '<span draggable="true">' + ((red)?'<mark class="red">':''));// + '&#x' + (num+cardNum+suit).toString(16) + ';' + red?'</mark>':''+'</span>';
-  return '<span draggable="true" class="outerspan" id="' + (num+cardNum+suit).toString()  +  '" ondragstart="dragstart_handler(event)" >' 
+  return '<span draggable="true" class="outerspan" id="' 
+    + (num+cardNum+suit).toString()  
+    + '" ontouchstart="dragstart_handler(event)" ondragstart="dragstart_handler(event)" >' 
     + ((red)?'<mark class="red">':'') 
     + '<span class="innerspan">&#x' 
     + (num+cardNum+suit).toString(16) 
@@ -60,6 +64,6 @@ window.addEventListener('load', function() {
   document.getElementById("main").innerHTML = strnum;
 });
 </script>
-<div id="main" ondrop="drop_handler(event)" ondragover="dragover_handler(event)" />
+<div id="main" ontouchstop="drop_handler(event)" ontouchmove="dragover_handler(event)"  ondrop="drop_handler(event)" ondragover="dragover_handler(event)" />
   </body>
 </html>
