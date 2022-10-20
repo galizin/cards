@@ -5,27 +5,52 @@
     <title>cards</title>
     <link rel="stylesheet" href="./style.css">
     <script src="./script.js"></script>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0">
   </head>
   <body>
     <!-- page content -->
 <script>
 
   function dragstart_handler(ev) {
+    ev.preventDefault();
     // Add the target element's id to the data transfer object
-    ev.dataTransfer.setData("application/my-app", ev.target.id);
-    ev.dataTransfer.effectAllowed = "move";
-    console.log('start');
+//    ev.dataTransfer.setData("application/my-app", ev.target.id);
+  //  ev.dataTransfer.effectAllowed = "move";
+    //console.log('start');
+  const touches = ev.changedTouches;
+const viewportOffset = ev.target.getBoundingClientRect();
+// these are relative to the viewport, i.e. the window
+//var top = viewportOffset.top;
+//var left = viewportOffset.left;
+//console.log((viewportOffset.top)  + ' ' + (viewportOffset.left));
+//console.log((-viewportOffset.top + touches[0].pageY -6.5)  + ' ' + (-viewportOffset.left + touches[0].pageX - 4.5));
+ev.target.setAttribute("touchstartoffset", 
+  (-viewportOffset.top + touches[0].pageY -6.5)  + ',' + (-viewportOffset.left + touches[0].pageX - 4.5));
   }
   function dragover_handler(ev) {
     ev.preventDefault();
-    ev.dataTransfer.dropEffect = "move";
-    console.log('move');
+   // ev.dataTransfer.dropEffect = "move";
+    //console.log('move');
+  const touches = ev.changedTouches;
+//console.log(touches[0].pageX + ' ' + touches[0].pageY);
+//console.log(ev);
+//console.log(ev.target.getAttribute("touchstartoffset").split(',')[0]);
+//console.log(Number(ev.target.getAttribute("touchstartoffset").split[0]));
+//console.log((touches[0].pageY + Number(ev.target.getAttribute("touchstartoffset").split[0])) + 'px');
+ev.target.closest(".outerspan").style.top = (touches[0].pageY - Number(ev.target.getAttribute("touchstartoffset").split(',')[0])) + 'px';
+ev.target.closest(".outerspan").style.left = (touches[0].pageX - Number(ev.target.getAttribute("touchstartoffset").split(',')[1])) + 'px';
+//ev.target.closest(".outerspan").style.top = touches[0].pageY + 'px';
+//ev.target.closest(".outerspan").style.left = touches[0].pageX + 'px';
+//console.log(ev.target.style.top);
+//console.log(ev.target.style.left);
+//console.log(touches[0].pageX + ' ' + touches[0].pageY);
+
   }
   function drop_handler(ev) {
     ev.preventDefault();
     // Get the id of the target and add the moved element to the target's DOM
-    const data = ev.dataTransfer.getData("application/my-app");
-    ev.target.prepend(document.getElementById(data));
+   // const data = ev.dataTransfer.getData("application/my-app");
+   // ev.target.prepend(document.getElementById(data));
   }
 
 
@@ -36,9 +61,10 @@ cardString = function (cardNum,suit) {
   var red = suit == 0x10 || suit == 0x20 ? 1 : 0; 
   //console.log(red);
   //console.log( '<span draggable="true">' + ((red)?'<mark class="red">':''));// + '&#x' + (num+cardNum+suit).toString(16) + ';' + red?'</mark>':''+'</span>';
-  return '<span draggable="true" class="outerspan" id="' 
+//  return '<span draggable="true" class="outerspan" id="' 
+  return '<span class="outerspan" id="' 
     + (num+cardNum+suit).toString()  
-    + '" ontouchstart="dragstart_handler(event)" ondragstart="dragstart_handler(event)" >' 
+    + '" ontouchstart="dragstart_handler(event)" >' 
     + ((red)?'<mark class="red">':'') 
     + '<span class="innerspan">&#x' 
     + (num+cardNum+suit).toString(16) 
@@ -64,6 +90,7 @@ window.addEventListener('load', function() {
   document.getElementById("main").innerHTML = strnum;
 });
 </script>
-<div id="main" ontouchstop="drop_handler(event)" ontouchmove="dragover_handler(event)"  ondrop="drop_handler(event)" ondragover="dragover_handler(event)" />
+<!--<div id="main" ontouchstop="drop_handler(event)" ontouchmove="dragover_handler(event)"  ondrop="drop_handler(event)" ondragover="dragover_handler(event)" />-->
+<div id="main" ontouchstop="drop_handler(event)" ontouchmove="dragover_handler(event)" />
   </body>
 </html>
