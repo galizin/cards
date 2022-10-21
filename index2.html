@@ -147,7 +147,7 @@ moveToMain = function(from, to, howmany) {
 
 procCmd = function(cmd) {
   switch(cmd.substring(0,1)) {
-    case "n":
+    case "q":
       if(stack[1].el.length === 0) {
         while(stack[0].el.length > 0) {
           stack[1].el.push(stack[0].el[0]);
@@ -161,11 +161,11 @@ procCmd = function(cmd) {
         }
       }
       break;
-    case "m": //from to how many
+    case "s": //from to how many
       const parm = (cmd.split(" ")).map(m => parseInt(m)).slice(1);
       //const from = main[parm[0]].splice(main[parm[0]].length);
       //const to = main[parm[1]];
-      moveToMain(main[parm[0]], main[parm[1]], parm[2]);      
+      moveToMain(parm[0] == 7 ? stack[0]: main[parm[0]], main[parm[1]], parm[0] == 7 ? 1, parm[2]);      
       break;
     case "d":
       const cmdn = parseInt(cmd.split(" ")[1]);
@@ -191,7 +191,7 @@ procCmd = function(cmd) {
 //      const lastidx = arr.el.length - 1;
       const lastEl = getLast(arr);
       const discardsuit = discard[lastEl.suit];
-      if(discardsuit.el.length == 0 ? lastEl.no == 0 : lastEl.no == getLast(discardsuit).no + 1)) {
+      if(discardsuit.el.length == 0 ? lastEl.no == 0 : lastEl.no == getLast(discardsuit).no + 1) {
         lastMove(arr, discardsuit);
 //        discardsuit.push(arr[lastidx]);
 //        arr.splice(lastidx);
