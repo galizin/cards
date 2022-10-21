@@ -27,16 +27,16 @@ class Card {
   }
 }
 
-const shuffleDeck = function() {
-  const initDeck = function(deck) {
-    for(let suits = 0; suits < 4; suits++) {
-      for(let nos = 0; nos < 13; nos++) {
-        deck.push(new Card(suits, nos, 0));
-      }
+const initDeck = function(deck) {
+  for(let suits = 0; suits < 4; suits++) {
+    for(let nos = 0; nos < 13; nos++) {
+      deck.push(new Card(suits, nos, 0));
     }
   }
+}
   
-  const deck = [], deck2 = [];
+const shuffleDeck = function(deck) {
+  const deck2 = [];
   initDeck(deck);
   while(deck.length > 0) {  
     let idx = Math.floor(Math.random() * deck.length);
@@ -46,7 +46,11 @@ const shuffleDeck = function() {
   return deck2;
 }
 
-const deck = shuffleDeck();
+const emptyDeck;
+
+initDeck(emptyDeck);
+
+const deck = shuffleDeck(emptyDeck);
 
 //$("body").html("<pre>" + deck.map(m => m.toString()).join(',') + "</pre>");
 
@@ -112,7 +116,26 @@ getLast = function(inArr) {
 
 lastMove = function(from, to) {
   to.push(getLast(from));
-  from.splice(from.length - 1);
+  from.splice(0, -1);
+}
+
+moveToMain(from, to, howmany) {
+  if(from[from.length - howmany].vis = 1) {
+    const neededFrom = [...from].slice(0, -howmany);
+    let doMove = false;
+    if (to.length == 0 && neededFrom[0].no == 12) {
+      doMove = true;
+    } else {
+      const bottom = getLast(to);
+      if (bottom.no == top.no+1 && top.suit %2 != bottom.suit %2) {
+        doMove = true;
+      }
+    }
+    if(doMove) {
+      from.splice(0, -howmany);
+      to=to.concat(neededFrom);
+    }
+  } 
 }
 
 procCmd = function(cmd) {
@@ -132,21 +155,23 @@ procCmd = function(cmd) {
       }
       break;
     case "m": //from to how many
-      const parm = (cmd.split(" ")).splice(1);
+      const parm = (cmd.split(" ")).map(m => parseInt(m)).slice(1);
       //const from = main[parm[0]].splice(main[parm[0]].length);
-      const to = main[parm[1]];      
+      //const to = main[parm[1]];
+      moveToMain(main[parm[0]], main[parm[1]], parm[2]);      
       break;
     case "d":
       const cmdn = parseInt(cmd.split(" ")[1]);
-      const top = getLast(stack[0]);
-      if (main[cmdn].length == 0 && top.no == 12) {
-        lastMove(stack[0], main[cmdn]);
-      } else {
-        const bottom = getLast(main[cmdn]);
-        if (bottom.no == top.no+1 && top.suit %2 != bottom.suit %2) {
-          lastMove(stack[0], main[cmdn]);      
-        }
-      }
+      moveToMain(stack[0], main[cmdn], 1);
+      //const top = getLast(stack[0]);
+      //if (main[cmdn].length == 0 && top.no == 12) {
+      //  lastMove(stack[0], main[cmdn]);
+      //} else {
+      //  const bottom = getLast(main[cmdn]);
+      //  if (bottom.no == top.no+1 && top.suit %2 != bottom.suit %2) {
+      //    lastMove(stack[0], main[cmdn]);      
+      //  }
+      //}
       break;
     case "r":
       const cmdl = parseInt(cmd.split(" ")[1]);
