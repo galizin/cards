@@ -27,6 +27,13 @@ class Card {
   }
 }
 
+class Stack {
+  constructor () {
+    this.el = [];
+  }
+}
+
+
 const initDeck = function(deck) {
   for(let suits = 0; suits < 4; suits++) {
     for(let nos = 0; nos < 13; nos++) {
@@ -37,7 +44,7 @@ const initDeck = function(deck) {
   
 const shuffleDeck = function(deck) {
   const deck2 = [];
-  initDeck(deck);
+  //initDeck(deck);
   while(deck.length > 0) {  
     let idx = Math.floor(Math.random() * deck.length);
     deck2.push(deck[idx]);
@@ -46,7 +53,7 @@ const shuffleDeck = function(deck) {
   return deck2;
 }
 
-const emptyDeck;
+const emptyDeck = [];
 
 initDeck(emptyDeck);
 
@@ -57,49 +64,49 @@ const deck = shuffleDeck(emptyDeck);
 const main=[];
 
 for(let i = 0; i < 7; i++) {
-  main.push([]);
+  main.push(new Stack());
 }
 
 const discard=[];
 for(let i = 0; i < 4; i++) {
-  discard.push([]);
+  discard.push(new Stack());
 }
 
-const stack=[[], []];
+const stack=[new Stack(), new Stack()];
 
-deck.forEach(m => stack[1].push(m));
+deck.forEach(m => stack[1].el.push(m));
 
 for(let i = 0; i < 7; i++) {
   for(let j = i; j < 7; j++) {
     if (j == i)
-      stack[1][0].vis = 1;
-    main[j].push(stack[1][0]);
-    stack[1].splice(0, 1);
+      stack[1].el[0].vis = 1;
+    main[j].el.push(stack[1].el[0]);
+    stack[1].el.splice(0, 1);
   }
 }
 
-stack[1].forEach(m => m.vis = 1);
+stack[1].el.forEach(m => m.vis = 1);
 
 let drawField = function() {
   let line = "";
   for(let i = 0; i<4; i++) {
-    line += discard[i].length == 0 ? "   " : discard[i][discard[i].length-1].toString() + " ";
+    line += discard[i].el.length == 0 ? "   " : discard[i].el[discard[i].el.length-1].toString() + " ";
   }  
   for(let i = 0; i<3; i++) {
-    line += (stack[0].length - 3 + i) < 0 ? "   " : stack[0][stack[0].length - 3 + i].toString() + " ";
+    line += (stack[0].el.length - 3 + i) < 0 ? "   " : stack[0].el[stack[0].el.length - 3 + i].toString() + " ";
   }
   line += "\n\n";
 
   let maxlen = 0;
-  main.forEach(m => {if (maxlen < m.length) {maxlen = m.length}});
+  main.forEach(m => {if (maxlen < m.el.length) {maxlen = m.el.length}});
 
   for(let j = 0; j < maxlen; j++) {
     for(let i = 0; i < 7; i++) {
-      //console.log(i + " " + j + " " + (main[i].length - 1));
-      if(j == main[i].length - 1 && main[i][j].vis == 0) {
-        main[i][j].vis = 1; 
+      //console.log(i + " " + j + " " + (main[i].el.length - 1));
+      if(j == main[i].el.length - 1 && main[i].el[j].vis == 0) {
+        main[i].el[j].vis = 1; 
       }
-      line += j < main[i].length ? main[i][j].toString() + " " : "   ";
+      line += j < main[i].el.length ? main[i].el[j].toString() + " " : "   ";
     }
     line += "\n";
   }
@@ -111,29 +118,29 @@ let drawField = function() {
 drawField();
 
 getLast = function(inArr) {
-  return inArr[inArr.length - 1];
+  return inArr.el[inArr.el.length - 1];
 }
 
 lastMove = function(from, to) {
-  to.push(getLast(from));
-  from.splice(0, -1);
+  to.el.push(getLast(from));
+  from.el.splice(0, from.el.length-1);
 }
 
-moveToMain(from, to, howmany) {
-  if(from[from.length - howmany].vis = 1) {
-    const neededFrom = [...from].slice(0, -howmany);
+moveToMain = function(from, to, howmany) {
+  if(from.el[from.el.length - howmany].vis = 1) {
+    const neededFrom = [...from.el].slice(from.el.length - howmany);
     let doMove = false;
-    if (to.length == 0 && neededFrom[0].no == 12) {
+    if (to.el.length == 0 && neededFrom[0].no == 12) {
       doMove = true;
     } else {
       const bottom = getLast(to);
-      if (bottom.no == top.no+1 && top.suit %2 != bottom.suit %2) {
+      if (bottom.no == neededFrom[0].no+1 && neededFrom[0].suit %2 != bottom.suit %2) {
         doMove = true;
       }
     }
     if(doMove) {
-      from.splice(0, -howmany);
-      to=to.concat(neededFrom);
+      from.el.splice(from.el.length -howmany);
+      to.el=to.el.concat(neededFrom);
     }
   } 
 }
@@ -141,16 +148,16 @@ moveToMain(from, to, howmany) {
 procCmd = function(cmd) {
   switch(cmd.substring(0,1)) {
     case "n":
-      if(stack[1].length === 0) {
-        while(stack[0].length > 0) {
-          stack[1].push(stack[0][0]);
-          stack[0].splice(0,1);
+      if(stack[1].el.length === 0) {
+        while(stack[0].el.length > 0) {
+          stack[1].el.push(stack[0].el[0]);
+          stack[0].el.splice(0,1);
         }        
       }
       for(let i = 0; i < 3; i++) {
-        if (stack[1].length > 0) {
-          stack[0].push(stack[1][0]);
-          stack[1].splice(0,1);
+        if (stack[1].el.length > 0) {
+          stack[0].el.push(stack[1].el[0]);
+          stack[1].el.splice(0,1);
         }
       }
       break;
@@ -181,9 +188,10 @@ procCmd = function(cmd) {
       } else {
         arr = stack[0];
       }
-      const lastidx = arr.length - 1;
-      const discardsuit = discard[arr[lastidx].suit];
-      if(discardsuit.length == 0 ? arr[lastidx].no == 0 : arr[lastidx].no == (discardsuit[discardsuit.length - 1].no + 1)) {
+//      const lastidx = arr.el.length - 1;
+      const lastEl = getLast(arr);
+      const discardsuit = discard[lastEl.suit];
+      if(discardsuit.el.length == 0 ? lastEl.no == 0 : lastEl.no == getLast(discardsuit).no + 1)) {
         lastMove(arr, discardsuit);
 //        discardsuit.push(arr[lastidx]);
 //        arr.splice(lastidx);
