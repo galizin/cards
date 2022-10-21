@@ -10,6 +10,7 @@
   </head>
   <body>
     <!-- page content -->
+  <input />
 <script>
 
 class Card {
@@ -19,27 +20,119 @@ class Card {
     this.vis = vis;
   }
   toString = function() {
-    return(this.suit + this.no.toString(16) + this.vis);
+//    return(this.suit + this.no.toString(16) + this.vis);
+    if(this.vis)
+      return(this.suit + this.no.toString(16));
+    return "xx";
   }
 }
 
-const deck = [], deck2 = [];
+const shuffleDeck = function() {
+  const initDeck = function(deck) {
+    for(let suits = 0; suits < 4; suits++) {
+      for(let nos = 0; nos < 13; nos++) {
+        deck.push(new Card(suits, nos, 0));
+      }
+    }
+  }
+  
+  const deck = [], deck2 = [];
+  initDeck(deck);
+  while(deck.length > 0) {  
+    let idx = Math.floor(Math.random() * deck.length);
+    deck2.push(deck[idx]);
+    deck.splice(idx, 1);
+  }
+  return deck2;
+}
 
-for(let suits = 0; suits < 4; suits++) {
-  for(let nos = 0; nos < 13; nos++) {
-    deck.push(new Card(suits, nos, 0));
+const deck = shuffleDeck();
+
+//$("body").html("<pre>" + deck.map(m => m.toString()).join(',') + "</pre>");
+
+const main=[];
+
+for(let i = 0; i < 7; i++) {
+  main.push([]);
+}
+
+const discard=[];
+for(let i = 0; i < 4; i++) {
+  discard.push([]);
+}
+
+const stack=[[], []];
+
+deck.forEach(m => stack[1].push(m));
+
+for(let i = 0; i < 7; i++) {
+  for(let j = i; j < 7; j++) {
+    if (j == i)
+      stack[1][0].vis = 1;
+    main[j].push(stack[1][0]);
+    stack[1].splice(0, 1);
   }
 }
 
-while(deck.length > 0) {
-  let idx = Math.floor(Math.random() * deck.length);
-  deck2.push(deck[idx]);
-  deck.splice(idx, 1);
+stack[1].forEach(m => m.vis = 1);
+
+let drawField = function() {
+  let line = "";
+  for(let i = 0; i<4; i++) {
+    line += discard[i].length == 0 ? "   " : discard[i][discard[i].length].toString() + " ";
+  }  
+  for(let i = 0; i<3; i++) {
+    line += (stack[0].length - 3 + i) < 0 ? "   " : stack[0][stack[0].length - 3 + i].toString() + " ";
+  }
+  line += "\n\n";
+
+  let maxlen = 0;
+  main.forEach(m => {if (maxlen < m.length) {maxlen = m.length}});
+
+  for(let j = 0; j < maxlen; j++) {
+    for(let i = 0; i < 7; i++) {
+       //console.log(i + " " + j + " " + (main[i].length - 1));
+       line += j < main[i].length ? main[i][j].toString() + " " : "   ";
+    }
+    line += "\n";
+  }
+  $("pre").remove(); 
+  $("body").append("<pre>" + line + "</pre>");
 }
 
-$("body").html("<pre>" + deck2.map(m => m.toString()).join(',') + "</pre>");
+drawField();
 
 
+procCmd = function(cmd) {
+  switch(cmd) {
+    case "s":
+      if(stack[1].length === 0) {
+        while(stack[0].length > 0) {
+          stack[1].push(stack[0][0]);
+          stack[0].splice(0,1);
+        }        
+      }
+      for(let i = 0; i < 3; i++) {
+        if (stack[1].length > 0) {
+          stack[0].push(stack[1][0]);
+          stack[1].splice(0,1);
+        }
+      }
+      drawField();
+      break;
+    default:
+      console.log("command " + cmd + " is not supported");
+  }
+}
+
+
+$("input").on("keypress", function (e) {
+    if(e.key === 'Enter') {
+        e.preventDefault();
+        //console.log($("input").val());
+        procCmd($("input").val());
+    }
+});
 
 
 /*  function dragstart_handler(ev) {
