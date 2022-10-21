@@ -106,6 +106,14 @@ let drawField = function() {
 
 drawField();
 
+getLast = function(inArr) {
+  return inArr[inArr.length - 1];
+}
+
+lastMove = function(from, to) {
+  to.push(getLast(from));
+  from.splice(from.length - 1);
+}
 
 procCmd = function(cmd) {
   switch(cmd.substring(0,1)) {
@@ -123,10 +131,22 @@ procCmd = function(cmd) {
         }
       }
       break;
-    case "m":
+    case "m": //from to how many
+      const parm = (cmd.split(" ")).splice(1);
+      //const from = main[parm[0]].splice(main[parm[0]].length);
+      const to = main[parm[1]];      
       break;
     case "d":
-      const cmdl = parseInt(cmd.split(" ")[1]);
+      const cmdn = parseInt(cmd.split(" ")[1]);
+      const top = getLast(stack[0]);
+      if (main[cmdn].length == 0 && top.no == 12) {
+        lastMove(stack[0], main[cmdn]);
+      } else {
+        const bottom = getLast(main[cmdn]);
+        if (bottom.no == top.no+1 && top.suit %2 != bottom.suit %2) {
+          lastMove(stack[0], main[cmdn]);      
+        }
+      }
       break;
     case "r":
       const cmdl = parseInt(cmd.split(" ")[1]);
@@ -139,8 +159,9 @@ procCmd = function(cmd) {
       const lastidx = arr.length - 1;
       const discardsuit = discard[arr[lastidx].suit];
       if(discardsuit.length == 0 ? arr[lastidx].no == 0 : arr[lastidx].no == (discardsuit[discardsuit.length - 1].no + 1)) {
-        discardsuit.push(arr[lastidx]);
-        arr.splice(lastidx);
+        lastMove(arr, discardsuit);
+//        discardsuit.push(arr[lastidx]);
+//        arr.splice(lastidx);
       }
       break;
     default:
