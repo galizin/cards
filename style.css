@@ -24,7 +24,8 @@ overflow:hidden;
 div#main {
 font-size:96px;
 font-family:Noto;
-height:500px;
+width:425px;
+height:455px;
 }
 
 @font-face {
