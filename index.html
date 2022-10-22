@@ -18,14 +18,14 @@
   //  ev.dataTransfer.effectAllowed = "move";
     //console.log('start');
   const touches = ev.changedTouches;
-const viewportOffset = ev.target.getBoundingClientRect();
+const viewportOffset = ev.target.closest(".outerspan").getBoundingClientRect();
 // these are relative to the viewport, i.e. the window
 //var top = viewportOffset.top;
 //var left = viewportOffset.left;
 //console.log((viewportOffset.top)  + ' ' + (viewportOffset.left));
 //console.log((-viewportOffset.top + touches[0].pageY -6.5)  + ' ' + (-viewportOffset.left + touches[0].pageX - 4.5));
-ev.target.setAttribute("touchstartoffset", 
-  (-viewportOffset.top + touches[0].pageY -6.5)  + ',' + (-viewportOffset.left + touches[0].pageX - 4.5));
+ev.target.closest(".outerspan").setAttribute("touchstartoffset", 
+  (-viewportOffset.top + touches[0].pageY)  + ',' + (-viewportOffset.left + touches[0].pageX));
   }
   function dragover_handler(ev) {
     ev.preventDefault();
@@ -37,8 +37,8 @@ ev.target.setAttribute("touchstartoffset",
 //console.log(ev.target.getAttribute("touchstartoffset").split(',')[0]);
 //console.log(Number(ev.target.getAttribute("touchstartoffset").split[0]));
 //console.log((touches[0].pageY + Number(ev.target.getAttribute("touchstartoffset").split[0])) + 'px');
-ev.target.closest(".outerspan").style.top = (touches[0].pageY - Number(ev.target.getAttribute("touchstartoffset").split(',')[0])) + 'px';
-ev.target.closest(".outerspan").style.left = (touches[0].pageX - Number(ev.target.getAttribute("touchstartoffset").split(',')[1])) + 'px';
+ev.target.closest(".outerspan").style.top = (touches[0].pageY - Number(ev.target.closest(".outerspan").getAttribute("touchstartoffset").split(',')[0])) + 'px';
+ev.target.closest(".outerspan").style.left = (touches[0].pageX - Number(ev.target.closest(".outerspan").getAttribute("touchstartoffset").split(',')[1])) + 'px';
 //ev.target.closest(".outerspan").style.top = touches[0].pageY + 'px';
 //ev.target.closest(".outerspan").style.left = touches[0].pageX + 'px';
 //console.log(ev.target.style.top);
