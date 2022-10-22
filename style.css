@@ -4,19 +4,30 @@ background:none;
 }
 span{
 cursor:pointer;
-line-height: 67px;
+line-height: /*67*/100px;
 }
 span.innerspan {
-margin: -3.5px;
+margin: /*-3.5*/-7px;
 }
 span.outerspan {
 position:fixed;
 background:white;
-height:65px;
-width:49.5px;
+/*height:65px;
+width:49.5px;*/
+height: 69px;
+width: 51px;
+border-style: solid;
+border-width: 2px;
+border-radius: 3px;
 overflow:hidden;
 }
 div#main {
-font-size:80px;
+font-size:96px;
+font-family:Noto;
 height:500px;
+}
+
+@font-face {
+  font-family: "Noto";
+  src: url("../assets/NotoSansSymbols2-Regular.ttf") format("truetype");
 }
