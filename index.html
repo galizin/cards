@@ -48,71 +48,38 @@ function drop_handler(ev) {
 
 var num = 0x1f0a0;
 var offs = 15;
+var hDim = 55;
+var vDim = 73;
+var vGap = 8
+var hGap = 7;
 
 cardString = function (cardNum,suit,top,left) {
-  let red = suit == 0x10 || suit == 0x20 ? 1 : 0; 
+  let red = suit == 1 || suit == 2 ? 1 : 0; 
   let el = document.createElement("span");
-  $(el).attr("class", "outerspan").attr("id", (num+cardNum+suit).toString()).attr("ontouchstart", "dragstart_handler(event)")
+  $(el).attr("class", "outerspan").attr("id", suit.toString(16) + cardNum.toString(16)).attr("ontouchstart", "dragstart_handler(event)")
     .attr("style", "top:" + top + "px; left:" + left + "px");
   $(el).html(((red)?'<mark class="red">':'') 
     + '<span class="innerspan">&#x' 
-    + (num+cardNum+suit).toString(16) 
+    + (num+(cardNum > 10?cardNum+2:cardNum+1) +suit*0x10).toString(16) 
     + ';</span>' 
     + ((red)?'</mark>':''));
   return el;
-  /*return '<span class="outerspan" id="' 
-    + (num+cardNum+suit).toString()  
-    + '" ontouchstart="dragstart_handler(event)" ' 
-    + 'style="top:' + top + 'px; left:' + left + 'px">' 
-    + ((red)?'<mark class="red">':'') 
-    + '<span class="innerspan">&#x' 
-    + (num+cardNum+suit).toString(16) 
-    + ';</span>' 
-    + ((red)?'</mark>':'') 
-    + '</span>';
-*/
 };
 
 window.addEventListener('load', function() {
-  //var strnum = cardString(0,0, 8, 7);
   for(var j = 0; j < 4; j++) {
     let parentEl = null;
-    for(var i=1; i<0xf; i++) {
-      if(i!=0xc) {
-        //el = document.createElement("span");
-        el = cardString(i, j*0x10, 8 + 15*i , 7 + (55+7)*j );
-        if (parentEl) {
-          parentEl.append(el);
-        } else {
-          document.getElementById("main").append(el);
-        }
-        parentEl = el;
+    for(var i=0; i<13; i++) {
+      el = cardString(i, j, vGap + vGap + vDim + offs*i , hGap + (hGap + hDim)*j );
+      if (parentEl) {
+        parentEl.append(el);
+      } else {
+        document.getElementById("main").append(el);
       }
+      parentEl = el;
     }
-    //strnum += cardString(i, j, 8, 7);
   }
-  /*
-  for(var i = 0; i < 7; i++) {
-    strnum += cardString(0,0, 8, 7+(55 +7)*i);
-  }
-  for(var i = 0; i < 7; i++) {
-    strnum += cardString(0,0, 8+73+8, 7+(55 +7)*i);
-  }
-  for(var i = 0; i < 6; i++) {
-    strnum += cardString(0,0, 8+73+8+15*i, 7+(55 +7)*6);
-  }
-  for(var i = 1; i<0xf; i++) {
-    strnum += cardString(i,0, 8+73+8+15*5 + (i-1)*15, 7+(55 +7)*6);
-  }
-  document.getElementById("main").innerHTML = strnum;*/
 });
-
-let vertGap = 15;
-
-let horizGap = 11;
-//51
-// 8 73 8 7 
-//8 7 94 7
 
 </script>
 <div id="main" ontouchstop="drop_handler(event)" ontouchmove="dragover_handler(event)" />
