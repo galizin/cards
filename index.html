@@ -42,8 +42,21 @@ function dragover_handler(ev) {
   }
 }
 
+function coordToLane(left) {
+  let laneNo = -1;
+  for(let i=0; i < 7;i++) {
+    if((left > hGap/2) && (left < (hGap/2 + hGap + (hGap + hDim)*i))) {
+      laneNo = i;
+      break;
+    } 
+  }
+  return laneNo;
+}
+
+
 function drop_handler(ev) {
   ev.preventDefault();
+  console.log(ev);
 }
 
 var num = 0x1f0a0;
