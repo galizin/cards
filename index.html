@@ -15,9 +15,11 @@
 function dragstart_handler(ev) {
   ev.preventDefault();
   const touches = ev.changedTouches;
-  const viewportOffset = ev.target.closest(".outerspan").getBoundingClientRect();
-  ev.target.closest(".outerspan").setAttribute("touchstartoffset", 
-    (-viewportOffset.top + touches[0].pageY)  + ',' + (-viewportOffset.left + touches[0].pageX));
+  const el = ev.target.closest(".outerspan");
+  const viewportOffset = el.getBoundingClientRect();
+  $(el).attr("touchstartoffset", 
+    (-viewportOffset.top + touches[0].pageY)  + ',' + (-viewportOffset.left + touches[0].pageX))
+    .attr("origLane", leftToLane(parseInt(el.style.left)));
 }
 
 function dragover_handler(ev) {
@@ -42,7 +44,7 @@ function dragover_handler(ev) {
   }
 }
 
-function coordToLane(left) {
+function leftToLane(left) {
   let laneNo = -1;
   for(let i=0; i < 7;i++) {
     if((left > hGap/2) && (left < (hGap/2 + hGap + (hGap + hDim)*i))) {
@@ -53,10 +55,28 @@ function coordToLane(left) {
   return laneNo;
 }
 
+function laneToLeft(laneNo) {
+  return( hGap + (hDim + hGap)*laneNo);
+}
 
 function drop_handler(ev) {
   ev.preventDefault();
-  console.log(ev);
+  //console.log(ev);
+  const touches = ev.changedTouches;
+  let el = ev.target.closest(".outerspan");
+  if (el) { 
+    //console.log(coordToLane(parseInt(el.style.left)));
+    let laneNo = leftToLane(parseInt(el.style.left));
+    laneNo = laneNo == -1 ? $(el).attr("origLane"): laneNo;
+    $(el).attr("origLane", laneNo);
+    el.style.left = laneToLeft(laneNo) + 'px';
+    for(let child of $(el).find('*')) {
+      if(child.classList.contains("outerspan")) {
+        child.style.left = laneToLeft(laneNo) + 'px';
+        $(child).attr("origLane", laneNo);
+      }
+    }    
+  }
 }
 
 var num = 0x1f0a0;
@@ -70,9 +90,10 @@ cardString = function (cardNum,suit,top,left) {
   let red = suit == 1 || suit == 2 ? 1 : 0; 
   let el = document.createElement("span");
   $(el).attr("class", "outerspan").attr("id", suit.toString(16) + cardNum.toString(16)).attr("ontouchstart", "dragstart_handler(event)")
-    .attr("style", "top:" + top + "px; left:" + left + "px");
+    .attr("style", "top:" + top + "px; left:" + left + "px").attr("ontouchend", "drop_handler(event)")
+    .attr("origLane", leftToLane(left));
   $(el).html(((red)?'<mark class="red">':'') 
-    + '<span class="innerspan">&#x' 
+    + '<span class="innerspan" ontouchsend="drop_handler(event)">&#x' 
     + (num+(cardNum > 10?cardNum+2:cardNum+1) +suit*0x10).toString(16) 
     + ';</span>' 
     + ((red)?'</mark>':''));
@@ -95,6 +116,6 @@ window.addEventListener('load', function() {
 });
 
 </script>
-<div id="main" ontouchstop="drop_handler(event)" ontouchmove="dragover_handler(event)" />
+<div id="main" ontouchmove="dragover_handler(event)" ontouchend="drop_handler(event)" /> 
   </body>
 </html>
