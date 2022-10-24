@@ -13,7 +13,7 @@
 <script>
 
 var num = 0x1f0a0;
-var offs = 15;
+var shft = 15;
 var hDim = 55;
 var vDim = 73;
 var vGap = 8
@@ -34,13 +34,29 @@ function laneToLeft(laneNo) {
   return( hGap + (hDim + hGap)*laneNo);
 }
 
+function prpgStack(el) {
+  let sh = 0;
+  const laneNo = $(el).attr("origLane");
+  const top = parseInt(el.style.top);
+  const left = parseInt(el.style.left);
+  //const left = laneToLeft(laneNo);
+  for(let child of $(el).find('.outerspan')) {
+    sh += shft;
+    child.style.top = top + sh + 'px';
+    child.style.left = left + 'px';
+    if(laneNo) {
+      $(child).attr("origLane", laneNo);
+    }
+  }
+}
+
 function dragstart_handler(ev) {
   ev.preventDefault();
   const touches = ev.changedTouches;
   const el = ev.target.closest(".outerspan");
   const viewportOffset = el.getBoundingClientRect();
   $(el).attr("touchstartoffset", (-viewportOffset.top + touches[0].pageY)  + ',' + (-viewportOffset.left + touches[0].pageX))
-    .attr("origLane", leftToLane(parseInt(el.style.left)));
+    .attr("origLane", leftToLane(parseInt(el.style.left))).attr("origTop", $(el).css("top"));
 }
 
 function dragover_handler(ev) {
@@ -51,12 +67,13 @@ function dragover_handler(ev) {
     let offs = $(el).attr("touchstartoffset");
     el.style.top = (touches[0].pageY - Number(offs.split(',')[0])) + 'px';
     el.style.left = (touches[0].pageX - Number(offs.split(',')[1])) + 'px';
-    let sh = 0;
-    for(let child of $(el).find('.outerspan')) {
-      sh += 15;
-      child.style.top = (touches[0].pageY - Number(offs.split(',')[0])) + sh + 'px';
-      child.style.left = (touches[0].pageX - Number(offs.split(',')[1])) + 'px';
-    }
+    prpgStack(el);
+    //let sh = 0;
+    //for(let child of $(el).find('.outerspan')) {
+      //sh += shft;
+      //child.style.top = (touches[0].pageY - Number(offs.split(',')[0])) + sh + 'px';
+      //child.style.left = (touches[0].pageX - Number(offs.split(',')[1])) + 'px';
+    //}
   }
 }
 
@@ -66,10 +83,28 @@ function drop_handler(ev) {
   let el = ev.target.closest(".outerspan");
   if (el) { 
     let laneNo = leftToLane(parseInt(el.style.left));
-    laneNo = laneNo == -1 ? $(el).attr("origLane"): laneNo;
-    $(el).attr("origLane", laneNo);
-    el.style.left = laneToLeft(laneNo) + 'px';
-    $(el).find(".outerspan").attr("origLane", laneNo).css("left", laneToLeft(laneNo) + "px");
+    if(laneNo == -1) {
+      const parentEl = el.closest(".outerspan");
+      if(parentEl) {
+        prpgStack(parentEl);
+      } else {
+        $(el).css("top", vDim + vGap*2 + "px").css("left", laneToLeft(parseInt($(el).attr("origLane"))) + "px");
+        prpgStack(el);
+      }
+    } else {
+      laneNo = laneNo == -1 ? $(el).attr("origLane"): laneNo;
+      stackOnLane = $("#main span[origLane=" + laneNo + "]").find(".outerspan");
+      if (stackOnLane.length == 0) {
+        $(el).appendTo("#main").css("top", vDim + vGap*2 + "px");
+      } else {
+        let newParent = stackOnLane[stackOnLane.length - 1];
+        $(el).appendTo(newParent).css("top", parseInt($(newParent).css("top")) + shft + "px");
+      }
+      $(el).attr("origLane", laneNo);
+      el.style.left = laneToLeft(laneNo) + 'px';
+      prpgStack(el);
+    }
+    //$(el).find(".outerspan").attr("origLane", laneNo).css("left", laneToLeft(laneNo) + "px");
   }
 }
 
@@ -91,7 +126,7 @@ window.addEventListener('load', function() {
   for(var j = 0; j < 4; j++) {
     let parentEl = null;
     for(var i=0; i<13; i++) {
-      el = cardString(i, j, vGap + vGap + vDim + offs*i , hGap + (hGap + hDim)*j );
+      el = cardString(i, j, vGap + vGap + vDim + shft*i , hGap + (hGap + hDim)*j );
       if (parentEl) {
         parentEl.append(el);
       } else {
