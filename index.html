@@ -12,42 +12,17 @@
     <!-- page content -->
 <script>
 
-function dragstart_handler(ev) {
-  ev.preventDefault();
-  const touches = ev.changedTouches;
-  const el = ev.target.closest(".outerspan");
-  const viewportOffset = el.getBoundingClientRect();
-  $(el).attr("touchstartoffset", 
-    (-viewportOffset.top + touches[0].pageY)  + ',' + (-viewportOffset.left + touches[0].pageX))
-    .attr("origLane", leftToLane(parseInt(el.style.left)));
-}
-
-function dragover_handler(ev) {
-  ev.preventDefault();
-  const touches = ev.changedTouches;
-  let el = ev.target.closest(".outerspan");
-  if (el) { 
-    el.style.top = 
-      (touches[0].pageY - Number(ev.target.closest(".outerspan").getAttribute("touchstartoffset").split(',')[0])) + 'px';
-    el.style.left = 
-      (touches[0].pageX - Number(ev.target.closest(".outerspan").getAttribute("touchstartoffset").split(',')[1])) + 'px';
-    let sh = 0;
-    for(let child of $(el).find('*')) {
-      if(child.classList.contains("outerspan")) {
-        sh += 15;
-        child.style.top = 
-          (touches[0].pageY - Number(ev.target.closest(".outerspan").getAttribute("touchstartoffset").split(',')[0])) + sh + 'px';
-        child.style.left = 
-          (touches[0].pageX - Number(ev.target.closest(".outerspan").getAttribute("touchstartoffset").split(',')[1])) + 'px';
-      }
-    }
-  }
-}
+var num = 0x1f0a0;
+var offs = 15;
+var hDim = 55;
+var vDim = 73;
+var vGap = 8
+var hGap = 7;
 
 function leftToLane(left) {
   let laneNo = -1;
   for(let i=0; i < 7;i++) {
-    if((left > hGap/2) && (left < (hGap/2 + hGap + (hGap + hDim)*i))) {
+    if((left > hGap - hDim/2 + (hGap + hDim)*i) && (left < (hGap + hDim/2 + (hGap + hDim)*i))) {
       laneNo = i;
       break;
     } 
@@ -59,32 +34,44 @@ function laneToLeft(laneNo) {
   return( hGap + (hDim + hGap)*laneNo);
 }
 
-function drop_handler(ev) {
+function dragstart_handler(ev) {
   ev.preventDefault();
-  //console.log(ev);
+  const touches = ev.changedTouches;
+  const el = ev.target.closest(".outerspan");
+  const viewportOffset = el.getBoundingClientRect();
+  $(el).attr("touchstartoffset", (-viewportOffset.top + touches[0].pageY)  + ',' + (-viewportOffset.left + touches[0].pageX))
+    .attr("origLane", leftToLane(parseInt(el.style.left)));
+}
+
+function dragover_handler(ev) {
+  ev.preventDefault();
   const touches = ev.changedTouches;
   let el = ev.target.closest(".outerspan");
   if (el) { 
-    //console.log(coordToLane(parseInt(el.style.left)));
+    let offs = $(el).attr("touchstartoffset");
+    el.style.top = (touches[0].pageY - Number(offs.split(',')[0])) + 'px';
+    el.style.left = (touches[0].pageX - Number(offs.split(',')[1])) + 'px';
+    let sh = 0;
+    for(let child of $(el).find('.outerspan')) {
+      sh += 15;
+      child.style.top = (touches[0].pageY - Number(offs.split(',')[0])) + sh + 'px';
+      child.style.left = (touches[0].pageX - Number(offs.split(',')[1])) + 'px';
+    }
+  }
+}
+
+function drop_handler(ev) {
+  ev.preventDefault();
+  const touches = ev.changedTouches;
+  let el = ev.target.closest(".outerspan");
+  if (el) { 
     let laneNo = leftToLane(parseInt(el.style.left));
     laneNo = laneNo == -1 ? $(el).attr("origLane"): laneNo;
     $(el).attr("origLane", laneNo);
     el.style.left = laneToLeft(laneNo) + 'px';
-    for(let child of $(el).find('*')) {
-      if(child.classList.contains("outerspan")) {
-        child.style.left = laneToLeft(laneNo) + 'px';
-        $(child).attr("origLane", laneNo);
-      }
-    }    
+    $(el).find(".outerspan").attr("origLane", laneNo).css("left", laneToLeft(laneNo) + "px");
   }
 }
-
-var num = 0x1f0a0;
-var offs = 15;
-var hDim = 55;
-var vDim = 73;
-var vGap = 8
-var hGap = 7;
 
 cardString = function (cardNum,suit,top,left) {
   let red = suit == 1 || suit == 2 ? 1 : 0; 
@@ -116,6 +103,6 @@ window.addEventListener('load', function() {
 });
 
 </script>
-<div id="main" ontouchmove="dragover_handler(event)" ontouchend="drop_handler(event)" /> 
+<div id="main" ontouchmove="dragover_handler(event)" /> 
   </body>
 </html>
