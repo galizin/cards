@@ -84,8 +84,8 @@ function drop_handler(ev) {
   if (el) { 
     let laneNo = leftToLane(parseInt(el.style.left));
     if(laneNo == -1) {
-      const parentEl = el.closest(".outerspan");
-      if(parentEl) {
+      const parentEl = $(el).parents()[0];
+      if($(parentEl).attr("id") != "main") {
         prpgStack(parentEl);
       } else {
         $(el).css("top", vDim + vGap*2 + "px").css("left", laneToLeft(parseInt($(el).attr("origLane"))) + "px");
@@ -97,8 +97,21 @@ function drop_handler(ev) {
       if (stackOnLane.length == 0) {
         $(el).appendTo("#main").css("top", vDim + vGap*2 + "px");
       } else {
-        let newParent = stackOnLane[stackOnLane.length - 1];
-        $(el).appendTo(newParent).css("top", parseInt($(newParent).css("top")) + shft + "px");
+        let isOnStack = false;
+        for(child of stackOnLane) {
+          if($(el).attr("id") == $(child).attr("id")) {
+            isOnStack = true;
+            break;
+          }
+        }
+        if($("#main span[origLane=" + laneNo + "]").attr("id") == $(el).attr("id")) {
+          isOnStack = true;
+        }
+        if(!isOnStack) {
+          let newParent = stackOnLane[stackOnLane.length - 1];
+
+          $(el).appendTo(newParent).css("top", parseInt($(newParent).css("top")) + shft + "px");
+        }
       }
       $(el).attr("origLane", laneNo);
       el.style.left = laneToLeft(laneNo) + 'px';
