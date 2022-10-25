@@ -36,16 +36,15 @@ function laneToLeft(laneNo) {
 
 function prpgStack(el) {
   let sh = 0;
-  const laneNo = $(el).attr("origLane");
+  const laneNo = $(el).attr("currLane");
   const top = parseInt(el.style.top);
   const left = parseInt(el.style.left);
-  //const left = laneToLeft(laneNo);
   for(let child of $(el).find('.outerspan')) {
     sh += shft;
     child.style.top = top + sh + 'px';
     child.style.left = left + 'px';
     if(laneNo) {
-      $(child).attr("origLane", laneNo);
+      $(child).attr("currLane", laneNo);
     }
   }
 }
@@ -56,8 +55,8 @@ function dragstart_handler(ev) {
   const el = ev.target.closest(".outerspan");
   const viewportOffset = el.getBoundingClientRect();
   $(el).attr("touchstartoffset", (-viewportOffset.top + touches[0].pageY)  + ',' + (-viewportOffset.left + touches[0].pageX))
-    .attr("origLane", leftToLane(parseInt(el.style.left))).attr("origTop", $(el).css("top"));
-  $(el).appendTo("#main").attr("origLane", "-1");
+    .attr("retLane", leftToLane(parseInt(el.style.left))).attr("origTop", $(el).css("top"));
+  $(el).appendTo("#main").attr("currLane", "-1");
 }
 
 function dragover_handler(ev) {
@@ -69,12 +68,6 @@ function dragover_handler(ev) {
     el.style.top = (touches[0].pageY - Number(offs.split(',')[0])) + 'px';
     el.style.left = (touches[0].pageX - Number(offs.split(',')[1])) + 'px';
     prpgStack(el);
-    //let sh = 0;
-    //for(let child of $(el).find('.outerspan')) {
-      //sh += shft;
-      //child.style.top = (touches[0].pageY - Number(offs.split(',')[0])) + sh + 'px';
-      //child.style.left = (touches[0].pageX - Number(offs.split(',')[1])) + 'px';
-    //}
   }
 }
 
@@ -84,55 +77,30 @@ function drop_handler(ev) {
   let el = ev.target.closest(".outerspan");
   if (el) { 
     let laneNo = leftToLane(parseInt(el.style.left));
-    //if(laneNo == -1) {
-      //const parentEl = $(el).parents()[0];
-      //if($(parentEl).attr("id") != "main") {
-        //prpgStack(parentEl);
-      //} else {
-        //$(el).css("top", vDim + vGap*2 + "px").css("left", laneToLeft(parseInt($(el).attr("origLane"))) + "px");
-        //prpgStack(el);
-      //}
-    //} else 
-    //{
-    laneNo = laneNo == -1 ? parseInt($(el).attr("origLane")): laneNo;
-    stackOnLane = $("#main").find("span[origLane=" + laneNo + "].outerspan");
+    laneNo = laneNo == -1 ? parseInt($(el).attr("retLane")): laneNo;
+    stackOnLane = $("#main").find("span[currLane=" + laneNo + "].outerspan");
     if (stackOnLane.length == 0) {
       $(el).appendTo("#main").css("top", vDim + vGap*2 + "px");
-      $(el).attr("origLane", laneNo);
+      $(el).attr("currLane", laneNo);
       el.style.left = laneToLeft(laneNo) + 'px';
       prpgStack(el);
     } else {
-      //if(laneNo == parseInt($(el).attr("origLane"))) {
-        //const parentEl = $(el).parents()[0];
-        //if($(parentEl).attr("id") != "main") {
-          //prpgStack(parentEl); 
-        //}  
-      //} else {
-        //console.log(stackOnLane);
-        //console.log($("#main")[0]);
-        //console.log(stackOnLane);
-        let isOnStack = false;
-        for(child of stackOnLane) {
-          if($(el).attr("id") == $(child).attr("id")) {
-            isOnStack = true;
-            break;
-          }
-        }
-        if($("#main span[origLane=" + laneNo + "]").attr("id") == $(el).attr("id")) {
+      let isOnStack = false;
+      for(child of stackOnLane) {
+        if($(el).attr("id") == $(child).attr("id")) {
           isOnStack = true;
+          break;
         }
-        if(!isOnStack) {
-          let newParent = stackOnLane[stackOnLane.length - 1];
-          $(el).appendTo(newParent);//.css("top", parseInt($(newParent).css("top")) + shft + "px");
-          prpgStack(newParent);
-        }
+      }
+      //if($("#main span[currLane=" + laneNo + "]").attr("id") == $(el).attr("id")) {
+        //isOnStack = true;
       //}
-      //$(el).attr("origLane", laneNo);
+      if(!isOnStack) {
+        let newParent = stackOnLane[stackOnLane.length - 1];
+        $(el).appendTo(newParent);
+        prpgStack(newParent);
+      }
     }
-    //el.style.left = laneToLeft(laneNo) + 'px';
-    //prpgStack(el);
-    //}
-    //$(el).find(".outerspan").attr("origLane", laneNo).css("left", laneToLeft(laneNo) + "px");
   }
 }
 
@@ -141,7 +109,7 @@ cardString = function (cardNum,suit,top,left) {
   let el = document.createElement("span");
   $(el).attr("class", "outerspan").attr("id", suit.toString(16) + cardNum.toString(16)).attr("ontouchstart", "dragstart_handler(event)")
     .attr("style", "top:" + top + "px; left:" + left + "px").attr("ontouchend", "drop_handler(event)")
-    .attr("origLane", leftToLane(left));
+    .attr("currLane", leftToLane(left));
   $(el).html(((red)?'<mark class="red">':'') 
     + '<span class="innerspan" ontouchsend="drop_handler(event)">&#x' 
     + (num+(cardNum > 10?cardNum+2:cardNum+1) +suit*0x10).toString(16) 
