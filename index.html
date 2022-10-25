@@ -57,6 +57,7 @@ function dragstart_handler(ev) {
   const viewportOffset = el.getBoundingClientRect();
   $(el).attr("touchstartoffset", (-viewportOffset.top + touches[0].pageY)  + ',' + (-viewportOffset.left + touches[0].pageX))
     .attr("origLane", leftToLane(parseInt(el.style.left))).attr("origTop", $(el).css("top"));
+  $(el).appendTo("#main").attr("origLane", "-1");
 }
 
 function dragover_handler(ev) {
@@ -83,20 +84,33 @@ function drop_handler(ev) {
   let el = ev.target.closest(".outerspan");
   if (el) { 
     let laneNo = leftToLane(parseInt(el.style.left));
-    if(laneNo == -1) {
-      const parentEl = $(el).parents()[0];
-      if($(parentEl).attr("id") != "main") {
-        prpgStack(parentEl);
-      } else {
-        $(el).css("top", vDim + vGap*2 + "px").css("left", laneToLeft(parseInt($(el).attr("origLane"))) + "px");
-        prpgStack(el);
-      }
+    //if(laneNo == -1) {
+      //const parentEl = $(el).parents()[0];
+      //if($(parentEl).attr("id") != "main") {
+        //prpgStack(parentEl);
+      //} else {
+        //$(el).css("top", vDim + vGap*2 + "px").css("left", laneToLeft(parseInt($(el).attr("origLane"))) + "px");
+        //prpgStack(el);
+      //}
+    //} else 
+    //{
+    laneNo = laneNo == -1 ? parseInt($(el).attr("origLane")): laneNo;
+    stackOnLane = $("#main").find("span[origLane=" + laneNo + "].outerspan");
+    if (stackOnLane.length == 0) {
+      $(el).appendTo("#main").css("top", vDim + vGap*2 + "px");
+      $(el).attr("origLane", laneNo);
+      el.style.left = laneToLeft(laneNo) + 'px';
+      prpgStack(el);
     } else {
-      laneNo = laneNo == -1 ? $(el).attr("origLane"): laneNo;
-      stackOnLane = $("#main span[origLane=" + laneNo + "]").find(".outerspan");
-      if (stackOnLane.length == 0) {
-        $(el).appendTo("#main").css("top", vDim + vGap*2 + "px");
-      } else {
+      //if(laneNo == parseInt($(el).attr("origLane"))) {
+        //const parentEl = $(el).parents()[0];
+        //if($(parentEl).attr("id") != "main") {
+          //prpgStack(parentEl); 
+        //}  
+      //} else {
+        //console.log(stackOnLane);
+        //console.log($("#main")[0]);
+        //console.log(stackOnLane);
         let isOnStack = false;
         for(child of stackOnLane) {
           if($(el).attr("id") == $(child).attr("id")) {
@@ -109,14 +123,15 @@ function drop_handler(ev) {
         }
         if(!isOnStack) {
           let newParent = stackOnLane[stackOnLane.length - 1];
-
-          $(el).appendTo(newParent).css("top", parseInt($(newParent).css("top")) + shft + "px");
+          $(el).appendTo(newParent);//.css("top", parseInt($(newParent).css("top")) + shft + "px");
+          prpgStack(newParent);
         }
-      }
-      $(el).attr("origLane", laneNo);
-      el.style.left = laneToLeft(laneNo) + 'px';
-      prpgStack(el);
+      //}
+      //$(el).attr("origLane", laneNo);
     }
+    //el.style.left = laneToLeft(laneNo) + 'px';
+    //prpgStack(el);
+    //}
     //$(el).find(".outerspan").attr("origLane", laneNo).css("left", laneToLeft(laneNo) + "px");
   }
 }
