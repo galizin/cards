@@ -24,7 +24,16 @@ function elToCard(el) {
 }
 
 function elToSuit(el) {
+//  console.log(parseInt($(el).attr("id").substring(0,1), 16));
   return parseInt($(el).attr("id").substring(0,1), 16);
+}
+
+function suitColor(suit) {
+  return [1,2].includes(suit) ? "red" : "black";
+}
+
+function suitTest(suit1, suit2) {
+  return suitColor(suit1) !== suitColor(suit2); 
 }
 
 function leftToLane(left) {
@@ -116,8 +125,7 @@ card is c and no stack or card is less by 1 and opposite oddity
       (level === false) &&
       (((stackOnLane.length === 0) && (elToCard(el) === 12)) || 
       ((stackOnLane.length !== 0) && (elToCard(el) + 1 === elToCard(stackOnLane[stackOnLane.length - 1])) &&
-      ((elToSuit(el) %2) !== (elToSuit(stackOnLane[stackOnLane.length - 1]) % 2)
-      )) 
+      (suitTest(elToSuit(el), elToSuit(stackOnLane[stackOnLane.length - 1]))))
       )
     )) {
       
