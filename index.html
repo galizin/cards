@@ -19,6 +19,14 @@ var vDim = 73;
 var vGap = 8
 var hGap = 7;
 
+function elToCard(el) {
+  return parseInt($(el).attr("id").substring(1,2), 16);
+}
+
+function elToSuit(el) {
+  return parseInt($(el).attr("id").substring(0,1), 16);
+}
+
 function leftToLane(left) {
   let laneNo = -1;
   for(let i=0; i < 7;i++) {
@@ -30,6 +38,10 @@ function leftToLane(left) {
   return laneNo;
 }
 
+function topToLevel(top) {
+  return top + vDim / 2 < (vGap * 1.5 + vDim);
+}
+
 function laneToLeft(laneNo) {
   return( hGap + (hDim + hGap)*laneNo);
 }
@@ -37,14 +49,18 @@ function laneToLeft(laneNo) {
 function prpgStack(el) {
   let sh = 0;
   const laneNo = $(el).attr("currLane");
+  const level = $(el).attr("currLevel");
   const top = parseInt(el.style.top);
   const left = parseInt(el.style.left);
   for(let child of $(el).find('.outerspan')) {
-    sh += shft;
+    if(($(el).attr("retLevel") === 'false')||(level === 'false')) {
+      sh += shft;
+    }
     child.style.top = top + sh + 'px';
     child.style.left = left + 'px';
     if(laneNo) {
       $(child).attr("currLane", laneNo);
+      $(child).attr("currLevel", level);
     }
   }
 }
@@ -55,8 +71,9 @@ function dragstart_handler(ev) {
   const el = ev.target.closest(".outerspan");
   const viewportOffset = el.getBoundingClientRect();
   $(el).attr("touchstartoffset", (-viewportOffset.top + touches[0].pageY)  + ',' + (-viewportOffset.left + touches[0].pageX))
-    .attr("retLane", leftToLane(parseInt(el.style.left))).attr("origTop", $(el).css("top"));
+    .attr("retLane", leftToLane(parseInt(el.style.left))).attr("retLevel", topToLevel(parseInt(el.style.top)));
   $(el).appendTo("#main").attr("currLane", "-1");
+  prpgStack(el);
 }
 
 function dragover_handler(ev) {
@@ -77,12 +94,48 @@ function drop_handler(ev) {
   let el = ev.target.closest(".outerspan");
   if (el) { 
     let laneNo = leftToLane(parseInt(el.style.left));
-    laneNo = laneNo == -1 ? parseInt($(el).attr("retLane")): laneNo;
-    stackOnLane = $("#main").find("span[currLane=" + laneNo + "].outerspan");
+    let level = topToLevel(parseInt(el.style.top));
+    let stackOnLane = $("#main").find("span[currLane=" + laneNo + "][currLevel=" + level + "].outerspan");
+
+/*
+drop successful:
+level 0
+lane 0,1,2,3
+no children
+same suit card bigger than lowest in stack by 1 or no stack and card = 0
+level 1
+lane 0-6
+card is c and no stack or card is less by 1 and opposite oddity
+*/
+
+    if((
+      (level === true) && ([0,1,2,3].includes(laneNo)) && ($(el).find(".outerspan").length === 0) && (elToSuit(el) === laneNo) &&
+      ((stackOnLane.length === 0) && (elToCard(el) === 0) || 
+      ((stackOnLane.length !== 0) && (elToCard(el) - 1 === elToCard(stackOnLane[stackOnLane.length - 1]))))
+    ) || (
+      (level === false) &&
+      (((stackOnLane.length === 0) && (elToCard(el) === 12)) || 
+      ((stackOnLane.length !== 0) && (elToCard(el) + 1 === elToCard(stackOnLane[stackOnLane.length - 1])) &&
+      ((elToSuit(el) %2) !== (elToSuit(stackOnLane[stackOnLane.length - 1]) % 2)
+      )) 
+      )
+    )) {
+      
+    } else {
+      laneNo = parseInt($(el).attr("retLane"));
+      level = ($(el).attr("retLevel") === "true");
+    }
+
+    //laneNo = laneNo == -1 ? parseInt($(el).attr("retLane")): laneNo;
+    $(el).attr("retLevel", "").attr("retLane", "").attr("currLevel", level);
+    stackOnLane = $("#main").find("span[currLane=" + laneNo + "][currLevel=" + level + "].outerspan");
     if (stackOnLane.length == 0) {
-      $(el).appendTo("#main").css("top", vDim + vGap*2 + "px");
-      $(el).attr("currLane", laneNo);
-      el.style.left = laneToLeft(laneNo) + 'px';
+      if(level) {
+        $(el).appendTo("#main").css("top", vGap + "px");
+      } else {
+        $(el).appendTo("#main").css("top", vDim + vGap*2 + "px");
+      }
+      $(el).attr("currLane", laneNo).css("left", laneToLeft(laneNo) + 'px')
       prpgStack(el);
     } else {
       let isOnStack = false;
@@ -109,7 +162,7 @@ cardString = function (cardNum,suit,top,left) {
   let el = document.createElement("span");
   $(el).attr("class", "outerspan").attr("id", suit.toString(16) + cardNum.toString(16)).attr("ontouchstart", "dragstart_handler(event)")
     .attr("style", "top:" + top + "px; left:" + left + "px").attr("ontouchend", "drop_handler(event)")
-    .attr("currLane", leftToLane(left));
+    .attr("currLane", leftToLane(left)).attr("currLevel", topToLevel(top));
   $(el).html(((red)?'<mark class="red">':'') 
     + '<span class="innerspan" ontouchsend="drop_handler(event)">&#x' 
     + (num+(cardNum > 10?cardNum+2:cardNum+1) +suit*0x10).toString(16) 
