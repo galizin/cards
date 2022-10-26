@@ -12,6 +12,37 @@
     <!-- page content -->
 <script>
 
+class Card {
+  constructor(suit,no) {
+    this.suit = suit;
+    this.no = no;
+  }
+}
+
+const initDeck = function(deck) {
+  for(let suits = 0; suits < 4; suits++) {
+    for(let nos = 0; nos < 13; nos++) {
+      deck.push(new Card(suits, nos));
+    }
+  }
+}
+
+const shuffleDeck = function(deck) {
+  const deck2 = [];
+  while(deck.length > 0) {
+    let idx = Math.floor(Math.random() * deck.length);
+    deck2.push(deck[idx]);
+    deck.splice(idx, 1);
+  }
+  return deck2;
+}
+
+const emptyDeck = [];
+
+initDeck(emptyDeck);
+
+const deck = shuffleDeck(emptyDeck);
+
 var num = 0x1f0a0;
 var shft = 15;
 var hDim = 55;
@@ -180,6 +211,26 @@ cardString = function (cardNum,suit,top,left) {
 };
 
 window.addEventListener('load', function() {
+  
+  for(let lane = 0; lane < 7; lane++) {
+    let parentEl = null;
+    for(let level = 0; level < 7; level++) {
+      if(lane >= level) {
+        const card = deck.pop();
+        el = cardString(card.no, card.suit, vGap*2 + vDim + shft*level, hGap + (hGap + hDim)*lane);
+        if(parentEl) {
+          parentEl.append(el);
+        } else {
+          $("#main")[0].append(el);
+        }
+        parentEl = el;
+      }
+    }
+  }
+  while(deck.length > 0) {
+    
+  }
+/*
   for(var j = 0; j < 4; j++) {
     let parentEl = null;
     for(var i=0; i<13; i++) {
@@ -192,6 +243,7 @@ window.addEventListener('load', function() {
       parentEl = el;
     }
   }
+*/
 });
 
 </script>
