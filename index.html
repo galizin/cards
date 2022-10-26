@@ -228,7 +228,9 @@ window.addEventListener('load', function() {
     }
   }
   while(deck.length > 0) {
-    
+    const card = deck.pop();
+    el = cardString(card.no, card.suit, vGap, hGap + (hGap + hDim)*5);
+    $("#main")[0].append(el);
   }
 /*
   for(var j = 0; j < 4; j++) {
