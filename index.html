@@ -181,9 +181,9 @@ card is c and no stack or card is less by 1 and opposite oddity
       let stock = $("#main").find(".outerspan[currLane = '" + laneNo + "'][currLevel = 'true']");
       $(el).attr("currLane", laneNo).css("left", laneToLeft(laneNo) + 'px');
       if(stock.length) {
-        $("#main")[0].append(el);
-      } else {
         stock[stock.length - 1].append(el);
+      } else {
+        $("#main")[0].append(el);
       }
       cycleStock();
     } 
