@@ -50,6 +50,35 @@ var vDim = 73;
 var vGap = 8
 var hGap = 7;
 
+function cycleStock() {
+  let stock = $("#main").find(".outerspan[currLane = '6'][currLevel = 'true']");
+  if(!stock.length) {
+    $("#main").find(".outerspan[currLane = '5'][currLevel = 'true']").toArray().map(m => $(m).attr("currLane", 6).css("left", laneToLeft(6)));
+    stock = $("#main").find(".outerspan[currLane = '6'][currLevel = 'true']");
+  }
+  let repeat = 0;
+  while (stock.length > 0) {
+    if(repeat > 2) {
+      break;
+    }
+    repeat++;
+    let stockOpen = $("#main").find(".outerspan[currLane = '5'][currLevel = 'true']");
+    $(stock[0]).attr("currLane", 5).css("left", laneToLeft(5));
+    if (stockOpen.length) {
+      stockOpen[stockOpen.length - 1].append(stock[0]);
+    } else {
+      $("#main")[0].append(stock[0]);
+    }
+    if(stock[1]) {
+    //stock[1].append(stock[0]);
+      $("#main")[0].append(stock[1]);
+    }
+    stock = $("#main").find(".outerspan[currLane = '6'][currLevel = 'true']");
+  }
+  console.log($("#main").find(".outerspan[currLane = '5'][currLevel = 'true']").toArray().map(m => $(m).attr("id")));
+  console.log($("#main").find(".outerspan[currLane = '6'][currLevel = 'true']").toArray().map(m => $(m).attr("id")));
+}
+
 function elToCard(el) {
   return parseInt($(el).attr("id").substring(1,2), 16);
 }
@@ -148,6 +177,14 @@ lane 0-6
 card is c and no stack or card is less by 1 and opposite oddity
 */
 
+    if((level === true) && ([5,6].includes(laneNo)) && ([5,6].includes(parseInt($(el).attr("retLane"))))) {
+      let stock = $("#main").find(".outerspan[currLane = '" + laneNo + "'][currLevel = 'true']");
+      $(el).attr("currLane", laneNo).css("left", laneToLeft(laneNo) + 'px');
+      stock[stock.length - 1].append(el);
+      cycleStock();
+    } 
+    else {
+
     if((
       (level === true) && ([0,1,2,3].includes(laneNo)) && ($(el).find(".outerspan").length === 0) && (elToSuit(el) === laneNo) &&
       ((stackOnLane.length === 0) && (elToCard(el) === 0) || 
@@ -174,7 +211,7 @@ card is c and no stack or card is less by 1 and opposite oddity
       } else {
         $(el).appendTo("#main").css("top", vDim + vGap*2 + "px");
       }
-      $(el).attr("currLane", laneNo).css("left", laneToLeft(laneNo) + 'px')
+      $(el).attr("currLane", laneNo).css("left", laneToLeft(laneNo) + 'px');
       prpgStack(el);
     } else {
       let isOnStack = false;
@@ -192,6 +229,7 @@ card is c and no stack or card is less by 1 and opposite oddity
         $(el).appendTo(newParent);
         prpgStack(newParent);
       }
+    }
     }
   }
 }
@@ -227,10 +265,16 @@ window.addEventListener('load', function() {
       }
     }
   }
+  let parentEl = null;
   while(deck.length > 0) {
     const card = deck.pop();
-    el = cardString(card.no, card.suit, vGap, hGap + (hGap + hDim)*5);
-    $("#main")[0].append(el);
+    el = cardString(card.no, card.suit, vGap, hGap + (hGap + hDim)*6);
+    if(parentEl) {
+      parentEl.append(el);
+    } else {
+      $("#main")[0].append(el);
+    }
+    parentEl = el;
   }
 /*
   for(var j = 0; j < 4; j++) {
