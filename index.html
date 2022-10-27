@@ -80,7 +80,8 @@ function cycleStock() {
   stockOpen = $("#main").find(".outerspan[currLane = '5'][currLevel = 'true']");
   for(let i = 0; i < stockOpen.length; i++) {
     $(stockOpen[stockOpen.length - 1 - i]).css("left", laneToLeft(5) + ([0,1].includes(i) ? -1 * i * vGap *1.5  : -2 * vGap *1.5 )  + 'px');
-  }  
+  }
+  $("#main")[0].append($("#stackoverturn")[0]);  
 }
 
 function elToCard(el) {
@@ -251,10 +252,25 @@ cardString = function (cardNum,suit,top,left) {
     .attr("style", "top:" + top + "px; left:" + left + "px").attr("ontouchend", "drop_handler(event)")
     .attr("currLane", leftToLane(left)).attr("currLevel", topToLevel(top));
   $(el).html(((red)?'<mark class="red">':'') 
-    + '<span class="innerspan" ontouchsend="drop_handler(event)">&#x' 
+    + '<span class="innerspan">&#x' 
     + (num+(cardNum > 10?cardNum+2:cardNum+1) +suit*0x10).toString(16) 
     + ';</span>' 
     + ((red)?'</mark>':''));
+  return el;
+};
+
+nonCardString = function (suit,top,left) {
+  let red = suit == "hearts" || suit == "diams" ? 1 : 0; 
+  let el = document.createElement("span");
+  $(el).attr("class", "outerspan").attr("style", "top:" + top + "px; left:" + left + "px");
+  if(suit === "") {
+    $(el).attr("ontouchstart", "dragstart_handler(event)").attr("ontouchend", "drop_handler(event)").attr("id", "stackoverturn");
+    $(el).html('<span class="innerspan">&#x' + num.toString(16) +  ';</span>');
+  } else {
+    $(el).html(((red)?'<mark class="red">':'') 
+      + '<span class="innerspan">&' + suit  + ';</span>' 
+      + ((red)?'</mark>':''));
+  }
   return el;
 };
 
@@ -286,6 +302,12 @@ window.addEventListener('load', function() {
     }
     parentEl = el;
   }
+  $("#main")[0].append(nonCardString("spades", vGap, hGap + (hGap + hDim) * 0));
+  $("#main")[0].append(nonCardString("hearts", vGap, hGap + (hGap + hDim) * 1));
+  $("#main")[0].append(nonCardString("diams", vGap, hGap + (hGap + hDim) * 2));
+  $("#main")[0].append(nonCardString("clubs", vGap, hGap + (hGap + hDim) * 3));
+  $("#main")[0].append(nonCardString("", vGap, hGap + (hGap + hDim) * 6));
+
 /*
   for(var j = 0; j < 4; j++) {
     let parentEl = null;
