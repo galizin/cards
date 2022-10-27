@@ -180,7 +180,11 @@ card is c and no stack or card is less by 1 and opposite oddity
     if((level === true) && ([5,6].includes(laneNo)) && ([5,6].includes(parseInt($(el).attr("retLane"))))) {
       let stock = $("#main").find(".outerspan[currLane = '" + laneNo + "'][currLevel = 'true']");
       $(el).attr("currLane", laneNo).css("left", laneToLeft(laneNo) + 'px');
-      stock[stock.length - 1].append(el);
+      if(stock.length) {
+        $("#main")[0].append(el);
+      } else {
+        stock[stock.length - 1].append(el);
+      }
       cycleStock();
     } 
     else {
