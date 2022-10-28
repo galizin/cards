@@ -43,6 +43,8 @@ initDeck(emptyDeck);
 
 const deck = shuffleDeck(emptyDeck);
 
+let deckBkp = [];
+
 var num = 0x1f0a0;
 var shft = 15;
 var hDim = 55;
@@ -274,13 +276,63 @@ nonCardString = function (suit,top,left) {
   return el;
 };
 
-window.addEventListener('load', function() {
-  
+
+function placeCards() {
+  const deckCopy = [...deck];
   for(let lane = 0; lane < 7; lane++) {
     let parentEl = null;
     for(let level = 0; level < 7; level++) {
       if(lane >= level) {
-        const card = deck.pop();
+        const card = deckCopy.pop();
+        //el = cardString(card.no, card.suit, vGap*2 + vDim + shft*level, hGap + (hGap + hDim)*lane);
+        el = $("#" + card.suit.toString(16) + card.no.toString(16))[0];
+        const top = vGap*2 + vDim + shft*level;
+        const left = hGap + (hGap + hDim)*lane;
+        $(el).css("top", top + "px").css("left", left + "px")
+          .attr("currLane", leftToLane(left)).attr("currLevel", topToLevel(top));
+        $("#main").append(el);
+        if(parentEl) {
+          parentEl.append(el);
+        } else {
+          $("#main")[0].append(el);
+        }
+        parentEl = el;
+      }
+    }
+  }
+  let parentEl = null;
+  while(deckCopy.length > 0) {
+    const card = deckCopy.pop();
+    //el = cardString(card.no, card.suit, vGap, hGap + (hGap + hDim)*6);
+    el = $("#" + card.suit.toString(16) + card.no.toString(16))[0];
+    const top = vGap;
+    const left = hGap + (hGap + hDim)*6;
+    $(el).css("top", top + "px").css("left", left + "px")
+      .attr("currLane", leftToLane(left)).attr("currLevel", topToLevel(top));
+    $("#main").append(el);
+    if(parentEl) {
+      parentEl.append(el);
+    } else {
+      $("#main")[0].append(el);
+    }
+    parentEl = el;
+  }
+  $("#main")[0].append($("#stackoverturn")[0]);
+}
+
+
+
+window.addEventListener('load', function() {
+  $("#main")[0].append(nonCardString("spades", vGap, hGap + (hGap + hDim) * 0));
+  $("#main")[0].append(nonCardString("hearts", vGap, hGap + (hGap + hDim) * 1));
+  $("#main")[0].append(nonCardString("diams", vGap, hGap + (hGap + hDim) * 2));
+  $("#main")[0].append(nonCardString("clubs", vGap, hGap + (hGap + hDim) * 3));
+  const deckCopy = [...deck];
+  for(let lane = 0; lane < 7; lane++) {
+    let parentEl = null;
+    for(let level = 0; level < 7; level++) {
+      if(lane >= level) {
+        const card = deckCopy.pop();
         el = cardString(card.no, card.suit, vGap*2 + vDim + shft*level, hGap + (hGap + hDim)*lane);
         if(parentEl) {
           parentEl.append(el);
@@ -292,8 +344,8 @@ window.addEventListener('load', function() {
     }
   }
   let parentEl = null;
-  while(deck.length > 0) {
-    const card = deck.pop();
+  while(deckCopy.length > 0) {
+    const card = deckCopy.pop();
     el = cardString(card.no, card.suit, vGap, hGap + (hGap + hDim)*6);
     if(parentEl) {
       parentEl.append(el);
@@ -302,11 +354,11 @@ window.addEventListener('load', function() {
     }
     parentEl = el;
   }
-  $("#main")[0].append(nonCardString("spades", vGap, hGap + (hGap + hDim) * 0));
-  $("#main")[0].append(nonCardString("hearts", vGap, hGap + (hGap + hDim) * 1));
-  $("#main")[0].append(nonCardString("diams", vGap, hGap + (hGap + hDim) * 2));
-  $("#main")[0].append(nonCardString("clubs", vGap, hGap + (hGap + hDim) * 3));
-  $("#main")[0].append(nonCardString("", vGap, hGap + (hGap + hDim) * 6));
+
+let btn = document.createElement("button");
+$(btn).css("top", "450px").html("reload").attr("onclick", "placeCards();");
+$("#main")[0].append(btn);
+$("#main")[0].append(nonCardString("", vGap, hGap + (hGap + hDim) * 6));
 
 /*
   for(var j = 0; j < 4; j++) {

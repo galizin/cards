@@ -32,3 +32,8 @@ height:440px;
   font-family: "Noto";
   src: url("../assets/NotoSansSymbols2-Regular.ttf") format("truetype");
 }
+
+button {
+  position:fixed;
+  font-family:Noto;
+}
