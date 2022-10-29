@@ -31,7 +31,7 @@ const deck = shuffleDeck(emptyDeck);
 
 let deckBkp = [];
 
-var num = 0x1f0a0;
+//var num = 0x1f0a0;
 var shft = 25;
 var hDim = 62;
 var vDim = 73;
@@ -41,7 +41,14 @@ var hGap = 2;
 function alignOpenStock() {
     stockOpen = $("#main").find(".outerspan[currLane = '5'][currLevel = 'true']");
     for (let i = 0; i < stockOpen.length; i++) {
-        $(stockOpen[stockOpen.length - 1 - i]).css("left", laneToLeft(5) + ([0, 1].includes(i) ? -1 * i * vGap * 4 : -2 * vGap * 4) + 'px');
+        let idx = stockOpen.length - 1 - i;
+        $(stockOpen[idx]).css("left", laneToLeft(5) + ([0, 1].includes(i) ? -1 * i * vGap * 4 : -2 * vGap * 4) + 'px');
+        if(!i) {
+          $(stockOpen[idx]).attr("ontouchstart", "dragstart_handler(event)").attr("ontouchend", "drop_handler(event)")
+            .attr("ontouchmove","dragover_handler(event)");
+        } else {
+          $(stockOpen[idx]).attr("ontouchstart", "").attr("ontouchend", "").attr("ontouchmove","");
+        }
     }
 }
 
@@ -65,13 +72,10 @@ function cycleStock() {
             $("#main")[0].append(stock[0]);
         }
         if (stock[1]) {
-            //stock[1].append(stock[0]);
             $("#main")[0].append(stock[1]);
         }
         stock = $("#main").find(".outerspan[currLane = '6'][currLevel = 'true']");
     }
-    //console.log($("#main").find(".outerspan[currLane = '5'][currLevel = 'true']").toArray().map(m => $(m).attr("id")));
-    //console.log($("#main").find(".outerspan[currLane = '6'][currLevel = 'true']").toArray().map(m => $(m).attr("id")));
     alignOpenStock();
     $("#main")[0].append($("#stackoverturn")[0]);
 }
@@ -81,7 +85,6 @@ function elToCard(el) {
 }
 
 function elToSuit(el) {
-    //  console.log(parseInt($(el).attr("id").substring(0,1), 16));
     return parseInt($(el).attr("id").substring(0, 1), 16);
 }
 
@@ -167,17 +170,6 @@ function drop_handler(ev) {
         let level = topToLevel(parseInt(el.style.top));
         let stackOnLane = $("#main").find("span[currLane=" + laneNo + "][currLevel=" + level + "].outerspan");
 
-        /*
-        drop successful:
-        level 0
-        lane 0,1,2,3
-        no children
-        same suit card bigger than lowest in stack by 1 or no stack and card = 0
-        level 1
-        lane 0-6
-        card is c and no stack or card is less by 1 and opposite oddity
-        */
-
         if ((level === true) && ([6].includes(laneNo)) && ([6].includes(parseInt($(el).attr("retLane"))))) {
             let stock = $("#main").find(".outerspan[currLane = '" + laneNo + "'][currLevel = 'true']");
             $(el).attr("currLane", laneNo).css("left", laneToLeft(laneNo) + 'px');
@@ -190,14 +182,15 @@ function drop_handler(ev) {
         } else {
 
             if ((
-                    (level === true) && ([0, 1, 2, 3].includes(laneNo)) && ($(el).find(".outerspan").length === 0) && (elToSuit(el) === laneNo) &&
-                    ((stackOnLane.length === 0) && (elToCard(el) === 0) ||
+                    (level === true) && ([0, 1, 2, 3].includes(laneNo)) && ($(el).find(".outerspan").length === 0)
+                    && (elToSuit(el) === laneNo)
+                    && ((stackOnLane.length === 0) && (elToCard(el) === 0) ||
                         ((stackOnLane.length !== 0) && (elToCard(el) - 1 === elToCard(stackOnLane[stackOnLane.length - 1]))))
                 ) || (
-                    (level === false) &&
-                    (((stackOnLane.length === 0) && (elToCard(el) === 12)) ||
-                        ((stackOnLane.length !== 0) && (elToCard(el) + 1 === elToCard(stackOnLane[stackOnLane.length - 1])) &&
-                            (suitTest(elToSuit(el), elToSuit(stackOnLane[stackOnLane.length - 1]))))
+                    (level === false)
+                    && (((stackOnLane.length === 0) && (elToCard(el) === 12)) ||
+                        ((stackOnLane.length !== 0) && (elToCard(el) + 1 === elToCard(stackOnLane[stackOnLane.length - 1]))
+                        &&  (suitTest(elToSuit(el), elToSuit(stackOnLane[stackOnLane.length - 1]))))
                     )
                 )) {
 
@@ -206,7 +199,6 @@ function drop_handler(ev) {
                 level = ($(el).attr("retLevel") === "true");
             }
 
-            //laneNo = laneNo == -1 ? parseInt($(el).attr("retLane")): laneNo;
             $(el).attr("retLevel", "").attr("retLane", "").attr("currLevel", level);
             stackOnLane = $("#main").find("span[currLane=" + laneNo + "][currLevel=" + level + "].outerspan");
             if (stackOnLane.length == 0) {
@@ -225,9 +217,6 @@ function drop_handler(ev) {
                         break;
                     }
                 }
-                //if($("#main span[currLane=" + laneNo + "]").attr("id") == $(el).attr("id")) {
-                //isOnStack = true;
-                //}
                 if (!isOnStack) {
                     let newParent = stackOnLane[stackOnLane.length - 1];
                     $(el).appendTo(newParent);
@@ -275,17 +264,12 @@ cardString = function(cardNum, suit, top, left) {
             break;
     }
     let el = document.createElement("span");
-    $(el).attr("class", "outerspan").attr("id", suit.toString(16) + cardNum.toString(16)).attr("ontouchstart", "dragstart_handler(event)")
-        .attr("style", "top:" + top + "px; left:" + left + "px").attr("ontouchend", "drop_handler(event)")
+    $(el).attr("class", "outerspan").attr("id", suit.toString(16) + cardNum.toString(16))
+        .attr("style", "top:" + top + "px; left:" + left + "px")
+        .attr("ontouchstart", "dragstart_handler(event)").attr("ontouchend", "drop_handler(event)")
+        .attr("ontouchmove","dragover_handler(event)")
         .attr("currLane", leftToLane(left)).attr("currLevel", topToLevel(top));
-    $(el).html(((red) ? '<mark class="red">' : '') +
-        '<span class="innerspan">' //&#x' 
-        +
-        cardname + suitname
-        //+ (num+(cardNum > 10?cardNum+2:cardNum+1) +suit*0x10).toString(16) 
-        + //';
-        '</span>' +
-        ((red) ? '</mark>' : ''));
+    $(el).html(((red) ? '<mark class="red">' : '') + '<span class="innerspan">' + cardname + suitname + '</span>' + ((red) ? '</mark>' : ''));
     return el;
 };
 
@@ -295,13 +279,9 @@ nonCardString = function(suit, top, left) {
     $(el).attr("class", "outerspan").attr("style", "top:" + top + "px; left:" + left + "px");
     if (suit === "") {
         $(el).attr("ontouchstart", "dragstart_handler(event)").attr("ontouchend", "drop_handler(event)").attr("id", "stackoverturn");
-        $(el).html('<span class="innerspan"><!--&#x' + num.toString(16) + ';--></span>');
+        $(el).html('<span class="innerspan" />');
     } else {
-        $(el).html(
-            //((red)?'<mark class="red">':'') +
-            '<span class="innerspan place ' + ((red) ? 'red' : '') + '">&' + suit + ';</span>'
-            //+ ((red)?'</mark>':'')
-        );
+        $(el).html('<span class="innerspan place ' + ((red) ? 'red' : '') + '">&' + suit + ';</span>');
     }
     return el;
 };
@@ -314,7 +294,6 @@ function placeCards() {
         for (let level = 0; level < 7; level++) {
             if (lane >= level) {
                 const card = deckCopy.pop();
-                //el = cardString(card.no, card.suit, vGap*2 + vDim + shft*level, hGap + (hGap + hDim)*lane);
                 el = $("#" + card.suit.toString(16) + card.no.toString(16))[0];
                 const top = vGap * 2 + vDim + shft * level;
                 const left = hGap + (hGap + hDim) * lane;
@@ -333,7 +312,6 @@ function placeCards() {
     let parentEl = null;
     while (deckCopy.length > 0) {
         const card = deckCopy.pop();
-        //el = cardString(card.no, card.suit, vGap, hGap + (hGap + hDim)*6);
         el = $("#" + card.suit.toString(16) + card.no.toString(16))[0];
         const top = vGap;
         const left = hGap + (hGap + hDim) * 6;
@@ -349,8 +327,6 @@ function placeCards() {
     }
     $("#main")[0].append($("#stackoverturn")[0]);
 }
-
-
 
 window.addEventListener('load', function() {
     $("#main")[0].append(nonCardString("spades", vGap, hGap + (hGap + hDim) * 0));
@@ -389,19 +365,4 @@ window.addEventListener('load', function() {
     $(btn).css("top", "450px").html("reload").attr("onclick", "placeCards();");
     $("#main")[0].append(btn);
     $("#main")[0].append(nonCardString("", vGap, hGap + (hGap + hDim) * 6));
-
-    /*
-      for(var j = 0; j < 4; j++) {
-        let parentEl = null;
-        for(var i=0; i<13; i++) {
-          el = cardString(i, j, vGap + vGap + vDim + shft*i , hGap + (hGap + hDim)*j );
-          if (parentEl) {
-            parentEl.append(el);
-          } else {
-            document.getElementById("main").append(el);
-          }
-          parentEl = el;
-        }
-      }
-    */
 });
