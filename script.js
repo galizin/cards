@@ -38,25 +38,45 @@ var vDim = 73;
 var vGap = 8
 var hGap = 2;
 
+spanIdx(idx,level) {
+  return("span.outerspan[currLane='" + idx + "'][currLevel = '" + level + "']");
+}
+
+spanUp(idx) {
+  return spanIdx(idx, "true");
+}
+
+spanDn(idx) {
+  return spanIdx(idx, "false");
+}
+
+elMove(el) {
+  $(el).attr("ontouchstart", "dragstart_handler(event)").attr("ontouchend", "drop_handler(event)")
+    .attr("ontouchmove","dragover_handler(event)");
+}
+
+elFix(el) {
+  $(el).attr("ontouchstart", "").attr("ontouchend", "").attr("ontouchmove","");
+}
+
 function alignOpenStock() {
-    stockOpen = $("#main").find(".outerspan[currLane = '5'][currLevel = 'true']");
+    stockOpen = $("#main").find(spanUp(5));
     for (let i = 0; i < stockOpen.length; i++) {
         let idx = stockOpen.length - 1 - i;
         $(stockOpen[idx]).css("left", laneToLeft(5) + ([0, 1].includes(i) ? -1 * i * vGap * 4 : -2 * vGap * 4) + 'px');
         if(!i) {
-          $(stockOpen[idx]).attr("ontouchstart", "dragstart_handler(event)").attr("ontouchend", "drop_handler(event)")
-            .attr("ontouchmove","dragover_handler(event)");
+          elMove(stockOpen[idx]);
         } else {
-          $(stockOpen[idx]).attr("ontouchstart", "").attr("ontouchend", "").attr("ontouchmove","");
+          elFix(stockOpen[idx]);
         }
     }
 }
 
 function cycleStock() {
-    let stock = $("#main").find(".outerspan[currLane = '6'][currLevel = 'true']");
+    let stock = $("#main").find(spanUp(6));
     if (!stock.length) {
-        $("#main").find(".outerspan[currLane = '5'][currLevel = 'true']").toArray().map(m => $(m).attr("currLane", 6).css("left", laneToLeft(6)));
-        stock = $("#main").find(".outerspan[currLane = '6'][currLevel = 'true']");
+        $("#main").find(spanUp(5)).toArray().map(m => $(m).attr("currLane", 6).css("left", laneToLeft(6)));
+        stock = $("#main").find(spanUp(6));
     }
     let repeat = 0;
     while (stock.length > 0) {
@@ -64,7 +84,7 @@ function cycleStock() {
             break;
         }
         repeat++;
-        let stockOpen = $("#main").find(".outerspan[currLane = '5'][currLevel = 'true']");
+        let stockOpen = $("#main").find(spanUp(6));
         $(stock[0]).attr("currLane", 5).css("left", laneToLeft(5) + 'px').css("top", vGap + 'px');
         if (stockOpen.length) {
             stockOpen[stockOpen.length - 1].append(stock[0]);
@@ -74,7 +94,7 @@ function cycleStock() {
         if (stock[1]) {
             $("#main")[0].append(stock[1]);
         }
-        stock = $("#main").find(".outerspan[currLane = '6'][currLevel = 'true']");
+        stock = $("#main").find(spanUp(6));
     }
     alignOpenStock();
     $("#main")[0].append($("#stackoverturn")[0]);
