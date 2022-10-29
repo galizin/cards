@@ -1,29 +1,47 @@
+span.innerspan.place {
+font-size:40px;
+margin: 0;
+display: flex;
+justify-content: center;
+line-height: 72px;
+color:rgba(0,0,0,0.4);
+}
+span.innerspan.place.red{
+color:rgba(255,0,0,0.4);
+}
 mark.red {
 color:#ff0000;
 background:none;
 }
 span{
 cursor:pointer;
-line-height: /*67*/100px;
+/*line-height: 100px;*/
+margin-top: -5px;
 }
 span.innerspan {
-margin: /*-3.5*/-7px;
+/*margin: -7px;*/
+display: flex;
+justify-content: left;
 }
+span.suit {
+font-family:Emoji;
+}
+
 span.outerspan {
 position:fixed;
 background:white;
 /*height:65px;
 width:49.5px;*/
 height: 69px;
-width: 51px;
+width: 56px;
 border-style: solid;
 border-width: 2px;
-border-radius: 3px;
+border-radius: 7px;
 overflow:hidden;
 }
 div#main {
-font-size:96px;
-font-family:Noto;
+font-size:30px;
+font-family:Text;
 width:425px;
 height:440px;
 }
@@ -33,7 +51,17 @@ height:440px;
   src: url("../assets/NotoSansSymbols2-Regular.ttf") format("truetype");
 }
 
+@font-face {
+  font-family: "Emoji";
+  src: url("../assets/NotoColorEmoji-Regular.ttf") format("truetype");
+}
+
+@font-face {
+  font-family: "Text";
+  src: url("../assets/ShareTechMono-Regular.ttf") format("truetype");
+}
+
 button {
   position:fixed;
-  font-family:Noto;
+  font-family:Text;
 }

@@ -46,11 +46,18 @@ const deck = shuffleDeck(emptyDeck);
 let deckBkp = [];
 
 var num = 0x1f0a0;
-var shft = 15;
-var hDim = 55;
+var shft = 25;
+var hDim = 62;
 var vDim = 73;
 var vGap = 8
-var hGap = 7;
+var hGap = 2;
+
+function alignOpenStock() {
+  stockOpen = $("#main").find(".outerspan[currLane = '5'][currLevel = 'true']");
+  for(let i = 0; i < stockOpen.length; i++) {
+    $(stockOpen[stockOpen.length - 1 - i]).css("left", laneToLeft(5) + ([0,1].includes(i) ? -1 * i * vGap *4  : -2 * vGap *4 )  + 'px');
+  }
+}
 
 function cycleStock() {
   let stock = $("#main").find(".outerspan[currLane = '6'][currLevel = 'true']");
@@ -79,10 +86,7 @@ function cycleStock() {
   }
   //console.log($("#main").find(".outerspan[currLane = '5'][currLevel = 'true']").toArray().map(m => $(m).attr("id")));
   //console.log($("#main").find(".outerspan[currLane = '6'][currLevel = 'true']").toArray().map(m => $(m).attr("id")));
-  stockOpen = $("#main").find(".outerspan[currLane = '5'][currLevel = 'true']");
-  for(let i = 0; i < stockOpen.length; i++) {
-    $(stockOpen[stockOpen.length - 1 - i]).css("left", laneToLeft(5) + ([0,1].includes(i) ? -1 * i * vGap *1.5  : -2 * vGap *1.5 )  + 'px');
-  }
+  alignOpenStock();
   $("#main")[0].append($("#stackoverturn")[0]);  
 }
 
@@ -146,8 +150,10 @@ function dragstart_handler(ev) {
   const touches = ev.changedTouches;
   const el = ev.target.closest(".outerspan");
   const viewportOffset = el.getBoundingClientRect();
+  let calcLeft = leftToLane(parseInt(el.style.left));
+  calcLeft = (topToLevel(parseInt(el.style.top)) && (calcLeft == 4)) ? 5 : calcLeft;
   $(el).attr("touchstartoffset", (-viewportOffset.top + touches[0].pageY)  + ',' + (-viewportOffset.left + touches[0].pageX))
-    .attr("retLane", leftToLane(parseInt(el.style.left))).attr("retLevel", topToLevel(parseInt(el.style.top)));
+    .attr("retLane", calcLeft ).attr("retLevel", topToLevel(parseInt(el.style.top)));
   $(el).appendTo("#main").attr("currLane", "-1");
   prpgStack(el);
 }
@@ -244,19 +250,55 @@ card is c and no stack or card is less by 1 and opposite oddity
       }
     }
     }
+    alignOpenStock();
   }
 }
 
 cardString = function (cardNum,suit,top,left) {
-  let red = suit == 1 || suit == 2 ? 1 : 0; 
+  let red = suit == 1 || suit == 2 ? 1 : 0;
+  let suitname = "";
+  switch(suit) {
+    case 0:
+      suitname = "&spades;";
+      break;
+    case 1:
+      suitname = "&hearts;";
+      break;
+    case 2:
+      suitname = "&diams;";
+      break;
+    case 3:
+      suitname = "&clubs;";
+      break;
+  } 
+  let cardname = "";
+  switch(cardNum) {
+    case 0:
+      cardname = "A";
+      break;
+    case 12:
+      cardname = "K";
+      break;
+    case 11:
+      cardname = "Q";
+      break;
+    case 10:
+      cardname = "J";
+      break;
+    default:
+      cardname = cardNum + 1 + "";
+      break;
+  }
   let el = document.createElement("span");
   $(el).attr("class", "outerspan").attr("id", suit.toString(16) + cardNum.toString(16)).attr("ontouchstart", "dragstart_handler(event)")
     .attr("style", "top:" + top + "px; left:" + left + "px").attr("ontouchend", "drop_handler(event)")
     .attr("currLane", leftToLane(left)).attr("currLevel", topToLevel(top));
   $(el).html(((red)?'<mark class="red">':'') 
-    + '<span class="innerspan">&#x' 
-    + (num+(cardNum > 10?cardNum+2:cardNum+1) +suit*0x10).toString(16) 
-    + ';</span>' 
+    + '<span class="innerspan">'//&#x' 
+    + cardname + suitname
+    //+ (num+(cardNum > 10?cardNum+2:cardNum+1) +suit*0x10).toString(16) 
+    + //';
+    '</span>' 
     + ((red)?'</mark>':''));
   return el;
 };
@@ -267,11 +309,13 @@ nonCardString = function (suit,top,left) {
   $(el).attr("class", "outerspan").attr("style", "top:" + top + "px; left:" + left + "px");
   if(suit === "") {
     $(el).attr("ontouchstart", "dragstart_handler(event)").attr("ontouchend", "drop_handler(event)").attr("id", "stackoverturn");
-    $(el).html('<span class="innerspan">&#x' + num.toString(16) +  ';</span>');
+    $(el).html('<span class="innerspan"><!--&#x' + num.toString(16) +  ';--></span>');
   } else {
-    $(el).html(((red)?'<mark class="red">':'') 
-      + '<span class="innerspan">&' + suit  + ';</span>' 
-      + ((red)?'</mark>':''));
+    $(el).html(
+    //((red)?'<mark class="red">':'') +
+      '<span class="innerspan place ' + ((red)?'red':'') + '">&' + suit  + ';</span>' 
+      //+ ((red)?'</mark>':'')
+    );
   }
   return el;
 };
