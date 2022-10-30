@@ -71,6 +71,14 @@ function elFix(el) {
   $(el).attr("ontouchstart", "").attr("ontouchend", "").attr("ontouchmove","");
 }
 
+function laneToLeft(laneNo) {
+    return (hGap + (hDim + hGap) * laneNo);
+}
+
+function posToLn(el, ln) {
+    return $(el).attr("currLane", ln).css("left", laneToLeft(ln) + 'px'));
+}
+
 function alignOpenStock() {
     stockOpen = stockUp(5);
     for (let i = 0; i < stockOpen.length; i++) {
@@ -87,7 +95,7 @@ function alignOpenStock() {
 function cycleStock() {
     let stock = stockUp(6);
     if (!stock.length) {
-        stockUp(5).toArray().map(m => $(m).attr("currLane", 6).css("left", laneToLeft(6)));
+        stockUp(5).toArray().map(m => {posToLn(m, 6);});
         stock = stockUp(6);
         $(stock[0]).addClass("grey");
     }
@@ -98,7 +106,7 @@ function cycleStock() {
         }
         repeat++;
         let stockOpen = stockUp(5);
-        $(stock[0]).attr("currLane", 5).css("left", laneToLeft(5) + 'px').css("top", vGap + 'px');
+        posToLn(stock[0], 5).css("top", vGap + 'px');
         if (stockOpen.length) {
             stockOpen[stockOpen.length - 1].append(stock[0]);
         } else {
@@ -144,10 +152,6 @@ function topToLevel(top) {
     return top + vDim / 2 < (vGap * 1.5 + vDim);
 }
 
-function laneToLeft(laneNo) {
-    return (hGap + (hDim + hGap) * laneNo);
-}
-
 function prpgStack(el) {
     let sh = 0;
     const laneNo = $(el).attr("currLane");
@@ -185,12 +189,12 @@ function dragover_handler(ev) {
     const touches = ev.changedTouches;
     let el = ev.target.closest(".outerspan");
     if (el) {
-        if (!(($(el).attr("retLane")==="6") && ($(el).attr("retLevel") === "true"))) {
+        //if (!(($(el).attr("retLane")==="6") && ($(el).attr("retLevel") === "true"))) {
             let offs = $(el).attr("touchstartoffset");
             el.style.top = (touches[0].pageY - Number(offs.split(',')[0])) + 'px';
             el.style.left = (touches[0].pageX - Number(offs.split(',')[1])) + 'px';
             prpgStack(el);
-        }
+        //}
     }
 }
 
@@ -217,36 +221,35 @@ function drop_handler(ev) {
             //cycleStock();
         //} else {
             let stackOnLane = stockIdx(laneNo, level);
+            const stackEmpty = stackOnLane.length === 0;
+            const onlyEl = $(el).find(".outerspan").length === 0;
+            const elSuit = elToSuit(el);
+            const elCard = elToCard(el);
+            const lastCardSuit = elToSuit($(stackOnLane).last());
+            const lastCardCard = elToCard($(stackOnLane).last());
+
             if ((
-                    (level === true) && ([0, 1, 2, 3].includes(laneNo)) && ($(el).find(".outerspan").length === 0)
-                    && (elToSuit(el) === laneNo)
-                    && ((stackOnLane.length === 0) && (elToCard(el) === 0) ||
-                        ((stackOnLane.length !== 0) && (elToCard(el) - 1 === 
-//elToCard(stackOnLane[stackOnLane.length - 1]))))
-elToCard($(stackOnLane).last()))))
+                    (level === true) && [0, 1, 2, 3].includes(laneNo) && onlyEl && (elSuit === laneNo)
+                    && (stackEmpty && (elCard === 0) || ((!stackEmpty) && (elCard - 1 === lastCardCard)))
                 ) || (
-                    (level === false)
-                    && (((stackOnLane.length === 0) && (elToCard(el) === 12)) ||
-                        ((stackOnLane.length !== 0) && (elToCard(el) + 1 === elToCard(stackOnLane[stackOnLane.length - 1]))
-                        &&  (suitTest(elToSuit(el), elToSuit(stackOnLane[stackOnLane.length - 1]))))
-                    )
+                    (level === false) && ((stackEmpty && (elCard === 12)) ||
+                    ((!stackEmpty) && (elCard + 1 === lastCardCard) && suitTest(elSuit, lastCardSuit)))
                 )) {
                 $(el).removeClass("grey");
-
             } else {
-                laneNo = parseInt($(el).attr("retLane"));
-                level = ($(el).attr("retLevel") === "true");
+                laneNo = retLane;
+                level = retLevel;
             }
 
             $(el).attr("retLevel", "").attr("retLane", "").attr("currLevel", level);
-            stackOnLane = $("#main").find("span[currLane=" + laneNo + "][currLevel=" + level + "].outerspan");
+            stackOnLane = stackIdx(laneNo, level);
             if (stackOnLane.length == 0) {
                 if (level) {
                     $(el).appendTo("#main").css("top", vGap + "px");
                 } else {
                     $(el).appendTo("#main").css("top", vDim + vGap * 2 + "px");
                 }
-                $(el).attr("currLane", laneNo).css("left", laneToLeft(laneNo) + 'px');
+                posToLn(el, laneNo); //$(el).attr("currLane", laneNo).css("left", laneToLeft(laneNo) + 'px');
                 prpgStack(el);
             } else {
                 let isOnStack = false;
