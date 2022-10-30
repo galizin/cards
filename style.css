@@ -1,10 +1,11 @@
 span.outerspan.move {
     background-color: white;
-    transition: background-color 2s, left 0s, top 0s;
+    transition:left 0s;
 }
 
 span.outerspan.grey {
     background-color: rgb(200,200,200);
+    transition: background-color 1s;
 }
 
 span.innerspan.place {
@@ -54,8 +55,8 @@ width:49.5px;*/
     overflow: hidden;
 }
 
-span.outerspan[currLane = "5"] {
-    transition: top 2s, left 2s;
+span.outerspan[currLane = "5"][currLevel = "true"] {
+    transition: left 1s;
 }
 
 div#main {

@@ -31,7 +31,6 @@ const deck = shuffleDeck(emptyDeck);
 
 let deckBkp = [];
 
-//var num = 0x1f0a0;
 var shft = 25;
 var hDim = 62;
 var vDim = 73;
@@ -192,20 +191,12 @@ function dragstart_handler(ev) {
     const el = ev.target.closest(".outerspan");
     if(el) {
       const viewportOffset = el.getBoundingClientRect();
-    //let calcLeft = leftToLane(parseInt(el.style.left));
-      //calcLeft = (topToLevel(parseInt(el.style.top)) && (calcLeft == 4)) ? 5 : calcLeft;
-     // console.log("retLane:" + $(el).attr("retLane"));
-     // console.log("currLane:" + $(el).attr("currLane"));
       if($(el).attr("currLane") !== "-1") {
         $(el).attr("retLane", $(el).attr("currLane"));
       }
       $(el).attr("touchstartoffset", (-viewportOffset.top + touches[0].pageY) + ',' + (-viewportOffset.left + touches[0].pageX))
-.attr("retLevel", $(el).attr("currLevel")) //;
-.appendTo("#main") //;
-      //$(el)
-.attr("currLane", "-1") //;
-
-.addClass("move");
+        .attr("retLevel", $(el).attr("currLevel")).appendTo("#main").attr("currLane", "-1").addClass("move");
+      $(el).removeClass("grey");
       prpgStack(el);
     }
 }
@@ -215,12 +206,10 @@ function dragover_handler(ev) {
     const touches = ev.changedTouches;
     let el = ev.target.closest(".outerspan");
     if (el && $(el).hasClass("move")) {
-        //if (!(($(el).attr("retLane")==="6") && ($(el).attr("retLevel") === "true"))) {
             let offs = $(el).attr("touchstartoffset");
             el.style.top = (touches[0].pageY - Number(offs.split(',')[0])) + 'px';
             el.style.left = (touches[0].pageX - Number(offs.split(',')[1])) + 'px';
             prpgStack(el);
-        //}
     }
 }
 
@@ -235,17 +224,6 @@ function drop_handler(ev) {
         const retLevel = $(el).attr("retLevel") === "true";
         let laneNo = fromLaneNo;
         let level = fromLevel;
-
-       // if ((level === true) && (retLevel === true) && (laneNo === 6) && (retLane === 6)) {
-         //   let stock = stockUp(laneNo); //  $("#main").find(".outerspan[currLane = '" + laneNo + "'][currLevel = 'true']");
-           // $(el).attr("currLane", laneNo).css("left", laneToLeft(laneNo) + 'px');
-           // if (stock.length) {
-            //    stock[stock.length - 1].append(el);
-           // } else {
-            //    $("#main")[0].append(el);
-           // }
-            //cycleStock();
-        //} else {
             let stackOnLane = stockIdx(laneNo, level);
             let stackEmpty = stackOnLane.length === 0;
             const onlyEl = $(el).find(".outerspan").length === 0;
@@ -261,7 +239,6 @@ function drop_handler(ev) {
                     (level === false) && ((stackEmpty && (elCard === 12)) ||
                     ((!stackEmpty) && (elCard + 1 === lastCardCard) && suitTest(elSuit, lastCardSuit)))
                 )) {
-                $(el).removeClass("grey");
             } else {
                 laneNo = retLane;
                 level = retLevel;
@@ -271,14 +248,6 @@ function drop_handler(ev) {
 
             $(el).attr("retLevel", "").attr("retLane", "").attr("currLevel", level).attr("currLane", laneNo);
             if (!stackEmpty) {
-        /*        if (level) {
-                    $(el).appendTo("#main").css("top", vGap + "px");
-                } else {
-                    $(el).appendTo("#main").css("top", vDim + vGap * 2 + "px");
-                }
-                posToLn(el, laneNo); //$(el).attr("currLane", laneNo).css("left", laneToLeft(laneNo) + 'px');
-                //prpgStack(el);
-            } else {*/
                 let isOnStack = false;
                 for (child of stackOnLane) {
                     if ($(el).attr("id") == $(child).attr("id")) {
@@ -287,19 +256,13 @@ function drop_handler(ev) {
                     }
                 }
                 if (!isOnStack) {
-                    //let newParent = stackOnLane[stackOnLane.length - 1];
                     $(el).appendTo($(stackOnLane).last()[0]);
-                    //prpgStack(newParent);
-                    console.log("appending to");
-                    console.log($(stackOnLane).last()[0]);
                 }
             }
             stackOnLane = stockIdx(laneNo, level);
             prpgStack(stackOnLane[0]);
         $(el).removeClass("move");
             prpgStack(stackOnLane[0]);
-        //prpgStack(el);
-        //}
         alignOpenStock();
     }
 }
@@ -341,10 +304,6 @@ cardString = function(cardNum, suit, fixed) {
     }
     let el = document.createElement("span");
     $(el).attr("class", "outerspan").attr("id", suit.toString(16) + cardNum.toString(16))
-        //.attr("style", "top:" + top + "px; left:" + left + "px")
-        //.attr("ontouchstart", "dragstart_handler(event)").attr("ontouchend", "drop_handler(event)")
-        //.attr("ontouchmove","dragover_handler(event)")
-        //.attr("currLane", lane).attr("currLevel", level);
     elMove(el);
     if(fixed) {
       elFix(el);
@@ -358,16 +317,13 @@ nonCardString = function(suit, top, left) {
     let el = document.createElement("span");
     $(el).attr("class", "outerspan").attr("style", "top:" + top + "px; left:" + left + "px");
     if (suit === "") {
-        $(el) //.attr("ontouchstart", "dragstart_handler(event)").attr("ontouchend", "drop_handler(event)")
-        .attr("onclick", "cycleStock()")
-        .attr("id", "stackoverturn");
+        $(el).attr("onclick", "cycleStock()").attr("id", "stackoverturn");
         $(el).html('<span class="innerspan" />');
     } else {
         $(el).html('<span class="innerspan place ' + ((red) ? 'red' : '') + '">&' + suit + ';</span>');
     }
     return el;
 };
-
 
 function placeCards() {
     const deckCopy = [...deck];
@@ -378,10 +334,7 @@ function placeCards() {
             if (lane >= level) {
                 const card = deckCopy.pop();
                 el = $("#" + card.suit.toString(16) + card.no.toString(16))[0];
-                //const top = vGap * 2 + vDim + shft * level;
-                //const left = hGap + (hGap + hDim) * lane;
-                $(el) //.css("top", top + "px").css("left", left + "px")
-                    .attr("currLane", lane).attr("currLevel", 'false');
+                $(el).attr("currLane", lane).attr("currLevel", 'false');
                 $("#main").append(el);
                 if (parentEl) {
                     parentEl.append(el);
@@ -399,10 +352,7 @@ function placeCards() {
     while (deckCopy.length > 0) {
         const card = deckCopy.pop();
         el = $("#" + card.suit.toString(16) + card.no.toString(16))[0];
-        //const top = vGap;
-        //const left = hGap + (hGap + hDim) * 6;
-        $(el) //.css("top", top + "px").css("left", left + "px")
-            .attr("currLane", 6).attr("currLevel", 'true');
+        $(el).attr("currLane", 6).attr("currLevel", 'true');
         $("#main").append(el);
         if (parentEl) {
             parentEl.append(el);
@@ -423,34 +373,10 @@ window.addEventListener('load', function() {
     $("#main")[0].append(nonCardString("clubs", vGap, hGap + (hGap + hDim) * 3));
     $("#main")[0].append(nonCardString("", vGap, hGap + (hGap + hDim) * 6));
     const deckCopy = [...deck];
-/*
-    for (let lane = 0; lane < 7; lane++) {
-        let parentEl = null;
-        for (let level = 0; level < 7; level++) {
-            if (lane >= level) {
-                const card = deckCopy.pop();
-                el = cardString(card.no, card.suit, vGap * 2 + vDim + shft * level, hGap + (hGap + hDim) * lane);
-                if (parentEl) {
-                    parentEl.append(el);
-                } else {
-                    $("#main")[0].append(el);
-                }
-                parentEl = el;
-            }
-        }
-    }
-    let parentEl = null;
-*/
     while (deckCopy.length > 0) {
         const card = deckCopy.pop();
         el = cardString(card.no, card.suit, false); //vGap, hGap + (hGap + hDim) * 6);
-        //if (parentEl) {
-            //parentEl.append(el);
-        //} else {
             $("#main")[0].append(el);
-            //$(el).addClass("grey");
-        //}
-        //parentEl = el;
     }
     placeCards();
     let btn = document.createElement("button");
