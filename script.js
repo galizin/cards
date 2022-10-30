@@ -38,29 +38,41 @@ var vDim = 73;
 var vGap = 8
 var hGap = 2;
 
-spanIdx(idx,level) {
+function spanIdx(idx,level) {
   return("span.outerspan[currLane='" + idx + "'][currLevel = '" + level + "']");
 }
 
-spanUp(idx) {
+function spanUp(idx) {
   return spanIdx(idx, "true");
 }
 
-spanDn(idx) {
+function spanDn(idx) {
   return spanIdx(idx, "false");
 }
 
-elMove(el) {
+function stockIdx(idx, level) {
+  return $("#main").find(spanIdx(idx,level));
+}
+
+function stockUp(idx) {
+  return $("#main").find(spanUp(idx));
+}
+
+function stockDn(idx) {
+  return $("#main").find(spanDn(idx));
+}
+
+function elMove(el) {
   $(el).attr("ontouchstart", "dragstart_handler(event)").attr("ontouchend", "drop_handler(event)")
     .attr("ontouchmove","dragover_handler(event)");
 }
 
-elFix(el) {
+function elFix(el) {
   $(el).attr("ontouchstart", "").attr("ontouchend", "").attr("ontouchmove","");
 }
 
 function alignOpenStock() {
-    stockOpen = $("#main").find(spanUp(5));
+    stockOpen = stockUp(5);
     for (let i = 0; i < stockOpen.length; i++) {
         let idx = stockOpen.length - 1 - i;
         $(stockOpen[idx]).css("left", laneToLeft(5) + ([0, 1].includes(i) ? -1 * i * vGap * 4 : -2 * vGap * 4) + 'px');
@@ -73,10 +85,11 @@ function alignOpenStock() {
 }
 
 function cycleStock() {
-    let stock = $("#main").find(spanUp(6));
+    let stock = stockUp(6);
     if (!stock.length) {
-        $("#main").find(spanUp(5)).toArray().map(m => $(m).attr("currLane", 6).css("left", laneToLeft(6)));
-        stock = $("#main").find(spanUp(6));
+        stockUp(5).toArray().map(m => $(m).attr("currLane", 6).css("left", laneToLeft(6)));
+        stock = stockUp(6);
+        $(stock[0]).addClass("grey");
     }
     let repeat = 0;
     while (stock.length > 0) {
@@ -84,7 +97,7 @@ function cycleStock() {
             break;
         }
         repeat++;
-        let stockOpen = $("#main").find(spanUp(6));
+        let stockOpen = stockUp(5);
         $(stock[0]).attr("currLane", 5).css("left", laneToLeft(5) + 'px').css("top", vGap + 'px');
         if (stockOpen.length) {
             stockOpen[stockOpen.length - 1].append(stock[0]);
@@ -94,7 +107,7 @@ function cycleStock() {
         if (stock[1]) {
             $("#main")[0].append(stock[1]);
         }
-        stock = $("#main").find(spanUp(6));
+        stock = stockUp(6);
     }
     alignOpenStock();
     $("#main")[0].append($("#stackoverturn")[0]);
@@ -172,7 +185,7 @@ function dragover_handler(ev) {
     const touches = ev.changedTouches;
     let el = ev.target.closest(".outerspan");
     if (el) {
-        if (!((["6"].includes($(el).attr("retLane"))) && ($(el).attr("retLevel") === "true"))) {
+        if (!(($(el).attr("retLane")==="6") && ($(el).attr("retLevel") === "true"))) {
             let offs = $(el).attr("touchstartoffset");
             el.style.top = (touches[0].pageY - Number(offs.split(',')[0])) + 'px';
             el.style.left = (touches[0].pageX - Number(offs.split(',')[1])) + 'px';
@@ -186,26 +199,31 @@ function drop_handler(ev) {
     const touches = ev.changedTouches;
     let el = ev.target.closest(".outerspan");
     if (el) {
-        let laneNo = leftToLane(parseInt(el.style.left));
-        let level = topToLevel(parseInt(el.style.top));
-        let stackOnLane = $("#main").find("span[currLane=" + laneNo + "][currLevel=" + level + "].outerspan");
+        const fromLaneNo = leftToLane(parseInt(el.style.left));
+        const fromLevel = topToLevel(parseInt(el.style.top));
+        const retLane = parseInt($(el).attr("retLane"));
+        const retLevel = $(el).attr("retLevel") === "true";
+        let laneNo = fromLaneNo;
+        let level = fromLevel;
 
-        if ((level === true) && ([6].includes(laneNo)) && ([6].includes(parseInt($(el).attr("retLane"))))) {
-            let stock = $("#main").find(".outerspan[currLane = '" + laneNo + "'][currLevel = 'true']");
-            $(el).attr("currLane", laneNo).css("left", laneToLeft(laneNo) + 'px');
-            if (stock.length) {
-                stock[stock.length - 1].append(el);
-            } else {
-                $("#main")[0].append(el);
-            }
-            cycleStock();
-        } else {
-
+       // if ((level === true) && (retLevel === true) && (laneNo === 6) && (retLane === 6)) {
+         //   let stock = stockUp(laneNo); //  $("#main").find(".outerspan[currLane = '" + laneNo + "'][currLevel = 'true']");
+           // $(el).attr("currLane", laneNo).css("left", laneToLeft(laneNo) + 'px');
+           // if (stock.length) {
+            //    stock[stock.length - 1].append(el);
+           // } else {
+            //    $("#main")[0].append(el);
+           // }
+            //cycleStock();
+        //} else {
+            let stackOnLane = stockIdx(laneNo, level);
             if ((
                     (level === true) && ([0, 1, 2, 3].includes(laneNo)) && ($(el).find(".outerspan").length === 0)
                     && (elToSuit(el) === laneNo)
                     && ((stackOnLane.length === 0) && (elToCard(el) === 0) ||
-                        ((stackOnLane.length !== 0) && (elToCard(el) - 1 === elToCard(stackOnLane[stackOnLane.length - 1]))))
+                        ((stackOnLane.length !== 0) && (elToCard(el) - 1 === 
+//elToCard(stackOnLane[stackOnLane.length - 1]))))
+elToCard($(stackOnLane).last()))))
                 ) || (
                     (level === false)
                     && (((stackOnLane.length === 0) && (elToCard(el) === 12)) ||
@@ -213,6 +231,7 @@ function drop_handler(ev) {
                         &&  (suitTest(elToSuit(el), elToSuit(stackOnLane[stackOnLane.length - 1]))))
                     )
                 )) {
+                $(el).removeClass("grey");
 
             } else {
                 laneNo = parseInt($(el).attr("retLane"));
@@ -243,7 +262,7 @@ function drop_handler(ev) {
                     prpgStack(newParent);
                 }
             }
-        }
+        //}
         alignOpenStock();
     }
 }
@@ -298,7 +317,9 @@ nonCardString = function(suit, top, left) {
     let el = document.createElement("span");
     $(el).attr("class", "outerspan").attr("style", "top:" + top + "px; left:" + left + "px");
     if (suit === "") {
-        $(el).attr("ontouchstart", "dragstart_handler(event)").attr("ontouchend", "drop_handler(event)").attr("id", "stackoverturn");
+        $(el) //.attr("ontouchstart", "dragstart_handler(event)").attr("ontouchend", "drop_handler(event)")
+        .attr("onclick", "cycleStock()")
+        .attr("id", "stackoverturn");
         $(el).html('<span class="innerspan" />');
     } else {
         $(el).html('<span class="innerspan place ' + ((red) ? 'red' : '') + '">&' + suit + ';</span>');
@@ -377,6 +398,7 @@ window.addEventListener('load', function() {
             parentEl.append(el);
         } else {
             $("#main")[0].append(el);
+            $(el).addClass("grey");
         }
         parentEl = el;
     }

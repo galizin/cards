@@ -1,9 +1,12 @@
+span.outerspan.grey {
+    background-color: rgb(200,200,200);
+}
 span.innerspan.place {
     font-size: 40px;
     margin: 0;
     display: flex;
     justify-content: center;
-    line-height: 72px;
+    line-height: 66px;
     color: rgba(0, 0, 0, 0.4);
 }
 
