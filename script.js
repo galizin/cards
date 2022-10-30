@@ -247,7 +247,7 @@ function drop_handler(ev) {
             //cycleStock();
         //} else {
             let stackOnLane = stockIdx(laneNo, level);
-            const stackEmpty = stackOnLane.length === 0;
+            let stackEmpty = stackOnLane.length === 0;
             const onlyEl = $(el).find(".outerspan").length === 0;
             const elSuit = elToSuit(el);
             const elCard = elToCard(el);
@@ -266,6 +266,7 @@ function drop_handler(ev) {
                 laneNo = retLane;
                 level = retLevel;
                 stackOnLane = stockIdx(laneNo, level);
+                stackEmpty = stackOnLane.length === 0;
             }
 
             $(el).attr("retLevel", "").attr("retLane", "").attr("currLevel", level).attr("currLane", laneNo);
@@ -289,6 +290,8 @@ function drop_handler(ev) {
                     //let newParent = stackOnLane[stackOnLane.length - 1];
                     $(el).appendTo($(stackOnLane).last()[0]);
                     //prpgStack(newParent);
+                    console.log("appending to");
+                    console.log($(stackOnLane).last()[0]);
                 }
             }
             stackOnLane = stockIdx(laneNo, level);
