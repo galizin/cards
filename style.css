@@ -1,6 +1,12 @@
+span.outerspan.move {
+    background-color: white;
+    transition: background-color 2s, left 0s, top 0s;
+}
+
 span.outerspan.grey {
     background-color: rgb(200,200,200);
 }
+
 span.innerspan.place {
     font-size: 40px;
     margin: 0;
@@ -46,6 +52,7 @@ width:49.5px;*/
     border-width: 2px;
     border-radius: 7px;
     overflow: hidden;
+    transition: top 2s, left 2s;
 }
 
 div#main {

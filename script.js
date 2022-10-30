@@ -76,7 +76,7 @@ function laneToLeft(laneNo) {
 }
 
 function posToLn(el, ln) {
-    return $(el).attr("currLane", ln).css("left", laneToLeft(ln) + 'px'));
+    return $(el).attr("currLane", ln).css("left", laneToLeft(ln) + 'px');
 }
 
 function alignOpenStock() {
@@ -95,7 +95,7 @@ function alignOpenStock() {
 function cycleStock() {
     let stock = stockUp(6);
     if (!stock.length) {
-        stockUp(5).toArray().map(m => {posToLn(m, 6);});
+        stockUp(5).toArray().map(m => {posToLn(m, 6); elFix(m);});
         stock = stockUp(6);
         $(stock[0]).addClass("grey");
     }
@@ -156,11 +156,17 @@ function prpgStack(el) {
     let sh = 0;
     const laneNo = $(el).attr("currLane");
     const level = $(el).attr("currLevel");
+    const move = $(el).hasClass("move");
     const top = parseInt(el.style.top);
     const left = parseInt(el.style.left);
     for (let child of $(el).find('.outerspan')) {
         if (($(el).attr("retLevel") === 'false') || (level === 'false')) {
             sh += shft;
+        }
+        if(move) {
+          $(child).addClass("move");
+        } else {
+          $(child).removeClass("move");
         }
         child.style.top = top + sh + 'px';
         child.style.left = left + 'px';
@@ -182,6 +188,7 @@ function dragstart_handler(ev) {
         .attr("retLane", calcLeft).attr("retLevel", topToLevel(parseInt(el.style.top)));
     $(el).appendTo("#main").attr("currLane", "-1");
     prpgStack(el);
+    $(el).addClass("move");
 }
 
 function dragover_handler(ev) {
@@ -203,6 +210,7 @@ function drop_handler(ev) {
     const touches = ev.changedTouches;
     let el = ev.target.closest(".outerspan");
     if (el) {
+        $(el).removeClass("move");
         const fromLaneNo = leftToLane(parseInt(el.style.left));
         const fromLevel = topToLevel(parseInt(el.style.top));
         const retLane = parseInt($(el).attr("retLane"));
@@ -225,8 +233,8 @@ function drop_handler(ev) {
             const onlyEl = $(el).find(".outerspan").length === 0;
             const elSuit = elToSuit(el);
             const elCard = elToCard(el);
-            const lastCardSuit = elToSuit($(stackOnLane).last());
-            const lastCardCard = elToCard($(stackOnLane).last());
+            const lastCardSuit = stackEmpty ? null : elToSuit($(stackOnLane).last());
+            const lastCardCard = stackEmpty ? null : elToCard($(stackOnLane).last());
 
             if ((
                     (level === true) && [0, 1, 2, 3].includes(laneNo) && onlyEl && (elSuit === laneNo)
@@ -242,7 +250,7 @@ function drop_handler(ev) {
             }
 
             $(el).attr("retLevel", "").attr("retLane", "").attr("currLevel", level);
-            stackOnLane = stackIdx(laneNo, level);
+            stackOnLane = stockIdx(laneNo, level);
             if (stackOnLane.length == 0) {
                 if (level) {
                     $(el).appendTo("#main").css("top", vGap + "px");
@@ -270,7 +278,7 @@ function drop_handler(ev) {
     }
 }
 
-cardString = function(cardNum, suit, top, left) {
+cardString = function(cardNum, suit, lane, level, fixed) {
     let red = suit == 1 || suit == 2 ? 1 : 0;
     let suitname = "";
     switch (suit) {
@@ -307,10 +315,14 @@ cardString = function(cardNum, suit, top, left) {
     }
     let el = document.createElement("span");
     $(el).attr("class", "outerspan").attr("id", suit.toString(16) + cardNum.toString(16))
-        .attr("style", "top:" + top + "px; left:" + left + "px")
-        .attr("ontouchstart", "dragstart_handler(event)").attr("ontouchend", "drop_handler(event)")
-        .attr("ontouchmove","dragover_handler(event)")
-        .attr("currLane", leftToLane(left)).attr("currLevel", topToLevel(top));
+        //.attr("style", "top:" + top + "px; left:" + left + "px")
+        //.attr("ontouchstart", "dragstart_handler(event)").attr("ontouchend", "drop_handler(event)")
+        //.attr("ontouchmove","dragover_handler(event)")
+        .attr("currLane", lane).attr("currLevel", level);
+    elMove(el);
+    if(fixed) {
+      elFix(el);
+    }
     $(el).html(((red) ? '<mark class="red">' : '') + '<span class="innerspan">' + cardname + suitname + '</span>' + ((red) ? '</mark>' : ''));
     return el;
 };
@@ -335,23 +347,26 @@ function placeCards() {
     const deckCopy = [...deck];
     for (let lane = 0; lane < 7; lane++) {
         let parentEl = null;
+        let topEl = null;
         for (let level = 0; level < 7; level++) {
             if (lane >= level) {
                 const card = deckCopy.pop();
                 el = $("#" + card.suit.toString(16) + card.no.toString(16))[0];
-                const top = vGap * 2 + vDim + shft * level;
-                const left = hGap + (hGap + hDim) * lane;
-                $(el).css("top", top + "px").css("left", left + "px")
-                    .attr("currLane", leftToLane(left)).attr("currLevel", topToLevel(top));
+                //const top = vGap * 2 + vDim + shft * level;
+                //const left = hGap + (hGap + hDim) * lane;
+                $(el) //.css("top", top + "px").css("left", left + "px")
+                    .attr("currLane", lane).attr("currLevel", 'false');
                 $("#main").append(el);
                 if (parentEl) {
                     parentEl.append(el);
                 } else {
                     $("#main")[0].append(el);
+                    topEl = el;
                 }
                 parentEl = el;
             }
         }
+        prpgStack(topEl);
     }
     let parentEl = null;
     while (deckCopy.length > 0) {
