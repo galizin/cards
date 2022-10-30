@@ -229,7 +229,6 @@ function drop_handler(ev) {
     const touches = ev.changedTouches;
     let el = ev.target.closest(".outerspan");
     if (el) {
-        $(el).removeClass("move");
         const fromLaneNo = leftToLane(parseInt(el.style.left));
         const fromLevel = topToLevel(parseInt(el.style.top));
         const retLane = parseInt($(el).attr("retLane"));
@@ -266,6 +265,7 @@ function drop_handler(ev) {
             } else {
                 laneNo = retLane;
                 level = retLevel;
+                stackOnLane = stockIdx(laneNo, level);
             }
 
             $(el).attr("retLevel", "").attr("retLane", "").attr("currLevel", level).attr("currLane", laneNo);
@@ -293,6 +293,9 @@ function drop_handler(ev) {
             }
             stackOnLane = stockIdx(laneNo, level);
             prpgStack(stackOnLane[0]);
+        $(el).removeClass("move");
+            prpgStack(stackOnLane[0]);
+        //prpgStack(el);
         //}
         alignOpenStock();
     }
