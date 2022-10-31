@@ -2,15 +2,16 @@ span.outerspan.move {
     background-color: white;
 }
 
-span.outerspan.move[currLane = "5"][currLevel = "true"] {
+/*span.outerspan.move[currLane = "5"][currLevel = "true"] {
     transition:left 0s;
-}
+}*/
 
+/*
 span.outerspan.grey {
     background-color: rgb(200,200,200);
     transition: background-color 1s;
 }
-
+*/
 span.innerspan.place {
     font-size: 40px;
     margin: 0;
@@ -57,11 +58,11 @@ width:49.5px;*/
     border-radius: 7px;
     overflow: hidden;
 }
-
+/*
 span.outerspan[currLane = "5"][currLevel = "true"] {
     transition: left 1s;
 }
-
+*/
 div#main {
     font-size: 30px;
     font-family: Text;

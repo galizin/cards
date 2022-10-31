@@ -80,29 +80,32 @@ function posToLn(el, ln) {
 
 function alignOpenStock() {
     const stockOpen = stockUp(5);
+    //stockUp(5).toArray().map(m => {$(m).addClass("move");});
     //stockOpen.toArray().map(m => {$(m).addClass("move"); $(m).css(left(
     let count = 0;
     while (count < stockOpen.length) {
-      elFix(stockOpen[count]);
+      let m = stockOpen[count];
+      elFix(m);
+      //$(m).addClass("move");
       switch (count) {
         case stockOpen.length - 2:
-          $(stockOpen[count]).css("left", laneToLeft(5) -1*vGap*4 + 'px');
+          $(m).css("left", laneToLeft(5) -1*vGap*4 + 'px');
           break;
         case stockOpen.length - 1:
-          $(stockOpen[count]).css("left", laneToLeft(5) + 'px');
-          elMove(stockOpen[count]);
+          $(m).css("left", laneToLeft(5) + 'px');
+          elMove(m);
           break;
         default:
-          $(stockOpen[count]).css("left", laneToLeft(5) -2*vGap*4 + 'px');
+          $(m).css("left", laneToLeft(5) -2*vGap*4 + 'px');
           break;
       }
+      //$(m).removeClass("move");
       count++;
     }
+    //stockUp(5).toArray().map(m => {$(m).removeClass("move");});
     /*for (let i = 0; i < stockOpen.length; i++) {
         let idx = stockOpen.length - 1 - i;
-        $(stockOpen[idx]).addClass("move");
         $(stockOpen[idx]).css("left", laneToLeft(5) + ([0, 1].includes(i) ? -1 * i * vGap * 4 : -2 * vGap * 4) + 'px');
-        $(stockOpen[idx]).removeClass("move");
         if(!i) {
           elMove(stockOpen[idx]);
         } else {
@@ -131,7 +134,7 @@ function cycleStock() {
         }
         //stock = stockUp(6);
         //$(stock[0]).addClass("grey");
-    }
+    } else {
     let repeat = 0;
     while (stock.length > 0) {
         if (repeat > 2) {
@@ -139,18 +142,22 @@ function cycleStock() {
         }
         repeat++;
         let stockOpen = stockUp(5);
-        posToLn($(stock).last()[0], 5).css("left", laneToLeft(5) -2*vGap * 4 + "px").css("top", vGap + 'px');
         if (stockOpen.length) {
             $(stockOpen).last()[0].append($(stock).last()[0]);
         } else {
             $("#main")[0].append($(stock).last()[0]);
         }
+        stockOpen = stockUp(5);
+        //$(stock).last().addClass("move");
+        posToLn($(stock).last()[0], 5).css("left", laneToLeft(5) -2*vGap * 4 + "px").css("top", vGap + 'px');
+        //$(stock).last().removeClass("move");
         //if (stock[1]) {
             //$("#main")[0].append(stock[1]);
         //}
         stock = stockUp(6);
     }
     alignOpenStock();
+    }
     $("#main")[0].append($("#stackoverturn")[0]);
 }
 
