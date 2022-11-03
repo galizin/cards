@@ -221,6 +221,7 @@ function dragstart_handler(ev) {
         .attr("retLevel", $(el).attr("currLevel")).appendTo("#main").attr("currLane", "-1").addClass("move");
       $(el).removeClass("grey");
       prpgStack(el);
+      alignOpenStock();
     }
 }
 
@@ -352,23 +353,23 @@ function placeCards() {
     const deckCopy = [...deck];
     for (let lane = 0; lane < 7; lane++) {
         let parentEl = null;
-        let topEl = null;
+        //let topEl = null;
         for (let level = 0; level < 7; level++) {
             if (lane >= level) {
                 const card = deckCopy.pop();
                 el = $("#" + card.suit.toString(16) + card.no.toString(16))[0];
                 $(el).attr("currLane", lane).attr("currLevel", 'false');
-                $("#main").append(el);
+                //$("#main").append(el);
                 if (parentEl) {
                     parentEl.append(el);
                 } else {
                     $("#main")[0].append(el);
-                    topEl = el;
+                    //topEl = el;
                 }
                 parentEl = el;
             }
         }
-        prpgStack(topEl);
+        //prpgStack(topEl);
     }
     let parentEl = null;
     let topEl = null;
@@ -376,7 +377,7 @@ function placeCards() {
         const card = deckCopy.pop();
         el = $("#" + card.suit.toString(16) + card.no.toString(16))[0];
         $(el).attr("currLane", 6).attr("currLevel", 'true');
-        $("#main").append(el);
+        //$("#main").append(el);
         if (parentEl) {
             parentEl.append(el);
         } else {
@@ -386,6 +387,9 @@ function placeCards() {
         parentEl = el;
     }
     prpgStack(topEl);
+    for (let lane = 0; lane < 7; lane++) {
+      prpgStack(stockDn(lane)[0]);
+    }
     $("#main")[0].append($("#stackoverturn")[0]);
 }
 
