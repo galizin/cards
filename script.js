@@ -159,6 +159,10 @@ function suitTest(suit1, suit2) {
     return suitColor(suit1) !== suitColor(suit2);
 }
 
+function unblockRetLane(laneNo) {
+      elMove(stockDn(laneNo).last()[0]);
+}
+
 function leftToLane(left) {
     let laneNo = -1;
     for (let i = 0; i < 7; i++) {
@@ -219,7 +223,7 @@ function dragstart_handler(ev) {
       }
       $(el).attr("touchstartoffset", (-viewportOffset.top + touches[0].pageY) + ',' + (-viewportOffset.left + touches[0].pageX))
         .attr("retLevel", $(el).attr("currLevel")).appendTo("#main").attr("currLane", "-1").addClass("move");
-      $(el).removeClass("grey");
+      //$(el).removeClass("grey");
       prpgStack(el);
       alignOpenStock();
     }
@@ -263,6 +267,9 @@ function drop_handler(ev) {
                     (level === false) && ((stackEmpty && (elCard === 12)) ||
                     ((!stackEmpty) && (elCard + 1 === lastCardCard) && suitTest(elSuit, lastCardSuit)))
                 )) {
+              if(!retLevel) {
+                unblockRetLane(retLane);
+              }
             } else {
                 laneNo = retLane;
                 level = retLevel;
@@ -365,6 +372,9 @@ function placeCards() {
                 } else {
                     $("#main")[0].append(el);
                     //topEl = el;
+                }
+                if(level != lane) {
+                  elFix(el);
                 }
                 parentEl = el;
             }
