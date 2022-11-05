@@ -377,6 +377,8 @@ function placeCards() {
                 }
                 if(level != lane) {
                   elFix(el);
+                } else {
+                  elMove(el);
                 }
                 parentEl = el;
             }
