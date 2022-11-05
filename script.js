@@ -23,13 +23,15 @@ const shuffleDeck = function(deck) {
     return deck2;
 }
 
-const emptyDeck = [];
+let deck = [];
 
-initDeck(emptyDeck);
+const shuffle = function() {
+    const emptyDeck = [];
+    initDeck(emptyDeck);
+    deck = shuffleDeck(emptyDeck);
+}
 
-const deck = shuffleDeck(emptyDeck);
-
-let deckBkp = [];
+shuffle();
 
 var shft = 25;
 var hDim = 62;
@@ -419,4 +421,15 @@ window.addEventListener('load', function() {
     let btn = document.createElement("button");
     $(btn).css("top", "450px").html("start over").attr("onclick", "placeCards();");
     $("#main")[0].append(btn);
+    btn = document.createElement("button");
+    $(btn).css("top", "450px").css("left", "110px").html("new").attr("onclick", "shuffle(); placeCards();");
+    $("#main")[0].append(btn);
+
+    const onConfirmRefresh = function (event) {
+        event.preventDefault();
+        return event.returnValue = "Are you sure you want to leave the page?";
+    }
+
+    window.addEventListener("beforeunload", onConfirmRefresh, { capture: true });
+
 });
