@@ -25,6 +25,21 @@ const shuffleDeck = function(deck) {
 
 let deck = [];
 
+let history = [];
+
+let historyPtr = 0;
+
+const pushHistory = function() {
+  let currStateUp = [];
+  let currStateDn = [];
+  for(let i = 0; i < 7; i++) {
+    currStateUp.push(stockUp(i).toArray().map(s => $(s).attr("id")));
+    currStateDn.push(stockDn(i).toArray().map(s => $(s).attr("id")));
+  }
+  history.push([currStateUp, currStateDn]);
+  historyPtr++;
+}
+
 const shuffle = function() {
     const emptyDeck = [];
     initDeck(emptyDeck);
@@ -143,6 +158,7 @@ function cycleStock() {
     alignOpenStock();
     }
     $("#main")[0].append($("#stackoverturn")[0]);
+    pushHistory();
 }
 
 function elToCard(el) {
@@ -254,6 +270,7 @@ function drop_handler(ev) {
         const retLevel = $(el).attr("retLevel") === "true";
         let laneNo = fromLaneNo;
         let level = fromLevel;
+        let saveHistory = false;
             let stackOnLane = stockIdx(laneNo, level);
             let stackEmpty = stackOnLane.length === 0;
             const onlyEl = $(el).find(".outerspan").length === 0;
@@ -271,6 +288,7 @@ function drop_handler(ev) {
                 )) {
               if(!retLevel) {
                 unblockRetLane(retLane);
+                saveHistory = true;
               }
             } else {
                 laneNo = retLane;
@@ -297,6 +315,9 @@ function drop_handler(ev) {
         $(el).removeClass("move");
             prpgStack(stackOnLane[0]);
         alignOpenStock();
+        if(saveHistory) {
+          pushHistory();
+        }
     }
 }
 
@@ -341,7 +362,7 @@ cardString = function(cardNum, suit, fixed) {
     if(fixed) {
       elFix(el);
     }
-    $(el).html(((red) ? '<mark class="red">' : '') + '<span class="innerspan">' + cardname + suitname + '</span>' + ((red) ? '</mark>' : ''));
+    $(el).html(((red) ? '<mark class="red">' : '') + '<span class="innerspan">' + suitname + cardname + '</span>' + ((red) ? '</mark>' : ''));
     return el;
 };
 
@@ -405,6 +426,8 @@ function placeCards() {
       prpgStack(stockDn(lane)[0]);
     }
     $("#main")[0].append($("#stackoverturn")[0]);
+    history = [];
+    pushHistory();
 }
 
 window.addEventListener('load', function() {
