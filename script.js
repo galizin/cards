@@ -30,6 +30,7 @@ let history = [];
 let historyPtr = 0;
 
 const pushHistory = function() {
+  //need to also record what is fixed
   let currStateUp = [];
   let currStateDn = [];
   for(let i = 0; i < 7; i++) {
@@ -45,7 +46,6 @@ const popHistory = function() {
     if(currStep > -1) {
       const currStateUp = history[currStep][0];
       const currStateDn = history[currStep][1];
-
       for (let lane = 0; lane < 7; lane++) {
         prpgStack(stockDn(lane)[0]);
       }
