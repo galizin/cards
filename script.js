@@ -40,6 +40,20 @@ const pushHistory = function() {
   historyPtr++;
 }
 
+const popHistory = function() {
+    const currStep = historyPtr - 1;
+    if(currStep > -1) {
+      const currStateUp = history[currStep][0];
+      const currStateDn = history[currStep][1];
+
+      for (let lane = 0; lane < 7; lane++) {
+        prpgStack(stockDn(lane)[0]);
+      }
+      alignOpenStock();
+      $("#main")[0].append($("#stackoverturn")[0]);
+    }
+}
+
 const shuffle = function() {
     const emptyDeck = [];
     initDeck(emptyDeck);
