@@ -128,6 +128,12 @@ nonCardString = function(suit, top, left) {
 
 let drawField = function() {
 
+    const deckCopy = [...deck];
+    while (deckCopy.length > 0) {
+        const card = deckCopy.pop();
+        el = cardString(card.no, card.suit, false);
+        $("#main")[0].append(el);
+    }
 
 /*
   //let line = "";
@@ -236,12 +242,6 @@ window.addEventListener('load', function() {
     $("#main")[0].append(nonCardString("diams", vGap, hGap + (hGap + hDim) * 2));
     $("#main")[0].append(nonCardString("clubs", vGap, hGap + (hGap + hDim) * 3));
     $("#main")[0].append(nonCardString("", vGap, hGap + (hGap + hDim) * 6));
-    const deckCopy = [...deck];
-    while (deckCopy.length > 0) {
-        const card = deckCopy.pop();
-        el = cardString(card.no, card.suit, false);
-        $("#main")[0].append(el);
-    }
     drawField();
     let btn = document.createElement("button");
     $(btn).css("top", "450px").html("start over").attr("onclick", "placeCards();");
