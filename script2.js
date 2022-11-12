@@ -68,6 +68,14 @@ var vDim = 73;
 var vGap = 8
 var hGap = 2;
 
+cardId = function(cardNum, suit) {
+  return(suit.toString(16) + cardNum.toString(16));
+}
+
+cardEl = function(card) {
+  return($("#" + cardId(card.no, card.suit))[0]);
+}
+
 cardString = function(cardNum, suit, fixed) {
     let red = suit == 1 || suit == 2 ? 1 : 0;
     let suitname = "";
@@ -104,7 +112,7 @@ cardString = function(cardNum, suit, fixed) {
             break;
     }
     let el = document.createElement("span");
-    $(el).attr("class", "outerspan").attr("id", suit.toString(16) + cardNum.toString(16))
+    $(el).attr("class", "outerspan").attr("id", cardId(suit, cardNum));
     elMove(el);
     if(fixed) {
       elFix(el);
@@ -131,9 +139,23 @@ let drawField = function() {
     const deckCopy = [...deck];
     while (deckCopy.length > 0) {
         const card = deckCopy.pop();
-        el = cardString(card.no, card.suit, false);
-        $("#main")[0].append(el);
+        //el = $("#"+cardId(card.no, card.suit))[0]; //cardString(card.no, card.suit, false);
+        $("#main")[0].append(cardEl(card));
     }
+
+  for(let i = 0; i < 7; i++) {
+    let parentEl = null;
+    for(let j = 0; j < main[i].el.length; j++) {
+      let currEl = cardEl(main[i].el[j]);
+      if(parentEl == null) {
+        $("main")[0].append(currEl);
+      }
+      else {
+        parentEl.append(currEl);
+      }
+      parentEl = currEl;
+    }
+  }
 
 /*
   //let line = "";
@@ -242,6 +264,13 @@ window.addEventListener('load', function() {
     $("#main")[0].append(nonCardString("diams", vGap, hGap + (hGap + hDim) * 2));
     $("#main")[0].append(nonCardString("clubs", vGap, hGap + (hGap + hDim) * 3));
     $("#main")[0].append(nonCardString("", vGap, hGap + (hGap + hDim) * 6));
+    const deckCopy = [...deck];
+    while (deckCopy.length > 0) {
+        const card = deckCopy.pop();
+        el = cardString(card.no, card.suit, false);
+        $("#main")[0].append(el);
+    }
+
     drawField();
     let btn = document.createElement("button");
     $(btn).css("top", "450px").html("start over").attr("onclick", "placeCards();");
