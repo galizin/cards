@@ -69,7 +69,7 @@ var vGap = 8
 var hGap = 2;
 
 cardId = function(cardNum, suit) {
-  return(suit.toString(16) + cardNum.toString(16));
+  return(cardNum.toString(16) + suit.toString(16));
 }
 
 cardEl = function(card) {
@@ -112,11 +112,11 @@ cardString = function(cardNum, suit, fixed) {
             break;
     }
     let el = document.createElement("span");
-    $(el).attr("class", "outerspan").attr("id", cardId(suit, cardNum));
-    elMove(el);
-    if(fixed) {
-      elFix(el);
-    }
+    $(el).attr("class", "outerspan").attr("id", cardId(cardNum, suit));
+    //elMove(el);
+    //if(fixed) {
+      //elFix(el);
+    //}
     $(el).html(((red) ? '<mark class="red">' : '') + '<span class="innerspan">' + suitname + cardname + '</span>' + ((red) ? '</mark>' : ''));
     return el;
 };
@@ -126,7 +126,7 @@ nonCardString = function(suit, top, left) {
     let el = document.createElement("span");
     $(el).attr("class", "outerspan").attr("style", "top:" + top + "px; left:" + left + "px");
     if (suit === "") {
-        $(el).attr("onclick", "cycleStock()").attr("id", "stackoverturn");
+        $(el).attr("onclick", "procCmd('a')").attr("id", "stackoverturn");
         $(el).html('<span class="innerspan" />');
     } else {
         $(el).html('<span class="innerspan place ' + ((red) ? 'red' : '') + '">&' + suit + ';</span>');
@@ -134,29 +134,59 @@ nonCardString = function(suit, top, left) {
     return el;
 };
 
+let drawStack = function(arr) {
+  let parentEl = null;
+  for(let j = 0; j < arr.el.length; j++) {
+    let currEl = cardEl(arr.el[j]);
+    if(parentEl == null) {
+      $("#main")[0].append(currEl);
+    }
+    else {
+      parentEl.append(currEl);
+    }
+    parentEl = currEl;
+  }
+}
+
+let moveDnStack = function(lane) {
+  for(let i = 0; i < main[lane].el.length; i++) {
+    $(cardEl(main[lane].el[i])).css("top", vGap * 2 + vDim + shft*i + "px").css("left", hGap + (hDim + hGap) * lane + "px");
+  }
+}
+
+let moveUpStack = function(lane) {
+  if(lane = 6) {
+    for(let i = 0; i < stack[1].el.length; i++) {
+      $(cardEl(stack[1].el[i])).css("top", vGap + "px").css("left", hGap + (hDim + hGap) * lane + "px");
+    }
+  } else {
+    for(let i = 0; i < discard[lane].el.length; i++) {
+      $(cardEl(discard[lane].el[i])).css("top", vGap + "px").css("left", hGap + (hDim + hGap) * lane + "px");
+    }
+  }
+}
+
 let drawField = function() {
 
     const deckCopy = [...deck];
     while (deckCopy.length > 0) {
         const card = deckCopy.pop();
-        //el = $("#"+cardId(card.no, card.suit))[0]; //cardString(card.no, card.suit, false);
         $("#main")[0].append(cardEl(card));
     }
 
   for(let i = 0; i < 7; i++) {
-    let parentEl = null;
-    for(let j = 0; j < main[i].el.length; j++) {
-      let currEl = cardEl(main[i].el[j]);
-      if(parentEl == null) {
-        $("main")[0].append(currEl);
-      }
-      else {
-        parentEl.append(currEl);
-      }
-      parentEl = currEl;
-    }
+    drawStack(main[i]);
+    moveDnStack(i);
   }
-
+  for(let i = 0; i < 4; i++) {
+    drawStack(discard[i]);
+    moveUpStack(i);
+  }
+  for(let i = 0; i < 2; i++) {
+    drawStack(stack[i]);
+    moveUpStack(i+5);
+  }
+  $("#main")[0].append($("#stackoverturn")[0]);
 /*
   //let line = "";
   for(let i = 0; i<4; i++) {
