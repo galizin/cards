@@ -76,6 +76,15 @@ cardEl = function(card) {
   return($("#" + cardId(card.no, card.suit))[0]);
 }
 
+function elMove(el) {
+  $(el).attr("ontouchstart", "dragstart_handler(event)").attr("ontouchend", "drop_handler(event)")
+    .attr("ontouchmove","dragover_handler(event)").attr("draggable", "true");
+}
+
+function elFix(el) {
+  $(el).attr("ontouchstart", "").attr("ontouchend", "").attr("ontouchmove","").attr("draggable", "false");
+}
+
 cardString = function(cardNum, suit, fixed) {
     let red = suit == 1 || suit == 2 ? 1 : 0;
     let suitname = "";
@@ -113,10 +122,10 @@ cardString = function(cardNum, suit, fixed) {
     }
     let el = document.createElement("span");
     $(el).attr("class", "outerspan").attr("id", cardId(cardNum, suit));
-    //elMove(el);
-    //if(fixed) {
-      //elFix(el);
-    //}
+    elMove(el);
+    if(fixed) {
+      elFix(el);
+    }
     $(el).html(((red) ? '<mark class="red">' : '') + '<span class="innerspan">' + suitname + cardname + '</span>' + ((red) ? '</mark>' : ''));
     return el;
 };
@@ -148,31 +157,61 @@ let drawStack = function(arr) {
   }
 }
 
+function laneToLeft(laneNo) {
+    return (hGap + (hDim + hGap) * laneNo);
+}
+
 let moveDnStack = function(lane) {
-  for(let i = 0; i < main[lane].el.length; i++) {
-    $(cardEl(main[lane].el[i])).css("top", vGap * 2 + vDim + shft*i + "px").css("left", hGap + (hDim + hGap) * lane + "px");
+  laneLen = main[lane].el.length;
+  for(let i = 0; i < laneLen; i++) {
+    let m = $(cardEl(main[lane].el[i]));
+    m.css("top", vGap * 2 + vDim + shft*i + "px").css("left", laneToLeft(lane) + "px");
+    main[lane].el[i].vis === 1 ? elMove(m) : elFix(m);
+    if(main[lane].el[i].vis === 1) {
+      m.css("height", vDim + shft * (laneLen - 1 - i)  + "px");
+    }
   }
 }
 
 let moveUpStack = function(lane) {
   if(lane = 6) {
     for(let i = 0; i < stack[1].el.length; i++) {
-      $(cardEl(stack[1].el[i])).css("top", vGap + "px").css("left", hGap + (hDim + hGap) * lane + "px");
+      $(cardEl(stack[1].el[i])).css("top", vGap + "px").css("left", laneToLeft(lane) + "px");
     }
   } else {
     for(let i = 0; i < discard[lane].el.length; i++) {
-      $(cardEl(discard[lane].el[i])).css("top", vGap + "px").css("left", hGap + (hDim + hGap) * lane + "px");
+      $(cardEl(discard[lane].el[i])).css("top", vGap + "px").css("left", laneToLeft(lane) + "px").css("height", vDim +"px");
+    }
+  }
+}
+
+let drawOpen = function() {
+  const stockLen = stack[0].el.length
+  for(let i = 0; i < stockLen; i++) {
+    let m = $(cardEl(stack[0].el[i]));
+    m.css("top", vGap + "px");
+    elFix(m);
+    switch (i) {
+      case stockLen - 2:
+        $(m).css("left", hGap + (hDim + hGap) * 5 -1*vGap*4 + 'px');
+        break;
+      case stockLen - 1:
+        $(m).css("left", laneToLeft(5) + 'px');
+        elMove(m);
+        break;
+      default:
+        $(m).css("left", laneToLeft(5) -2*vGap*4 + 'px');
+        break;
     }
   }
 }
 
 let drawField = function() {
-
-    const deckCopy = [...deck];
-    while (deckCopy.length > 0) {
-        const card = deckCopy.pop();
-        $("#main")[0].append(cardEl(card));
-    }
+  const deckCopy = [...deck];
+  while (deckCopy.length > 0) {
+    const card = deckCopy.pop();
+    $("#main")[0].append(cardEl(card));
+  }
 
   for(let i = 0; i < 7; i++) {
     drawStack(main[i]);
@@ -186,6 +225,7 @@ let drawField = function() {
     drawStack(stack[i]);
     moveUpStack(i+5);
   }
+  drawOpen();
   $("#main")[0].append($("#stackoverturn")[0]);
 /*
   //let line = "";
