@@ -148,6 +148,7 @@ nonCardString = function(suit, top, left) {
         $(el).html('<span class="innerspan" />');
     } else {
         $(el).html('<span class="innerspan place ' + ((red) ? 'red' : '') + '">&' + suit + ';</span>');
+        dropTarget(el);
     }
     return el;
 };
@@ -163,7 +164,10 @@ function drag(ev) {
 function drop(ev) {
   ev.preventDefault();
   var data = ev.dataTransfer.getData("cardid");
-  console.log("dropping " + data + " on " + ev.target.id); //.appendChild(document.getElementById(data));
+  //console.log(ev.currentTarget);
+  if(ev.currentTarget.id === ev.target.closest(".outerspan").id) {
+    console.log("dropping " + data + " on " + ev.target.closest(".outerspan").id); //.appendChild(document.getElementById(data));
+  }
 }
 
 let drawStack = function(arr) {
@@ -193,17 +197,22 @@ let moveDnStack = function(lane) {
     if(main[lane].el[i].vis === 1) {
       m.css("height", vDim + shft * (laneLen - 1 - i)  + "px");
     }
+    dropTarget(m);
   }
 }
 
 let moveUpStack = function(lane) {
   if(lane = 6) {
     for(let i = 0; i < stack[1].el.length; i++) {
-      $(cardEl(stack[1].el[i])).css("top", vGap + "px").css("left", laneToLeft(lane) + "px");
+      let m = $(cardEl(stack[1].el[i]));
+      m.css("top", vGap + "px").css("left", laneToLeft(lane) + "px");
+      nonDropTarget(m);
     }
   } else {
     for(let i = 0; i < discard[lane].el.length; i++) {
-      $(cardEl(discard[lane].el[i])).css("top", vGap + "px").css("left", laneToLeft(lane) + "px").css("height", vDim +"px");
+      let m = $(cardEl(discard[lane].el[i]));
+      m.css("top", vGap + "px").css("left", laneToLeft(lane) + "px").css("height", vDim +"px");
+      dropTarget(m);
     }
   }
 }
@@ -214,6 +223,7 @@ let drawOpen = function() {
     let m = $(cardEl(stack[0].el[i]));
     m.css("top", vGap + "px");
     elFix(m);
+    nonDropTarget(m);
     switch (i) {
       case stockLen - 2:
         $(m).css("left", hGap + (hDim + hGap) * 5 -1*vGap*4 + 'px');
