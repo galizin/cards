@@ -78,11 +78,20 @@ cardEl = function(card) {
 
 function elMove(el) {
   $(el).attr("ontouchstart", "dragstart_handler(event)").attr("ontouchend", "drop_handler(event)")
-    .attr("ontouchmove","dragover_handler(event)").attr("draggable", "true");
+    .attr("ontouchmove","dragover_handler(event)").attr("draggable", "true").attr("ondragstart", "drag(event)");
 }
 
 function elFix(el) {
-  $(el).attr("ontouchstart", "").attr("ontouchend", "").attr("ontouchmove","").attr("draggable", "false");
+  $(el).attr("ontouchstart", "").attr("ontouchend", "").attr("ontouchmove","").attr("draggable", "false")
+    .attr("ondragstart", "");
+}
+
+function dropTarget(el) {
+  $(el).attr("ondrop","drop(event)").attr("ondragover","allowDrop(event)");
+}
+
+function nonDropTarget(el) {
+  $(el).attr("ondrop","").attr("ondragover","");
 }
 
 cardString = function(cardNum, suit, fixed) {
@@ -142,6 +151,20 @@ nonCardString = function(suit, top, left) {
     }
     return el;
 };
+
+function allowDrop(ev) {
+  ev.preventDefault();
+}
+
+function drag(ev) {
+  ev.dataTransfer.setData("cardid", ev.target.id);
+}
+
+function drop(ev) {
+  ev.preventDefault();
+  var data = ev.dataTransfer.getData("cardid");
+  console.log("dropping " + data + " on " + ev.target.id); //.appendChild(document.getElementById(data));
+}
 
 let drawStack = function(arr) {
   let parentEl = null;
@@ -343,10 +366,12 @@ window.addEventListener('load', function() {
 
     drawField();
     let btn = document.createElement("button");
-    $(btn).css("top", "450px").html("start over").attr("onclick", "placeCards();");
+    const btnTop = vGap * 3 + vDim * 2 + shft * 16;
+
+    $(btn).css("top", btnTop + "px").html("start over").attr("onclick", "placeCards();");
     $("#main")[0].append(btn);
     btn = document.createElement("button");
-    $(btn).css("top", "450px").css("left", "110px").html("new").attr("onclick", "shuffle(); placeCards();");
+    $(btn).css("top", btnTop + "px").css("left", "110px").html("new").attr("onclick", "shuffle(); placeCards();");
     $("#main")[0].append(btn);
 
     const onConfirmRefresh = function (event) {
