@@ -69,11 +69,15 @@ var vGap = 8
 var hGap = 2;
 
 cardId = function(cardNum, suit) {
-  return(cardNum.toString(16) + suit.toString(16));
+  return cardNum.toString(16) + suit.toString(16);
+}
+
+cardCardId = function(card) {
+  return cardId(card.no, card.suit);
 }
 
 cardEl = function(card) {
-  return($("#" + cardId(card.no, card.suit))[0]);
+  return($("#" + cardCardId(card))[0]);
 }
 
 function elMove(el) {
@@ -139,15 +143,14 @@ cardString = function(cardNum, suit, fixed) {
     return el;
 };
 
-nonCardString = function(suit, top, left) {
+nonCardString = function(suit, top, left, suitNo) {
     let red = suit == "hearts" || suit == "diams" ? 1 : 0;
     let el = document.createElement("span");
     $(el).attr("class", "outerspan").attr("style", "top:" + top + "px; left:" + left + "px");
     if (suit === "") {
-        $(el).attr("onclick", "procCmd('a')").attr("id", "stackoverturn");
-        $(el).html('<span class="innerspan" />');
+        $(el).attr("onclick", "procCmd('a')").attr("id", "stackoverturn").html('<span class="innerspan" />');
     } else {
-        $(el).html('<span class="innerspan place ' + ((red) ? 'red' : '') + '">&' + suit + ';</span>');
+        $(el).html('<span class="innerspan place ' + ((red) ? 'red' : '') + '">&' + suit + ';</span>').attr("id", suitNo);
         dropTarget(el);
     }
     return el;
@@ -161,12 +164,38 @@ function drag(ev) {
   ev.dataTransfer.setData("cardid", ev.target.id);
 }
 
+function move2cmd(from, to) {
+  function isDown(a) {
+    for(let i = 0; i < 7; i++) {
+      if (main[i].el.map(m => cardCardId(m)).indexOf(a) !== -1) {
+        return i;
+      }
+    }
+    return -1;
+  }
+  function isUp(a) {
+    for(let i = 0; i < 4; i++) {
+      if (discard[i].el.map(m => cardCardId(m)).indexOf(a) !== -1) {
+        return i;
+      }
+    }
+    return ["0", "1", "2", "3"].indexOf(a);
+  }
+  if(isUp(to) !== -1) {
+    procCmd('r ' + isDown(from));
+  } else {
+    if (isDown(from) === -1) {
+      procCmd('d ' + isDown(to));
+    } else {
+    }
+  }
+}
+
 function drop(ev) {
   ev.preventDefault();
   var data = ev.dataTransfer.getData("cardid");
-  //console.log(ev.currentTarget);
   if(ev.currentTarget.id === ev.target.closest(".outerspan").id) {
-    console.log("dropping " + data + " on " + ev.target.closest(".outerspan").id); //.appendChild(document.getElementById(data));
+    move2cmd(data, ev.target.closest(".outerspan").id);
   }
 }
 
@@ -202,7 +231,7 @@ let moveDnStack = function(lane) {
 }
 
 let moveUpStack = function(lane) {
-  if(lane = 6) {
+  if(lane === 6) {
     for(let i = 0; i < stack[1].el.length; i++) {
       let m = $(cardEl(stack[1].el[i]));
       m.css("top", vGap + "px").css("left", laneToLeft(lane) + "px");
@@ -245,7 +274,6 @@ let drawField = function() {
     const card = deckCopy.pop();
     $("#main")[0].append(cardEl(card));
   }
-
   for(let i = 0; i < 7; i++) {
     drawStack(main[i]);
     moveDnStack(i);
@@ -256,38 +284,10 @@ let drawField = function() {
   }
   for(let i = 0; i < 2; i++) {
     drawStack(stack[i]);
-    moveUpStack(i+5);
+    i === 0 ? drawOpen() : moveUpStack(i+5);
   }
-  drawOpen();
   $("#main")[0].append($("#stackoverturn")[0]);
-/*
-  //let line = "";
-  for(let i = 0; i<4; i++) {
-    //line += discard[i].el.length == 0 ? "   " : discard[i].el[discard[i].el.length-1].toString() + " ";
-  }
-  for(let i = 0; i<3; i++) {
-    //line += (stack[0].el.length - 3 + i) < 0 ? "   " : stack[0].el[stack[0].el.length - 3 + i].toString() + " ";
-  }
-  //line += "\n\n";
-
-  let maxlen = 0;
-  main.forEach(m => {if (maxlen < m.el.length) {maxlen = m.el.length}});
-
-  for(let j = 0; j < maxlen; j++) {
-    for(let i = 0; i < 7; i++) {
-      if(j == main[i].el.length - 1 && main[i].el[j].vis == 0) {
-        main[i].el[j].vis = 1;
-      }
-      line += j < main[i].el.length ? main[i].el[j].toString() + " " : "   ";
-    }
-    //line += "\n";
-  }
-  //$("pre").remove();
-  //$("body").append("<pre>" + line + "</pre>");
-  //$("input").val("");*/
 }
-
-//drawField();
 
 getLast = function(inArr) {
   return inArr.el[inArr.el.length - 1];
@@ -344,7 +344,7 @@ procCmd = function(cmd) {
     case "r":
       const cmdl = parseInt(cmd.split(" ")[1]);
       let arr;
-      if(cmdl < 7) {
+      if(cmdl > 0) {
         arr = main[cmdl];
       } else {
         arr = stack[0];
@@ -362,10 +362,10 @@ procCmd = function(cmd) {
 }
 
 window.addEventListener('load', function() {
-    $("#main")[0].append(nonCardString("spades", vGap, hGap + (hGap + hDim) * 0));
-    $("#main")[0].append(nonCardString("hearts", vGap, hGap + (hGap + hDim) * 1));
-    $("#main")[0].append(nonCardString("diams", vGap, hGap + (hGap + hDim) * 2));
-    $("#main")[0].append(nonCardString("clubs", vGap, hGap + (hGap + hDim) * 3));
+    $("#main")[0].append(nonCardString("spades", vGap, hGap + (hGap + hDim) * 0, 0));
+    $("#main")[0].append(nonCardString("hearts", vGap, hGap + (hGap + hDim) * 1, 1));
+    $("#main")[0].append(nonCardString("diams", vGap, hGap + (hGap + hDim) * 2, 2));
+    $("#main")[0].append(nonCardString("clubs", vGap, hGap + (hGap + hDim) * 3, 3));
     $("#main")[0].append(nonCardString("", vGap, hGap + (hGap + hDim) * 6));
     const deckCopy = [...deck];
     while (deckCopy.length > 0) {
@@ -373,22 +373,17 @@ window.addEventListener('load', function() {
         el = cardString(card.no, card.suit, false);
         $("#main")[0].append(el);
     }
-
     drawField();
     let btn = document.createElement("button");
     const btnTop = vGap * 3 + vDim * 2 + shft * 16;
-
     $(btn).css("top", btnTop + "px").html("start over").attr("onclick", "placeCards();");
     $("#main")[0].append(btn);
     btn = document.createElement("button");
     $(btn).css("top", btnTop + "px").css("left", "110px").html("new").attr("onclick", "shuffle(); placeCards();");
     $("#main")[0].append(btn);
-
     const onConfirmRefresh = function (event) {
         event.preventDefault();
         return event.returnValue = "Are you sure you want to leave the page?";
     }
-
     window.addEventListener("beforeunload", onConfirmRefresh, { capture: true });
-
 });
