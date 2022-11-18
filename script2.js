@@ -187,6 +187,7 @@ function move2cmd(from, to) {
     if (isDown(from) === -1) {
       procCmd('d ' + isDown(to));
     } else {
+
     }
   }
 }
@@ -224,7 +225,7 @@ let moveDnStack = function(lane) {
     m.css("top", vGap * 2 + vDim + shft*i + "px").css("left", laneToLeft(lane) + "px");
     main[lane].el[i].vis === 1 ? elMove(m) : elFix(m);
     if(main[lane].el[i].vis === 1) {
-      m.css("height", vDim + shft * (laneLen - 1 - i)  + "px");
+      m.css("height", vDim + shft * (laneLen - 1 - i) - 4 + "px");
     }
     dropTarget(m);
   }
@@ -240,7 +241,7 @@ let moveUpStack = function(lane) {
   } else {
     for(let i = 0; i < discard[lane].el.length; i++) {
       let m = $(cardEl(discard[lane].el[i]));
-      m.css("top", vGap + "px").css("left", laneToLeft(lane) + "px").css("height", vDim +"px");
+      m.css("top", vGap + "px").css("left", laneToLeft(lane) + "px").css("height", vDim -4 +"px");
       dropTarget(m);
     }
   }
@@ -296,6 +297,15 @@ getLast = function(inArr) {
 lastMove = function(from, to) {
   to.el.push(getLast(from));
   from.el.splice(from.el.length-1);
+  from.el[from.el.length - 1].vis = 1;
+}
+
+function suitColor(suit) {
+    return [1, 2].includes(suit) ? "red" : "black";
+}
+
+function suitTest(suit1, suit2) {
+    return suitColor(suit1) !== suitColor(suit2);
 }
 
 moveToMain = function(from, to, howmany) {
@@ -306,12 +316,13 @@ moveToMain = function(from, to, howmany) {
       doMove = true;
     } else {
       const bottom = getLast(to);
-      if (bottom.no == neededFrom[0].no+1 && neededFrom[0].suit %2 != bottom.suit %2) {
+      if (bottom.no == neededFrom[0].no+1 && suitTest(neededFrom[0].suit, bottom.suit)) {
         doMove = true;
       }
     }
     if(doMove) {
       from.el.splice(from.el.length -howmany);
+      from.el[from.el.length - 1].vis = 1;
       to.el=to.el.concat(neededFrom);
     }
   }
@@ -325,11 +336,12 @@ procCmd = function(cmd) {
           stack[1].el.push(stack[0].el[0]);
           stack[0].el.splice(0,1);
         }
-      }
-      for(let i = 0; i < 3; i++) {
-        if (stack[1].el.length > 0) {
-          stack[0].el.push(stack[1].el[0]);
-          stack[1].el.splice(0,1);
+      } else {
+        for(let i = 0; i < 3; i++) {
+          if (stack[1].el.length > 0) {
+            stack[0].el.push(stack[1].el[0]);
+            stack[1].el.splice(0,1);
+          }
         }
       }
       break;
