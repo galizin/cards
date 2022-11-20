@@ -10,6 +10,9 @@ class Stack {
   constructor () {
     this.el = [];
   }
+  clear() {
+    this.el = [];
+  }
 }
 
 const initDeck = function(deck) {
@@ -43,24 +46,48 @@ for(let i = 0; i < 7; i++) {
 }
 
 const discard=[];
+
 for(let i = 0; i < 4; i++) {
   discard.push(new Stack());
 }
 
 const stack=[new Stack(), new Stack()];
 
-deck.forEach(m => stack[1].el.push(m));
+replay = function (isSame) {
 
-for(let i = 0; i < 7; i++) {
-  for(let j = i; j < 7; j++) {
-    if (j == i)
-      stack[1].el[0].vis = 1;
-    main[j].el.push(stack[1].el[0]);
-    stack[1].el.splice(0, 1);
+  for(let i = 0; i < 7; i++) {
+    main[i].clear();
   }
+
+  for(let i = 0; i < 4; i++) {
+    discard[i].clear();
+  }
+
+  stack[0].clear();
+  stack[1].clear();
+
+  if(!isSame) {
+    deck = shuffleDeck(emptyDeck);
+  }
+
+  const deckCopy = [...deck];
+
+  deckCopy.forEach(m => stack[1].el.push(m));
+
+  for(let i = 0; i < 7; i++) {
+    for(let j = i; j < 7; j++) {
+      if (j == i)
+        stack[1].el[0].vis = 1;
+     main[j].el.push(stack[1].el[0]);
+     stack[1].el.splice(0, 1);
+   }
+  }
+  
+  drawField();
 }
 
-stack[1].el.forEach(m => m.vis = 1);
+replay(false);
+//stack[1].el.forEach(m => m.vis = 1);
 
 var shft = 25;
 var hDim = 62;
@@ -386,13 +413,14 @@ window.addEventListener('load', function() {
         el = cardString(card.no, card.suit, false);
         $("#main")[0].append(el);
     }
-    drawField();
+    replay(false);
+    //drawField();
     let btn = document.createElement("button");
     const btnTop = vGap * 3 + vDim * 2 + shft * 16;
-    $(btn).css("top", btnTop + "px").html("start over").attr("onclick", "placeCards();");
+    $(btn).css("top", btnTop + "px").html("start over").attr("onclick", "replay(true);");
     $("#main")[0].append(btn);
     btn = document.createElement("button");
-    $(btn).css("top", btnTop + "px").css("left", "110px").html("new").attr("onclick", "shuffle(); placeCards();");
+    $(btn).css("top", btnTop + "px").css("left", "110px").html("new").attr("onclick", "replay(false);");
     $("#main")[0].append(btn);
     const onConfirmRefresh = function (event) {
         event.preventDefault();
