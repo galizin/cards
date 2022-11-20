@@ -4,6 +4,15 @@ class Card {
     this.no = no;
     this.vis = vis;
   }
+  static cardId(card) {
+    return card.no.toString(16) + card.suit.toString(16);
+  }
+  static cardEl(card) {
+    return($("#" + Card.cardId(card))[0]);
+  }
+  cardId() {
+    return Card.cardId(this);
+  }
 }
 
 class Stack {
@@ -13,17 +22,25 @@ class Stack {
   clear() {
     this.el = [];
   }
-}
-
-const initDeck = function(deck) {
-  for(let suits = 0; suits < 4; suits++) {
-    for(let nos = 0; nos < 13; nos++) {
-      deck.push(new Card(suits, nos, 0));
+  last() {
+    if(this.el.length === 0) {
+      return null;
+    } else {
+      return  this.el[this.el.lenght - 1];
     }
   }
 }
 
-const shuffleDeck = function(deck) {
+const shuffleDeck = function() {
+  const initDeck = function(deck) {
+    for(let suits = 0; suits < 4; suits++) {
+      for(let nos = 0; nos < 13; nos++) {
+        deck.push(new Card(suits, nos, 0));
+      }
+    }
+    return deck;
+  }
+  const deck = initDeck([]);
   const deck2 = [];
   while(deck.length > 0) {
     let idx = Math.floor(Math.random() * deck.length);
@@ -33,11 +50,7 @@ const shuffleDeck = function(deck) {
   return deck2;
 }
 
-const emptyDeck = [];
-
-initDeck(emptyDeck);
-
-const deck = shuffleDeck(emptyDeck);
+let deck = [];
 
 const main=[];
 
@@ -67,7 +80,7 @@ replay = function (isSame) {
   stack[1].clear();
 
   if(!isSame) {
-    deck = shuffleDeck(emptyDeck);
+    deck = shuffleDeck();
   }
 
   const deckCopy = [...deck];
@@ -82,11 +95,11 @@ replay = function (isSame) {
      stack[1].el.splice(0, 1);
    }
   }
-  
+
   drawField();
 }
 
-replay(false);
+//replay(false);
 //stack[1].el.forEach(m => m.vis = 1);
 
 var shft = 25;
@@ -407,12 +420,16 @@ window.addEventListener('load', function() {
     $("#main")[0].append(nonCardString("diams", vGap, hGap + (hGap + hDim) * 2, 2));
     $("#main")[0].append(nonCardString("clubs", vGap, hGap + (hGap + hDim) * 3, 3));
     $("#main")[0].append(nonCardString("", vGap, hGap + (hGap + hDim) * 6));
-    const deckCopy = [...deck];
-    while (deckCopy.length > 0) {
-        const card = deckCopy.pop();
-        el = cardString(card.no, card.suit, false);
+    //const deckCopy = [...deck];
+    //while (deckCopy.length > 0) {
+        //const card = deckCopy.pop();
+    for(let suits = 0; suits < 4; suits++) {
+      for(let nos = 0; nos < 13; nos++) {
+        el = cardString(nos, suits, false);
         $("#main")[0].append(el);
+      }
     }
+    //}
     replay(false);
     //drawField();
     let btn = document.createElement("button");
