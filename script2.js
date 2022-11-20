@@ -150,7 +150,7 @@ nonCardString = function(suit, top, left, suitNo) {
     if (suit === "") {
         $(el).attr("onclick", "procCmd('a')").attr("id", "stackoverturn").html('<span class="innerspan" />');
     } else {
-        $(el).html('<span class="innerspan place ' + ((red) ? 'red' : '') + '">&' + suit + ';</span>').attr("id", suitNo);
+        //$(el).html('<span class="innerspan place ' + ((red) ? 'red' : '') + '">&' + suit + ';</span>').attr("id", suitNo);
         dropTarget(el);
     }
     return el;
@@ -355,6 +355,7 @@ procCmd = function(cmd) {
       break;
     case "r":
       const cmdl = parseInt(cmd.split(" ")[1]);
+      const topile = parseInt(cmd.split(" ")[2]);
       let arr;
       if(cmdl > 0) {
         arr = main[cmdl];
@@ -362,8 +363,8 @@ procCmd = function(cmd) {
         arr = stack[0];
       }
       const lastEl = getLast(arr);
-      const discardsuit = discard[lastEl.suit];
-      if(discardsuit.el.length == 0 ? lastEl.no == 0 : lastEl.no == getLast(discardsuit).no + 1) {
+      const discardsuit = discard[topile];
+      if(discardsuit.el.length == 0 ? lastEl.no == 0 : (lastEl.no == getLast(discardsuit).no + 1) && (lastEl.suit == grtLast(discardsuit).no) ) {
         lastMove(arr, discardsuit);
       }
       break;
