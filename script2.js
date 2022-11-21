@@ -25,11 +25,19 @@ class Stack {
   clear() {
     this.el = [];
   }
+  len() {
+    return this.el.length;
+  }
   last() {
-    if(this.el.length === 0) {
+    if(this.len() === 0) {
       return null;
     } else {
-      return  this.el[this.el.length - 1];
+      return  this.el[this.len() - 1];
+    }
+  }
+  visLast() {
+    if (this.len() > 0) {
+      this.last().vis = true;
     }
   }
 }
@@ -38,7 +46,7 @@ const shuffleDeck = function() {
   const initDeck = function(deck) {
     for(let suits = 0; suits < 4; suits++) {
       for(let nos = 0; nos < 13; nos++) {
-        deck.push(new Card(suits, nos, 0));
+        deck.push(new Card(suits, nos, false));
       }
     }
     return deck;
@@ -93,7 +101,7 @@ replay = function (isSame) {
   for(let i = 0; i < 7; i++) {
     for(let j = i; j < 7; j++) {
       if (j == i)
-        stack[1].el[0].vis = 1;
+        stack[1].el[0].vis = true;
      main[j].el.push(stack[1].el[0]);
      stack[1].el.splice(0, 1);
    }
@@ -180,7 +188,7 @@ function drag(ev) {
 function move2cmd(from, to) {
   function isDown(a) {
     for(let i = 0; i < 7; i++) {
-      if (main[i].el.map(m => cardCardId(m)).indexOf(a) !== -1) {
+      if (main[i].el.map(m => m.cardId).indexOf(a) !== -1) {
         return i;
       }
     }
@@ -188,7 +196,7 @@ function move2cmd(from, to) {
   }
   function isUp(a) {
     for(let i = 0; i < 4; i++) {
-      if (discard[i].el.map(m => cardCardId(m)).indexOf(a) !== -1) {
+      if (discard[i].el.map(m => m.cardId).indexOf(a) !== -1) {
         return i;
       }
     }
@@ -236,8 +244,8 @@ let moveDnStack = function(lane) {
   for(let i = 0; i < laneLen; i++) {
     let m = $(cardEl(main[lane].el[i]));
     m.css("top", vGap * 2 + vDim + shft*i + "px").css("left", laneToLeft(lane) + "px");
-    main[lane].el[i].vis === 1 ? elMove(m) : elFix(m);
-    if(main[lane].el[i].vis === 1) {
+    main[lane].el[i].vis ? elMove(m) : elFix(m);
+    if(main[lane].el[i].vis) {
       m.css("height", vDim + shft * (laneLen - 1 - i) - 4 + "px");
     }
     dropTarget(m);
@@ -306,15 +314,10 @@ let drawField = function() {
 lastMove = function(from, to) {
   to.el.push(from.last());
   from.el.splice(from.el.length-1);
-  from.el[from.el.length - 1].vis = 1;
-}
-
-function suitTest(suit1, suit2) {
-    return suitColor(suit1) !== suitColor(suit2);
 }
 
 moveToMain = function(from, to, howmany) {
-  if(from.el[from.el.length - howmany].vis = 1) {
+  if(from.el[from.el.length - howmany].vis) {
     const neededFrom = [...from.el].slice(from.el.length - howmany);
     let doMove = false;
     if (to.el.length == 0 && neededFrom[0].no == 12) {
@@ -327,10 +330,11 @@ moveToMain = function(from, to, howmany) {
     }
     if(doMove) {
       from.el.splice(from.el.length -howmany);
-      from.el[from.el.length - 1].vis = 1;
+      //from.el[from.el.length - 1].vis = true;
       to.el=to.el.concat(neededFrom);
     }
   }
+  return doMove;
 }
 
 procCmd = function(cmd) {
@@ -350,28 +354,46 @@ procCmd = function(cmd) {
         }
       }
       break;
-    case "s": //from to how many
+    case "s": //from to how many  (sm) (m)
       const parm = (cmd.split(" ")).map(m => parseInt(m)).slice(1);
-      moveToMain(parm[0] == 7 ? stack[0]: main[parm[0]], main[parm[1]], parm[0] == 7 ? 1: parm[2]);
+      const doMove = moveToMain(parm[0] < 0 ? stack[0]: main[parm[0]], main[parm[1]], parm[0] == 7 ? 1: parm[2]);
+      if((parm[0] >= 0) && doMove) {
+        main[parm[0]].visLast();
+      }
       break;
-    case "d":
-      const cmdn = parseInt(cmd.split(" ")[1]);
-      moveToMain(stack[0], main[cmdn], 1);
-      break;
-    case "r":
-      const cmdl = parseInt(cmd.split(" ")[1]);
-      const topile = parseInt(cmd.split(" ")[2]);
-      let arr;
-      if(cmdl > 0) {
-        arr = main[cmdl];
+    //case "d":
+      //const cmdn = parseInt(cmd.split(" ")[1]);
+      //moveToMain(stack[0], main[cmdn], 1);
+      //break;
+    case "r": //(sm) (d)
+      const fromPileNo = parseInt(cmd.split(" ")[1]);
+      const toPileNo = parseInt(cmd.split(" ")[2]);
+      let fromPile;
+      if(fromPileNo > 0) {
+        fromPile = main[fromPileNo];
       } else {
-        arr = stack[0];
+        fromPile = stack[0];
       }
-      const lastEl = arr.last(); //getLast(arr);
-      const discardsuit = discard[topile];
-      if(discardsuit.el.length == 0 ? lastEl.no == 0 : (lastEl.no == discardsuit.last().no + 1) && (lastEl.suit == discardsuit.last().no) ) {
-        lastMove(arr, discardsuit);
+      const fromLast = fromPile.last(); //getLast(arr);
+      const toLast = discard[toPileNo].last();
+      if(discard[toPileNo].el.length === 0 ? fromLast.no === 0 : (fromLast.no === toLast.no + 1) && (fromLast.suit === toLast.suit) ) {
+        lastMove(fromPile, discard[toPileNo]);
+        if(fromPileNo > 0) {
+          fromPile.visLast();
+        }
       }
+      break;
+    case "u": //(d) (d)
+      const from = parseInt(cmd.split(" ")[1]);
+      const to = parseInt(cmd.split(" ")[2]);
+      if((from !== to) && (discard[from].last().no === 0) && (discard[to].el.length === 0)) {
+        lastMove(discard[from], discard[to]);
+      }
+      break;
+    case "b": //(d) (m)
+      const bparm1 = parseInt(cmd.split(" ")[1]);
+      const bparm2 = parseInt(cmd.split(" ")[2]);
+      moveToMain(discard[bparm1], main[bparm2], 1);
       break;
     default:
       console.log("command " + cmd + " is not supported");
