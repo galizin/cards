@@ -13,6 +13,9 @@ class Card {
   cardId() {
     return Card.cardId(this);
   }
+  color() {
+    return [1, 2].includes(this.suit) ? "red" : "black";
+  }
 }
 
 class Stack {
@@ -26,7 +29,7 @@ class Stack {
     if(this.el.length === 0) {
       return null;
     } else {
-      return  this.el[this.el.lenght - 1];
+      return  this.el[this.el.length - 1];
     }
   }
 }
@@ -140,39 +143,8 @@ function nonDropTarget(el) {
 
 cardString = function(cardNum, suit, fixed) {
     let red = suit == 1 || suit == 2 ? 1 : 0;
-    let suitname = "";
-    switch (suit) {
-        case 0:
-            suitname = "&spades;";
-            break;
-        case 1:
-            suitname = "&hearts;";
-            break;
-        case 2:
-            suitname = "&diams;";
-            break;
-        case 3:
-            suitname = "&clubs;";
-            break;
-    }
-    let cardname = "";
-    switch (cardNum) {
-        case 0:
-            cardname = "A";
-            break;
-        case 12:
-            cardname = "K";
-            break;
-        case 11:
-            cardname = "Q";
-            break;
-        case 10:
-            cardname = "J";
-            break;
-        default:
-            cardname = cardNum + 1 + "";
-            break;
-    }
+    let suitname = ["&spades;","&hearts;","&diams;","&clubs;"][suit];
+    let cardname = ['A','2','3','4','5','6','7','8','9','10', 'J', 'Q', 'K'][cardNum];
     let el = document.createElement("span");
     $(el).attr("class", "outerspan").attr("id", cardId(cardNum, suit));
     elMove(el);
@@ -191,6 +163,7 @@ nonCardString = function(suit, top, left, suitNo) {
         $(el).attr("onclick", "procCmd('a')").attr("id", "stackoverturn").html('<span class="innerspan" />');
     } else {
         //$(el).html('<span class="innerspan place ' + ((red) ? 'red' : '') + '">&' + suit + ';</span>').attr("id", suitNo);
+        $(el).attr("id", suitNo);
         dropTarget(el);
     }
     return el;
@@ -222,7 +195,7 @@ function move2cmd(from, to) {
     return ["0", "1", "2", "3"].indexOf(a);
   }
   if(isUp(to) !== -1) {
-    procCmd('r ' + isDown(from));
+    procCmd('r ' + isDown(from) + ' ' + isUp(to));
   } else {
     if (isDown(from) === -1) {
       procCmd('d ' + isDown(to));
@@ -330,18 +303,10 @@ let drawField = function() {
   $("#main")[0].append($("#stackoverturn")[0]);
 }
 
-getLast = function(inArr) {
-  return inArr.el[inArr.el.length - 1];
-}
-
 lastMove = function(from, to) {
-  to.el.push(getLast(from));
+  to.el.push(from.last());
   from.el.splice(from.el.length-1);
   from.el[from.el.length - 1].vis = 1;
-}
-
-function suitColor(suit) {
-    return [1, 2].includes(suit) ? "red" : "black";
 }
 
 function suitTest(suit1, suit2) {
@@ -355,8 +320,8 @@ moveToMain = function(from, to, howmany) {
     if (to.el.length == 0 && neededFrom[0].no == 12) {
       doMove = true;
     } else {
-      const bottom = getLast(to);
-      if (bottom.no == neededFrom[0].no+1 && suitTest(neededFrom[0].suit, bottom.suit)) {
+      //const bottom = getLast(to);
+      if (to.last().no == neededFrom[0].no+1 && (neededFrom[0].color() != to.last().color())) {
         doMove = true;
       }
     }
@@ -402,9 +367,9 @@ procCmd = function(cmd) {
       } else {
         arr = stack[0];
       }
-      const lastEl = getLast(arr);
+      const lastEl = arr.last(); //getLast(arr);
       const discardsuit = discard[topile];
-      if(discardsuit.el.length == 0 ? lastEl.no == 0 : (lastEl.no == getLast(discardsuit).no + 1) && (lastEl.suit == grtLast(discardsuit).no) ) {
+      if(discardsuit.el.length == 0 ? lastEl.no == 0 : (lastEl.no == discardsuit.last().no + 1) && (lastEl.suit == discardsuit.last().no) ) {
         lastMove(arr, discardsuit);
       }
       break;
