@@ -189,17 +189,18 @@ function allowDrop(ev) {
 
 function drag(ev) {
   ev.dataTransfer.setData("cardid", ev.target.id);
+  console.log(ev);
 }
 
 function move2cmd(from, to) {
   function isSM(a) {
-    if(stock[0].last().id() === a) {
+    if(stack[0].last() && stack[0].last().id() === a) {
       return [7, 1];
     }
     for(let i = 0; i < 7; i++) {
       const idx = main[i].idx(a);
       if (idx !== -1) {
-        return [i, main[i].length - idx];
+        return [i, main[i].len() - idx];
       }
     }
     return [-1, 1];
@@ -229,8 +230,8 @@ function move2cmd(from, to) {
   //r sm d
   //u d d
   //b d m
-  if(fromSM[0] > -1 && toM > -1) {
-    prodCmd('s ' + fromSM[0] + ' ' + toM + ' ' + fromSM[1]); //howmany
+  if(fromSM[0] > -1 && toM[0] > -1) {
+    procCmd('s ' + fromSM[0] + ' ' + toM[0] + ' ' + fromSM[1]); //howmany
   }
   if(fromSM[0] > -1 && toD > -1) {
     procCmd('r ' + fromSM[0] + ' ' + toD);
@@ -239,13 +240,18 @@ function move2cmd(from, to) {
     procCmd('u ' + fromD + ' ' + toD);
   }
   if(fromD > -1 && toM > -1) {
-    procCmd('b ' + fromD + ' ' + toM);
+    procCmd('b ' + fromD + ' ' + toM[0]);
   }
 }
 
 function drop(ev) {
   ev.preventDefault();
   var data = ev.dataTransfer.getData("cardid");
+  if(ev.currentTarget.id === "main") {
+    console.log("dropped on main");
+    console.log(ev);
+    return;
+  }
   if(ev.currentTarget.id === ev.target.closest(".outerspan").id) {
     move2cmd(data, ev.target.closest(".outerspan").id);
   }
@@ -299,17 +305,17 @@ let moveUpStack = function(lane) {
 }
 
 let drawOpen = function() {
-  const stockLen = stack[0].el.length
-  for(let i = 0; i < stockLen; i++) {
+  const stackLen = stack[0].el.length
+  for(let i = 0; i < stackLen; i++) {
     let m = $(stack[0].el[i].el());
     m.css("top", vGap + "px");
     elFix(m);
     nonDropTarget(m);
     switch (i) {
-      case stockLen - 2:
+      case stackLen - 2:
         $(m).css("left", hGap + (hDim + hGap) * 5 -1*vGap*4 + 'px');
         break;
-      case stockLen - 1:
+      case stackLen - 1:
         $(m).css("left", laneToLeft(5) + 'px');
         elMove(m);
         break;
@@ -347,9 +353,9 @@ lastMove = function(from, to) {
 }
 
 moveToMain = function(from, to, howmany) {
+  let doMove = false;
   if(from.el[from.el.length - howmany].vis) {
     const neededFrom = [...from.el].slice(from.el.length - howmany);
-    let doMove = false;
     if (to.el.length == 0 && neededFrom[0].no == 12) {
       doMove = true;
     } else {
@@ -432,6 +438,7 @@ procCmd = function(cmd) {
 }
 
 window.addEventListener('load', function() {
+    dropTarget($("#main")[0]);
     $("#main")[0].append(nonCardString("spades", vGap, hGap + (hGap + hDim) * 0, 0));
     $("#main")[0].append(nonCardString("hearts", vGap, hGap + (hGap + hDim) * 1, 1));
     $("#main")[0].append(nonCardString("diams", vGap, hGap + (hGap + hDim) * 2, 2));

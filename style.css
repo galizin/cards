@@ -50,11 +50,15 @@ span.outerspan {
     overflow: hidden;
 }
 
+body {
+    margin: 0;
+}
+
 div#main {
     font-size: 30px;
     font-family: Text;
-    width: 425px;
-    height: 440px;
+    width: 448px;
+    height: 570px;
 }
 
 @font-face {
