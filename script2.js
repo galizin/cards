@@ -10,8 +10,11 @@ class Card {
   static cardEl(card) {
     return($("#" + Card.cardId(card))[0]);
   }
-  cardId() {
+  id() {
     return Card.cardId(this);
+  }
+  el() {
+    return Card.cardEl(this);
   }
   color() {
     return [1, 2].includes(this.suit) ? "red" : "black";
@@ -39,6 +42,9 @@ class Stack {
     if (this.len() > 0) {
       this.last().vis = true;
     }
+  }
+  idx(id) {
+    return this.el.map(m => m.id()).indexOf(id);
   }
 }
 
@@ -119,17 +125,17 @@ var vDim = 73;
 var vGap = 8
 var hGap = 2;
 
-cardId = function(cardNum, suit) {
-  return cardNum.toString(16) + suit.toString(16);
-}
+//cardId = function(cardNum, suit) {
+  //return cardNum.toString(16) + suit.toString(16);
+//}
 
-cardCardId = function(card) {
-  return cardId(card.no, card.suit);
-}
+//cardCardId = function(card) {
+  //return cardId(card.no, card.suit);
+//}
 
-cardEl = function(card) {
-  return($("#" + cardCardId(card))[0]);
-}
+//cardEl = function(card) {
+  //return($("#" + cardCardId(card))[0]);
+//}
 
 function elMove(el) {
   $(el).attr("ontouchstart", "dragstart_handler(event)").attr("ontouchend", "drop_handler(event)")
@@ -149,17 +155,17 @@ function nonDropTarget(el) {
   $(el).attr("ondrop","").attr("ondragover","");
 }
 
-cardString = function(cardNum, suit, fixed) {
-    let red = suit == 1 || suit == 2 ? 1 : 0;
-    let suitname = ["&spades;","&hearts;","&diams;","&clubs;"][suit];
-    let cardname = ['A','2','3','4','5','6','7','8','9','10', 'J', 'Q', 'K'][cardNum];
+cardString = function(card) {
+    let red = card.color() === "red"; //suit == 1 || suit == 2 ? 1 : 0;
+    let suitname = ["&spades;","&hearts;","&diams;","&clubs;"][card.suit];
+    let cardname = ['A','2','3','4','5','6','7','8','9','10', 'J', 'Q', 'K'][card.no];
     let el = document.createElement("span");
-    $(el).attr("class", "outerspan").attr("id", cardId(cardNum, suit));
-    elMove(el);
-    if(fixed) {
-      elFix(el);
-    }
-    $(el).html(((red) ? '<mark class="red">' : '') + '<span class="innerspan">' + suitname + cardname + '</span>' + ((red) ? '</mark>' : ''));
+    $(el).attr("class", "outerspan").attr("id", card.id());
+    //elMove(el);
+    //if(fixed) {
+    ///elFix(el);
+    //}
+    $(el).html((red ? '<mark class="red">' : '') + '<span class="innerspan">' + suitname + cardname + '</span>' + (red ? '</mark>' : ''));
     return el;
 };
 
@@ -186,30 +192,54 @@ function drag(ev) {
 }
 
 function move2cmd(from, to) {
-  function isDown(a) {
+  function isSM(a) {
+    if(stock[0].last().id() === a) {
+      return [7, 1];
+    }
     for(let i = 0; i < 7; i++) {
-      if (main[i].el.map(m => m.cardId).indexOf(a) !== -1) {
-        return i;
+      const idx = main[i].idx(a);
+      if (idx !== -1) {
+        return [i, main[i].length - idx];
       }
     }
-    return -1;
+    return [-1, 1];
   }
-  function isUp(a) {
+  function isD(a) {
     for(let i = 0; i < 4; i++) {
-      if (discard[i].el.map(m => m.cardId).indexOf(a) !== -1) {
+      if (discard[i].idx(a) !== -1) {
         return i;
       }
     }
     return ["0", "1", "2", "3"].indexOf(a);
   }
-  if(isUp(to) !== -1) {
-    procCmd('r ' + isDown(from) + ' ' + isUp(to));
-  } else {
-    if (isDown(from) === -1) {
-      procCmd('d ' + isDown(to));
-    } else {
+  fromSM = isSM(from);
+  fromD = isD(from);
+  toM = isSM(to);
+  toD = isD(to);
+  //if(isUp(to) !== -1) {
+    //procCmd('r ' + isDown(from) + ' ' + isUp(to));
+  //} else {
+    //if (isDown(from) === -1) {
+      //procCmd('d ' + isDown(to));
+    //} else {
 
-    }
+    //}
+  //}
+  //s sm m
+  //r sm d
+  //u d d
+  //b d m
+  if(fromSM[0] > -1 && toM > -1) {
+    prodCmd('s ' + fromSM[0] + ' ' + toM + ' ' + fromSM[1]); //howmany
+  }
+  if(fromSM[0] > -1 && toD > -1) {
+    procCmd('r ' + fromSM[0] + ' ' + toD);
+  }
+  if(fromD > -1 && toD > -1) {
+    procCmd('u ' + fromD + ' ' + toD);
+  }
+  if(fromD > -1 && toM > -1) {
+    procCmd('b ' + fromD + ' ' + toM);
   }
 }
 
@@ -224,7 +254,7 @@ function drop(ev) {
 let drawStack = function(arr) {
   let parentEl = null;
   for(let j = 0; j < arr.el.length; j++) {
-    let currEl = cardEl(arr.el[j]);
+    let currEl = arr.el[j].el();
     if(parentEl == null) {
       $("#main")[0].append(currEl);
     }
@@ -242,7 +272,7 @@ function laneToLeft(laneNo) {
 let moveDnStack = function(lane) {
   laneLen = main[lane].el.length;
   for(let i = 0; i < laneLen; i++) {
-    let m = $(cardEl(main[lane].el[i]));
+    let m = $(main[lane].el[i].el());
     m.css("top", vGap * 2 + vDim + shft*i + "px").css("left", laneToLeft(lane) + "px");
     main[lane].el[i].vis ? elMove(m) : elFix(m);
     if(main[lane].el[i].vis) {
@@ -255,13 +285,13 @@ let moveDnStack = function(lane) {
 let moveUpStack = function(lane) {
   if(lane === 6) {
     for(let i = 0; i < stack[1].el.length; i++) {
-      let m = $(cardEl(stack[1].el[i]));
+      let m = $(stack[1].el[i].el());
       m.css("top", vGap + "px").css("left", laneToLeft(lane) + "px");
       nonDropTarget(m);
     }
   } else {
     for(let i = 0; i < discard[lane].el.length; i++) {
-      let m = $(cardEl(discard[lane].el[i]));
+      let m = $(discard[lane].el[i].el());
       m.css("top", vGap + "px").css("left", laneToLeft(lane) + "px").css("height", vDim -4 +"px");
       dropTarget(m);
     }
@@ -271,7 +301,7 @@ let moveUpStack = function(lane) {
 let drawOpen = function() {
   const stockLen = stack[0].el.length
   for(let i = 0; i < stockLen; i++) {
-    let m = $(cardEl(stack[0].el[i]));
+    let m = $(stack[0].el[i].el());
     m.css("top", vGap + "px");
     elFix(m);
     nonDropTarget(m);
@@ -294,7 +324,7 @@ let drawField = function() {
   const deckCopy = [...deck];
   while (deckCopy.length > 0) {
     const card = deckCopy.pop();
-    $("#main")[0].append(cardEl(card));
+    $("#main")[0].append(card.el());
   }
   for(let i = 0; i < 7; i++) {
     drawStack(main[i]);
@@ -356,8 +386,8 @@ procCmd = function(cmd) {
       break;
     case "s": //from to how many  (sm) (m)
       const parm = (cmd.split(" ")).map(m => parseInt(m)).slice(1);
-      const doMove = moveToMain(parm[0] < 0 ? stack[0]: main[parm[0]], main[parm[1]], parm[0] == 7 ? 1: parm[2]);
-      if((parm[0] >= 0) && doMove) {
+      const doMove = moveToMain(parm[0] === 7 ? stack[0]: main[parm[0]], main[parm[1]], parm[0] === 7 ? 1: parm[2]);
+      if((parm[0] < 7) && doMove) {
         main[parm[0]].visLast();
       }
       break;
@@ -369,7 +399,7 @@ procCmd = function(cmd) {
       const fromPileNo = parseInt(cmd.split(" ")[1]);
       const toPileNo = parseInt(cmd.split(" ")[2]);
       let fromPile;
-      if(fromPileNo > 0) {
+      if(fromPileNo < 7) {
         fromPile = main[fromPileNo];
       } else {
         fromPile = stack[0];
@@ -412,8 +442,7 @@ window.addEventListener('load', function() {
         //const card = deckCopy.pop();
     for(let suits = 0; suits < 4; suits++) {
       for(let nos = 0; nos < 13; nos++) {
-        el = cardString(nos, suits, false);
-        $("#main")[0].append(el);
+        $("#main")[0].append(cardString(new Card(suits, nos, false)));
       }
     }
     //}
