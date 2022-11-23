@@ -307,10 +307,10 @@ let moveDnStack = function(lane) {
   laneLen = main[lane].el.length;
   for(let i = 0; i < laneLen; i++) {
     let m = $(main[lane].el[i].el());
-    m.css("top", vGap * 2 + vDim + shft*i + "px").css("left", laneToLeft(lane) + "px");
+    m.css("top", vGap * 2 + vDim + shft*i + "px").css("left", laneToLeft(lane) + "px").css("height", vDim - 2*border + "px");
     main[lane].el[i].vis ? elMove(m) : elFix(m);
     if(main[lane].el[i].vis) {
-      m.css("height", vDim + shft * (laneLen - 1 - i) - 4 + "px");
+      m.css("height", vDim + shft * (laneLen - 1 - i) - 2*border + "px");
     }
     dropTarget(m);
   }
@@ -320,13 +320,13 @@ let moveUpStack = function(lane) {
   if(lane === 6) {
     for(let i = 0; i < stack[1].el.length; i++) {
       let m = $(stack[1].el[i].el());
-      m.css("top", vGap + "px").css("left", laneToLeft(lane) + "px");
+      m.css("top", vGap + "px").css("left", laneToLeft(lane) + "px").css("height", vDim - 2*border + "px");
       nonDropTarget(m);
     }
   } else {
     for(let i = 0; i < discard[lane].el.length; i++) {
       let m = $(discard[lane].el[i].el());
-      m.css("top", vGap + "px").css("left", laneToLeft(lane) + "px").css("height", vDim -4 +"px");
+      m.css("top", vGap + "px").css("left", laneToLeft(lane) + "px").css("height", vDim - 2*border +"px");
       dropTarget(m);
     }
   }
