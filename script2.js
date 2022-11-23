@@ -113,6 +113,7 @@ replay = function (isSame) {
    }
   }
 
+  stack[1].el.forEach(m => m.vis = true);
   drawField();
 }
 
