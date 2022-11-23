@@ -191,10 +191,14 @@ function allowDrop(ev) {
 
 function drag(ev) {
   ev.dataTransfer.setData("cardid", ev.target.id);
-  console.log("x:" + ev.clientX + " y:" + ev.clientY);
+  //console.log("x:" + (parseInt($(ev.target).css("left")) + hDim/2 - ev.clientX) + " y:" +  (parseInt($(ev.target).css("top")) + vDim/2 - ev.clientY));
+  ev.dataTransfer.setData("hoff", parseInt($(ev.target).css("left")) + hDim/2 - ev.clientX);
+  ev.dataTransfer.setData("voff", parseInt($(ev.target).css("top")) + vDim/2 - ev.clientY);
 }
 
-function move2cmd(from, to) {
+
+
+function move2cmd(from, hlane, vlane) {
   function isSM(a) {
     if(stack[0].last() && stack[0].last().id() === a) {
       return [7, 1];
@@ -217,8 +221,8 @@ function move2cmd(from, to) {
   }
   fromSM = isSM(from);
   fromD = isD(from);
-  toM = isSM(to);
-  toD = isD(to);
+  //toM = isSM(to);
+  //toD = isD(to);
   //if(isUp(to) !== -1) {
     //procCmd('r ' + isDown(from) + ' ' + isUp(to));
   //} else {
@@ -232,32 +236,52 @@ function move2cmd(from, to) {
   //r sm d
   //u d d
   //b d m
-  if(fromSM[0] > -1 && toM[0] > -1) {
-    procCmd('s ' + fromSM[0] + ' ' + toM[0] + ' ' + fromSM[1]); //howmany
+  if(fromSM[0] > -1 && vlane === 1) {
+    procCmd('s ' + fromSM[0] + ' ' + hlane + ' ' + fromSM[1]); //howmany
   }
-  if(fromSM[0] > -1 && toD > -1) {
-    procCmd('r ' + fromSM[0] + ' ' + toD);
+  if(fromSM[0] > -1 && vlane === 0) {
+    procCmd('r ' + fromSM[0] + ' ' + hlane);
   }
-  if(fromD > -1 && toD > -1) {
-    procCmd('u ' + fromD + ' ' + toD);
+  if(fromD > -1 && vlane === 0) {
+    procCmd('u ' + fromD + ' ' + hlane);
   }
-  if(fromD > -1 && toM > -1) {
-    procCmd('b ' + fromD + ' ' + toM[0]);
+  if(fromD > -1 && vlane === 1) {
+    procCmd('b ' + fromD + ' ' + hlane);
   }
 }
 
 function drop(ev) {
   ev.preventDefault();
-  var data = ev.dataTransfer.getData("cardid");
+  const data = ev.dataTransfer.getData("cardid");
+  const hoff = ev.dataTransfer.getData("hoff");
+  const voff = ev.dataTransfer.getData("voff");
   if(ev.currentTarget.id === "main") {
     //console.log("dropped on main");
     //console.log(ev);
-    console.log("x:" + ev.clientX + " y:" + ev.clientY);
+    const hcoord = parseFloat(hoff) + ev.clientX;
+    const vcoord = parseFloat(voff) + ev.clientY;
+    const hlane = Math.floor(hcoord / (hGap + hDim));
+    //const vlane = Math.floor(vcoord / (vGap + vDim));
+    let vlane;
+    if (vcoord > vGap && vcoord < (vGap + vDim)) {
+      vlane = 0;
+    }
+    if (vcoord > (2*vGap + vDim)) {
+      vlane = 1;
+    }
+    if ([0,1].includes(vlane) && (hcoord - hlane*(hGap + hDim) > 4) && (hlane > -1) && (hlane < 7) && (vlane === 0 ? (hlane < 4) : true)) {
+      move2cmd(data, hlane, vlane);
+      //console.log("not in");
+    //} else {
+      //console.log(hlane);
+    }
+    //console.log("x:" + hcoord + " y:" + vcoord);
+    //console.log(Math.floor(hcoord / (hGap + hDim)));
     return;
   }
-  if(ev.currentTarget.id === ev.target.closest(".outerspan").id) {
-    move2cmd(data, ev.target.closest(".outerspan").id);
-  }
+  //if(ev.currentTarget.id === ev.target.closest(".outerspan").id) {
+    //move2cmd(data, ev.target.closest(".outerspan").id);
+  //}
 }
 
 let drawStack = function(arr) {
