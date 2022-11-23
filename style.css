@@ -26,12 +26,12 @@ mark.red {
 
 span {
     cursor: pointer;
-    margin-top: -5px;
     user-select: none;
 }
 
 span.innerspan {
     display: flex;
+    margin-top: -5px;
     justify-content: left;
 }
 
@@ -43,7 +43,7 @@ span.outerspan {
     position: fixed;
     background: white;
     height: 69px;
-    width: 56px;
+    width: 58px;
     border-style: solid;
     border-width: 2px;
     border-radius: 7px;
@@ -57,7 +57,7 @@ body {
 div#main {
     font-size: 30px;
     font-family: Text;
-    width: 448px;
+    width: 450px;
     height: 570px;
 }
 

@@ -120,10 +120,11 @@ replay = function (isSame) {
 //stack[1].el.forEach(m => m.vis = 1);
 
 var shft = 25;
-var hDim = 62;
+var hDim = 59;
 var vDim = 73;
-var vGap = 8
-var hGap = 2;
+var vGap = 4;
+var hGap = 4;
+var border = 2;
 
 //cardId = function(cardNum, suit) {
   //return cardNum.toString(16) + suit.toString(16);
@@ -160,7 +161,7 @@ cardString = function(card) {
     let suitname = ["&spades;","&hearts;","&diams;","&clubs;"][card.suit];
     let cardname = ['A','2','3','4','5','6','7','8','9','10', 'J', 'Q', 'K'][card.no];
     let el = document.createElement("span");
-    $(el).attr("class", "outerspan").attr("id", card.id());
+    $(el).attr("class", "outerspan").attr("id", card.id()).css("height", vDim - border*2 + "px").css("width", hDim - border*2 + "px");
     //elMove(el);
     //if(fixed) {
     ///elFix(el);
@@ -172,7 +173,8 @@ cardString = function(card) {
 nonCardString = function(suit, top, left, suitNo) {
     let red = suit == "hearts" || suit == "diams" ? 1 : 0;
     let el = document.createElement("span");
-    $(el).attr("class", "outerspan").attr("style", "top:" + top + "px; left:" + left + "px");
+    $(el).attr("class", "outerspan").attr("style", "top:" + top + "px; left:" + left + "px")
+      .css("height", vDim - border*2 + "px").css("width", hDim - border*2 + "px");
     if (suit === "") {
         $(el).attr("onclick", "procCmd('a')").attr("id", "stackoverturn").html('<span class="innerspan" />');
     } else {
@@ -189,7 +191,7 @@ function allowDrop(ev) {
 
 function drag(ev) {
   ev.dataTransfer.setData("cardid", ev.target.id);
-  console.log(ev);
+  console.log("x:" + ev.clientX + " y:" + ev.clientY);
 }
 
 function move2cmd(from, to) {
@@ -248,8 +250,9 @@ function drop(ev) {
   ev.preventDefault();
   var data = ev.dataTransfer.getData("cardid");
   if(ev.currentTarget.id === "main") {
-    console.log("dropped on main");
-    console.log(ev);
+    //console.log("dropped on main");
+    //console.log(ev);
+    console.log("x:" + ev.clientX + " y:" + ev.clientY);
     return;
   }
   if(ev.currentTarget.id === ev.target.closest(".outerspan").id) {
@@ -313,14 +316,14 @@ let drawOpen = function() {
     nonDropTarget(m);
     switch (i) {
       case stackLen - 2:
-        $(m).css("left", hGap + (hDim + hGap) * 5 -1*vGap*4 + 'px');
+        $(m).css("left", hGap + (hDim + hGap) * 5 -1*hGap*8 + 'px');
         break;
       case stackLen - 1:
         $(m).css("left", laneToLeft(5) + 'px');
         elMove(m);
         break;
       default:
-        $(m).css("left", laneToLeft(5) -2*vGap*4 + 'px');
+        $(m).css("left", laneToLeft(5) -2*hGap*8 + 'px');
         break;
     }
   }
@@ -456,8 +459,9 @@ window.addEventListener('load', function() {
     replay(false);
     //drawField();
     let btn = document.createElement("button");
-    const btnTop = vGap * 3 + vDim * 2 + shft * 16;
-    $(btn).css("top", btnTop + "px").html("start over").attr("onclick", "replay(true);");
+    const btnTop = vGap * 3 + vDim * 2 + shft * 18;
+    $("#main").css("width", hDim * 7 + hGap * 8 + "px").css("height", btnTop + "px");
+    $(btn).css("top", btnTop + "px").css("left", hGap +'px').html("start over").attr("onclick", "replay(true);");
     $("#main")[0].append(btn);
     btn = document.createElement("button");
     $(btn).css("top", btnTop + "px").css("left", "110px").html("new").attr("onclick", "replay(false);");
