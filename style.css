@@ -48,10 +48,17 @@ span.outerspan {
     background: white;
     height: 69px;
     width: 58px;
+    overflow: hidden;
+}
+
+span.outerspan, button {
     border-style: solid;
     border-width: 2px;
     border-radius: 7px;
-    overflow: hidden;
+}
+
+button {
+    border-color: black;
 }
 
 body {

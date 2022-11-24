@@ -181,10 +181,11 @@ function dragstart_handler(ev) {
       const viewportOffset = el.getBoundingClientRect();
       //const inMain = searchMain(el.id);
       //if (inMain[0] !== -1) {
-        const parent = $(el).parent("span.outerspan");
-        if(parent) {
-          parent.css("height", vDim - 2*border+ "px");
-        }
+        //const parents =
+        $(el).parents("span.outerspan").css("height", vDim - 2*border+ "px");
+        //if(parents.length > 0) {
+          //parents.forEach(m => m.css("height", vDim - 2*border+ "px"));
+        //}
       //}
       $(el).attr("touchstartoffset", (-viewportOffset.top + touches[0].pageY) + ',' + (-viewportOffset.left + touches[0].pageX)) //.addClass("move")
         .appendTo("#main");
@@ -428,8 +429,10 @@ moveToMain = function(from, to, howmany) {
     if (to.el.length == 0 && neededFrom[0].no == 12) {
       doMove = true;
     } else {
-      if (to.last().no == neededFrom[0].no+1 && (neededFrom[0].color() != to.last().color())) {
-        doMove = true;
+      if (to.len() > 0) {
+        if (to.last().no == neededFrom[0].no+1 && (neededFrom[0].color() != to.last().color())) {
+          doMove = true;
+        }
       }
     }
     if(doMove) {
@@ -515,10 +518,12 @@ window.addEventListener('load', function() {
     let btn = document.createElement("button");
     const btnTop = vGap * 3 + vDim * 2 + shft * 18;
     $("#main").css("width", hDim * 7 + hGap * 8 + "px").css("height", btnTop + "px");
-    $(btn).css("top", btnTop + "px").css("left", hGap +'px').html("start over").attr("onclick", "replay(true);");
+    $(btn).css("top", btnTop + "px").css("left", hGap +'px').html("start over").css("width", hDim*2 +hGap +"px")
+      .attr("onclick", "replay(true);");
     $("#main")[0].append(btn);
     btn = document.createElement("button");
-    $(btn).css("top", btnTop + "px").css("left", "93px").html("new").attr("onclick", "replay(false);");
+    $(btn).css("top", btnTop + "px").css("left", hDim*2 + 2*border + hGap*2 + "px").css("width", hDim + "px")
+      .html("new").attr("onclick", "replay(false);");
     $("#main")[0].append(btn);
     const onConfirmRefresh = function (event) {
         event.preventDefault();
