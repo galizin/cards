@@ -179,6 +179,7 @@ function dragstart_handler(ev) {
     const el = ev.target.closest(".outerspan");
     if(el) {
       const viewportOffset = el.getBoundingClientRect();
+      $(el).closest("span").closest("span").css("height", vDim - 2*border+ "px");
       $(el).attr("touchstartoffset", (-viewportOffset.top + touches[0].pageY) + ',' + (-viewportOffset.left + touches[0].pageX)) //.addClass("move")
         .appendTo("#main");
     }
