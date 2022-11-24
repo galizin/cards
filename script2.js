@@ -173,6 +173,40 @@ nonCardString = function(suit, top, left, suitNo) {
     return el;
 };
 
+function dragstart_handler(ev) {
+    ev.preventDefault();
+    const touches = ev.changedTouches;
+    const el = ev.target.closest(".outerspan");
+    if(el) {
+      const viewportOffset = el.getBoundingClientRect();
+      $(el).attr("touchstartoffset", (-viewportOffset.top + touches[0].pageY) + ',' + (-viewportOffset.left + touches[0].pageX)).addClass("move");
+    }
+}
+
+function dragover_handler(ev) {
+    ev.preventDefault();
+    const touches = ev.changedTouches;
+    let el = ev.target.closest(".outerspan");
+    if (el && $(el).hasClass("move")) {
+            let offs = $(el).attr("touchstartoffset");
+            el.style.top = (touches[0].pageY - Number(offs.split(',')[0])) + 'px';
+            el.style.left = (touches[0].pageX - Number(offs.split(',')[1])) + 'px';
+    }
+}
+
+function drop_handler(ev) {
+    ev.preventDefault();
+    const touches = ev.changedTouches;
+    let el = ev.target.closest(".outerspan");
+    if (el) {
+        //const fromLaneNo = leftToLane(parseInt(el.style.left));
+        //const fromLevel = topToLevel(parseInt(el.style.top));
+      const hcoord = parseInt(el.style.left) + hDim/2;
+      const vcoord = parseInt(el.style.top) + vDim/2;
+      coord2move(el.id, hcoord, vcoord);
+    }
+}
+
 function allowDrop(ev) {
   ev.preventDefault();
 }
@@ -220,14 +254,7 @@ function move2cmd(from, hlane, vlane) {
   }
 }
 
-function drop(ev) {
-  ev.preventDefault();
-  const data = ev.dataTransfer.getData("cardid");
-  const hoff = ev.dataTransfer.getData("hoff");
-  const voff = ev.dataTransfer.getData("voff");
-  if(ev.currentTarget.id === "main") {
-    const hcoord = parseFloat(hoff) + ev.clientX;
-    const vcoord = parseFloat(voff) + ev.clientY;
+function coord2move(id, hcoord, vcoord) {
     const hlane = Math.floor(hcoord / (hGap + hDim));
     let vlane;
     if (vcoord > vGap && vcoord < (vGap + vDim)) {
@@ -237,8 +264,30 @@ function drop(ev) {
       vlane = 1;
     }
     if ([0,1].includes(vlane) && (hcoord - hlane*(hGap + hDim) > 4) && (hlane > -1) && (hlane < 7) && (vlane === 0 ? (hlane < 4) : true)) {
-      move2cmd(data, hlane, vlane);
+      move2cmd(id, hlane, vlane);
     }
+}
+
+function drop(ev) {
+  ev.preventDefault();
+  const data = ev.dataTransfer.getData("cardid");
+  const hoff = ev.dataTransfer.getData("hoff");
+  const voff = ev.dataTransfer.getData("voff");
+  if(ev.currentTarget.id === "main") {
+    const hcoord = parseFloat(hoff) + ev.clientX;
+    const vcoord = parseFloat(voff) + ev.clientY;
+    coord2move(data, hcoord, vcoord);
+    /*const hlane = Math.floor(hcoord / (hGap + hDim));
+    let vlane;
+    if (vcoord > vGap && vcoord < (vGap + vDim)) {
+      vlane = 0;
+    }
+    if (vcoord > (2*vGap + vDim)) {
+      vlane = 1;
+    }
+    if ([0,1].includes(vlane) && (hcoord - hlane*(hGap + hDim) > 4) && (hlane > -1) && (hlane < 7) && (vlane === 0 ? (hlane < 4) : true)) {
+      move2cmd(data, hlane, vlane);
+    }*/
     return;
   }
 }
