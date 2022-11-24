@@ -139,14 +139,23 @@ var border = 2;
   //return($("#" + cardCardId(card))[0]);
 //}
 
+
+
 function elMove(el) {
   $(el).attr("ontouchstart", "dragstart_handler(event)").attr("ontouchend", "drop_handler(event)")
     .attr("ontouchmove","dragover_handler(event)").attr("draggable", "true").attr("ondragstart", "drag(event)");
+  let found = $(el).find(".innerspan");
+  if(found) {
+    found.removeClass("transparent");
+  }
 }
 
 function elFix(el) {
-  $(el).attr("ontouchstart", "").attr("ontouchend", "").attr("ontouchmove","").attr("draggable", "false")
-    .attr("ondragstart", "");
+  $(el).attr("ontouchstart", "").attr("ontouchend", "").attr("ontouchmove","").attr("draggable", "false").attr("ondragstart", "");
+  let found = $(el).find(".innerspan");
+  if(found) {
+    found.addClass("transparent");
+  }
 }
 
 function dropTarget(el) {
@@ -489,7 +498,7 @@ window.addEventListener('load', function() {
     $(btn).css("top", btnTop + "px").css("left", hGap +'px').html("start over").attr("onclick", "replay(true);");
     $("#main")[0].append(btn);
     btn = document.createElement("button");
-    $(btn).css("top", btnTop + "px").css("left", "110px").html("new").attr("onclick", "replay(false);");
+    $(btn).css("top", btnTop + "px").css("left", "93px").html("new").attr("onclick", "replay(false);");
     $("#main")[0].append(btn);
     const onConfirmRefresh = function (event) {
         event.preventDefault();

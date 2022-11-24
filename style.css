@@ -6,6 +6,10 @@ span.outerspan[currLane = "5"][currLevel = "true"] {
     transition:transform 1s;
 }
 
+span.transparent {
+    opacity: 0.5;
+}
+
 span.innerspan.place {
     font-size: 40px;
     margin: 0;
