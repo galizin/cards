@@ -1,248 +1,177 @@
 class Card {
-    constructor(suit, no) {
-        this.suit = suit;
-        this.no = no;
-    }
+  constructor(suit,no,vis) {
+    this.suit = suit;
+    this.no = no;
+    this.vis = vis;
+  }
+  static cardId(card) {
+    return card.no.toString(16) + card.suit.toString(16);
+  }
+  static cardEl(card) {
+    return($("#" + Card.cardId(card))[0]);
+  }
+  id() {
+    return Card.cardId(this);
+  }
+  el() {
+    return Card.cardEl(this);
+  }
+  color() {
+    return [1, 2].includes(this.suit) ? "red" : "black";
+  }
 }
 
-const initDeck = function(deck) {
-    for (let suits = 0; suits < 4; suits++) {
-        for (let nos = 0; nos < 13; nos++) {
-            deck.push(new Card(suits, nos));
-        }
+class Stack {
+  constructor () {
+    this.el = [];
+  }
+  clear() {
+    this.el = [];
+  }
+  len() {
+    return this.el.length;
+  }
+  last() {
+    if(this.len() === 0) {
+      return null;
+    } else {
+      return  this.el[this.len() - 1];
     }
+  }
+  visLast() {
+    if (this.len() > 0) {
+      this.last().vis = true;
+    }
+  }
+  idx(id) {
+    return this.el.map(m => m.id()).indexOf(id);
+  }
 }
 
-const shuffleDeck = function(deck) {
-    const deck2 = [];
-    while (deck.length > 0) {
-        let idx = Math.floor(Math.random() * deck.length);
-        deck2.push(deck[idx]);
-        deck.splice(idx, 1);
+const shuffleDeck = function() {
+  const initDeck = function(deck) {
+    for(let suits = 0; suits < 4; suits++) {
+      for(let nos = 0; nos < 13; nos++) {
+        deck.push(new Card(suits, nos, false));
+      }
     }
-    return deck2;
+    return deck;
+  }
+  const deck = initDeck([]);
+  const deck2 = [];
+  while(deck.length > 0) {
+    let idx = Math.floor(Math.random() * deck.length);
+    deck2.push(deck[idx]);
+    deck.splice(idx, 1);
+  }
+  return deck2;
 }
 
 let deck = [];
 
-let history = [];
+const main=[];
 
-let historyPtr = 0;
+for(let i = 0; i < 7; i++) {
+  main.push(new Stack());
+}
 
-const pushHistory = function() {
-  //need to also record what is fixed
-  let currStateUp = [];
-  let currStateDn = [];
+const discard=[];
+
+for(let i = 0; i < 4; i++) {
+  discard.push(new Stack());
+}
+
+const stack=[new Stack(), new Stack()];
+
+replay = function (isSame) {
+
   for(let i = 0; i < 7; i++) {
-    currStateUp.push(stockUp(i).toArray().map(s => $(s).attr("id")));
-    currStateDn.push(stockDn(i).toArray().map(s => $(s).attr("id")));
+    main[i].clear();
   }
-  history.push([currStateUp, currStateDn]);
-  historyPtr++;
-}
 
-const popHistory = function() {
-    const currStep = historyPtr - 1;
-    if(currStep > -1) {
-      const currStateUp = history[currStep][0];
-      const currStateDn = history[currStep][1];
-      for (let lane = 0; lane < 7; lane++) {
-        prpgStack(stockDn(lane)[0]);
-      }
-      alignOpenStock();
-      $("#main")[0].append($("#stackoverturn")[0]);
-    }
-}
+  for(let i = 0; i < 4; i++) {
+    discard[i].clear();
+  }
 
-const shuffle = function() {
-    const emptyDeck = [];
-    initDeck(emptyDeck);
-    deck = shuffleDeck(emptyDeck);
-}
+  stack[0].clear();
+  stack[1].clear();
 
-shuffle();
+  if(!isSame) {
+    deck = shuffleDeck();
+  }
+
+  const deckCopy = [...deck];
+
+  deckCopy.forEach(m => stack[1].el.push(m));
+
+  for(let i = 0; i < 7; i++) {
+    for(let j = i; j < 7; j++) {
+      if (j == i)
+        stack[1].el[0].vis = true;
+     main[j].el.push(stack[1].el[0]);
+     stack[1].el.splice(0, 1);
+   }
+  }
+
+  stack[1].el.forEach(m => m.vis = true);
+  drawField();
+}
 
 var shft = 25;
-var hDim = 62;
+var hDim = 59;
 var vDim = 73;
-var vGap = 8
-var hGap = 2;
-
-function spanIdx(idx,level) {
-  return("span.outerspan[currLane='" + idx + "'][currLevel = '" + level + "']");
-}
-
-function spanUp(idx) {
-  return spanIdx(idx, "true");
-}
-
-function spanDn(idx) {
-  return spanIdx(idx, "false");
-}
-
-function stockIdx(idx, level) {
-  return $("#main").find(spanIdx(idx,level));
-}
-
-function stockUp(idx) {
-  return $("#main").find(spanUp(idx));
-}
-
-function stockDn(idx) {
-  return $("#main").find(spanDn(idx));
-}
+var vGap = 4;
+var hGap = 4;
+var border = 2;
 
 function elMove(el) {
   $(el).attr("ontouchstart", "dragstart_handler(event)").attr("ontouchend", "drop_handler(event)")
-    .attr("ontouchmove","dragover_handler(event)");
+    .attr("ontouchmove","dragover_handler(event)").attr("draggable", "true").attr("ondragstart", "drag(event)");
+  let found = $(el).find(".innerspan");
+  if(found) {
+    found.removeClass("transparent");
+  }
 }
 
 function elFix(el) {
-  $(el).attr("ontouchstart", "").attr("ontouchend", "").attr("ontouchmove","");
+  $(el).attr("ontouchstart", "").attr("ontouchend", "").attr("ontouchmove","").attr("draggable", "false").attr("ondragstart", "");
+  let found = $(el).find(".innerspan");
+  if(found) {
+    found.addClass("transparent");
+  }
 }
 
-function laneToLeft(laneNo) {
-    return (hGap + (hDim + hGap) * laneNo);
+function dropTarget(el) {
+  $(el).attr("ondrop","drop(event)").attr("ondragover","allowDrop(event)");
 }
 
-function posToLn(el, ln) {
-    return $(el).attr("currLane", ln).css("left", laneToLeft(ln) + 'px');
+function nonDropTarget(el) {
+  $(el).attr("ondrop","").attr("ondragover","");
 }
 
-function alignOpenStock() {
-    const stockOpen = stockUp(5);
-    let count = 0;
-    while (count < stockOpen.length) {
-      let m = stockOpen[count];
-      elFix(m);
-      switch (count) {
-        case stockOpen.length - 2:
-          $(m).css("left", laneToLeft(5) -1*vGap*4 + 'px');
-          //$(m).css("transform", `translateX(${vGap*4}px)`);
-          break;
-        case stockOpen.length - 1:
-          $(m).css("left", laneToLeft(5) + 'px');
-          //$(m).css("transform", `translateX(${vGap*4}px)`);
-          //$(m).css("left", laneToLeft(5) + 'px');
-          //$(m).css("transform", `translateX(}px)`);
-          elMove(m);
-          break;
-        default:
-          $(m).css("left", laneToLeft(5) -2*vGap*4 + 'px');
-          break;
-      }
-      count++;
-    }
-}
+cardString = function(card) {
+    let red = card.color() === "red"; //suit == 1 || suit == 2 ? 1 : 0;
+    let suitname = ["&spades;","&hearts;","&diams;","&clubs;"][card.suit];
+    let cardname = ['A','2','3','4','5','6','7','8','9','10', 'J', 'Q', 'K'][card.no];
+    let el = document.createElement("span");
+    $(el).attr("class", "outerspan").attr("id", card.id()).css("height", vDim - border*2 + "px").css("width", hDim - border*2 + "px");
+    $(el).html((red ? '<mark class="red">' : '') + '<span class="innerspan">' + suitname + cardname + '</span>' + (red ? '</mark>' : ''));
+    return el;
+};
 
-function cycleStock() {
-    let stock = stockUp(6);
-    if (!stock.length) {
-        let stockOpen = stockUp(5);
-
-        while (stockOpen.length) {
-          let m = $(stockOpen).last()[0];
-          posToLn(m, 6);
-          elFix(m);
-          if (stock.length) {
-             $(stock).last()[0].append(m);
-          } else {
-              $("#main")[0].append(m);
-          }
-          stock = stockUp(6);
-          stockOpen = stockUp(5);
-        }
+nonCardString = function(suit, top, left, suitNo) {
+    let red = suit == "hearts" || suit == "diams" ? 1 : 0;
+    let el = document.createElement("span");
+    $(el).attr("class", "outerspan").attr("style", "top:" + top + "px; left:" + left + "px")
+      .css("height", vDim - border*2 + "px").css("width", hDim - border*2 + "px");
+    if (suit === "") {
+        $(el).attr("onclick", "procCmd('a'); drawField();").attr("id", "stackoverturn").html('<span class="innerspan" />');
     } else {
-    let repeat = 0;
-    while (stock.length > 0) {
-        if (repeat > 2) {
-            break;
-        }
-        repeat++;
-        let stockOpen = stockUp(5);
-        if (stockOpen.length) {
-            $(stockOpen).last()[0].append($(stock).last()[0]);
-        } else {
-            $("#main")[0].append($(stock).last()[0]);
-        }
-        stockOpen = stockUp(5);
-        posToLn($(stock).last()[0], 5).css("left", laneToLeft(5) -2*vGap * 4 + "px").css("top", vGap + 'px');
-        stock = stockUp(6);
+        $(el).attr("id", suitNo);
+        dropTarget(el);
     }
-    alignOpenStock();
-    }
-    $("#main")[0].append($("#stackoverturn")[0]);
-    pushHistory();
-}
-
-function elToCard(el) {
-    return parseInt($(el).attr("id").substring(1, 2), 16);
-}
-
-function elToSuit(el) {
-    return parseInt($(el).attr("id").substring(0, 1), 16);
-}
-
-function suitColor(suit) {
-    return [1, 2].includes(suit) ? "red" : "black";
-}
-
-function suitTest(suit1, suit2) {
-    return suitColor(suit1) !== suitColor(suit2);
-}
-
-function unblockRetLane(laneNo) {
-      elMove(stockDn(laneNo).last()[0]);
-}
-
-function leftToLane(left) {
-    let laneNo = -1;
-    for (let i = 0; i < 7; i++) {
-        if ((left > hGap - hDim / 2 + (hGap + hDim) * i) && (left < (hGap + hDim / 2 + (hGap + hDim) * i))) {
-            laneNo = i;
-            break;
-        }
-    }
-    return laneNo;
-}
-
-function topToLevel(top) {
-    return top + vDim / 2 < (vGap * 1.5 + vDim);
-}
-
-function prpgStack(el) {
-    let sh = 0;
-    const laneNo = $(el).attr("currLane");
-    const level = $(el).attr("currLevel");
-    const move = $(el).hasClass("move");
-    let top = 0;
-    let left = 0;
-    if(move) {
-      top = parseInt(el.style.top);
-      left = parseInt(el.style.left);
-    } else {
-      top = vGap + (level === 'false' ? (vGap + vDim) : 0); //parseInt(el.style.top);
-      left = laneToLeft(laneNo); //parseInt(el.style.left);
-      el.style.top = top + sh + 'px';
-      el.style.left = left + 'px';
-    }
-    for (let child of $(el).find('.outerspan')) {
-        if (/*($(el).attr("retLevel") === 'false') ||*/ (level === 'false')) {
-            sh += shft;
-        }
-        if(move) {
-          $(child).addClass("move");
-        } else {
-          $(child).removeClass("move");
-        }
-        child.style.top = top + sh + 'px';
-        child.style.left = left + 'px';
-        if (laneNo) {
-            $(child).attr("currLane", laneNo);
-            $(child).attr("currLevel", level);
-        }
-    }
-}
+    return el;
+};
 
 function dragstart_handler(ev) {
     ev.preventDefault();
@@ -250,14 +179,16 @@ function dragstart_handler(ev) {
     const el = ev.target.closest(".outerspan");
     if(el) {
       const viewportOffset = el.getBoundingClientRect();
-      if($(el).attr("currLane") !== "-1") {
-        $(el).attr("retLane", $(el).attr("currLane"));
-      }
-      $(el).attr("touchstartoffset", (-viewportOffset.top + touches[0].pageY) + ',' + (-viewportOffset.left + touches[0].pageX))
-        .attr("retLevel", $(el).attr("currLevel")).appendTo("#main").attr("currLane", "-1").addClass("move");
-      //$(el).removeClass("grey");
-      prpgStack(el);
-      alignOpenStock();
+      //const inMain = searchMain(el.id);
+      //if (inMain[0] !== -1) {
+        //const parents =
+        $(el).parents("span.outerspan").css("height", vDim - 2*border+ "px");
+        //if(parents.length > 0) {
+          //parents.forEach(m => m.css("height", vDim - 2*border+ "px"));
+        //}
+      //}
+      $(el).attr("touchstartoffset", (-viewportOffset.top + touches[0].pageY) + ',' + (-viewportOffset.left + touches[0].pageX)) //.addClass("move")
+        .appendTo("#main");
     }
 }
 
@@ -265,11 +196,27 @@ function dragover_handler(ev) {
     ev.preventDefault();
     const touches = ev.changedTouches;
     let el = ev.target.closest(".outerspan");
-    if (el && $(el).hasClass("move")) {
+    if (el /*&& $(el).hasClass("move")*/) {
+      let sh = 0;
             let offs = $(el).attr("touchstartoffset");
             el.style.top = (touches[0].pageY - Number(offs.split(',')[0])) + 'px';
             el.style.left = (touches[0].pageX - Number(offs.split(',')[1])) + 'px';
-            prpgStack(el);
+      for (let child of $(el).find('.outerspan')) {
+         //if (/*($(el).attr("retLevel") === 'false') ||*/ (level === 'false')) {
+             sh += shft;
+         //}
+         //if(move) {
+           //$(child).addClass("move");
+         //} else {
+           //$(child).removeClass("move");
+         //}
+         child.style.top = parseInt(el.style.top) + sh + 'px';
+         child.style.left = el.style.left;
+         //if (laneNo) {
+             //$(child).attr("currLane", laneNo);
+             //$(child).attr("currLevel", level);
+         //}
+      }
     }
 }
 
@@ -278,197 +225,309 @@ function drop_handler(ev) {
     const touches = ev.changedTouches;
     let el = ev.target.closest(".outerspan");
     if (el) {
-        const fromLaneNo = leftToLane(parseInt(el.style.left));
-        const fromLevel = topToLevel(parseInt(el.style.top));
-        const retLane = parseInt($(el).attr("retLane"));
-        const retLevel = $(el).attr("retLevel") === "true";
-        let laneNo = fromLaneNo;
-        let level = fromLevel;
-        let saveHistory = false;
-            let stackOnLane = stockIdx(laneNo, level);
-            let stackEmpty = stackOnLane.length === 0;
-            const onlyEl = $(el).find(".outerspan").length === 0;
-            const elSuit = elToSuit(el);
-            const elCard = elToCard(el);
-            const lastCardSuit = stackEmpty ? null : elToSuit($(stackOnLane).last());
-            const lastCardCard = stackEmpty ? null : elToCard($(stackOnLane).last());
-
-            if ((
-                    (level === true) && [0, 1, 2, 3].includes(laneNo) && onlyEl && (elSuit === laneNo)
-                    && (stackEmpty && (elCard === 0) || ((!stackEmpty) && (elCard - 1 === lastCardCard)))
-                ) || (
-                    (level === false) && ((stackEmpty && (elCard === 12)) ||
-                    ((!stackEmpty) && (elCard + 1 === lastCardCard) && suitTest(elSuit, lastCardSuit)))
-                )) {
-              if(!retLevel) {
-                unblockRetLane(retLane);
-                saveHistory = true;
-              }
-            } else {
-                laneNo = retLane;
-                level = retLevel;
-                stackOnLane = stockIdx(laneNo, level);
-                stackEmpty = stackOnLane.length === 0;
-            }
-
-            $(el).attr("retLevel", "").attr("retLane", "").attr("currLevel", level).attr("currLane", laneNo);
-            if (!stackEmpty) {
-                let isOnStack = false;
-                for (child of stackOnLane) {
-                    if ($(el).attr("id") == $(child).attr("id")) {
-                        isOnStack = true;
-                        break;
-                    }
-                }
-                if (!isOnStack) {
-                    $(el).appendTo($(stackOnLane).last()[0]);
-                }
-            }
-            stackOnLane = stockIdx(laneNo, level);
-            prpgStack(stackOnLane[0]);
-        $(el).removeClass("move");
-            prpgStack(stackOnLane[0]);
-        alignOpenStock();
-        if(saveHistory) {
-          pushHistory();
-        }
+        //const fromLaneNo = leftToLane(parseInt(el.style.left));
+        //const fromLevel = topToLevel(parseInt(el.style.top));
+      const hcoord = parseInt(el.style.left) + hDim/2;
+      const vcoord = parseInt(el.style.top) + vDim/2;
+      coord2move(el.id, hcoord, vcoord);
     }
 }
 
-cardString = function(cardNum, suit, fixed) {
-    let red = suit == 1 || suit == 2 ? 1 : 0;
-    let suitname = "";
-    switch (suit) {
-        case 0:
-            suitname = "&spades;";
-            break;
-        case 1:
-            suitname = "&hearts;";
-            break;
-        case 2:
-            suitname = "&diams;";
-            break;
-        case 3:
-            suitname = "&clubs;";
-            break;
-    }
-    let cardname = "";
-    switch (cardNum) {
-        case 0:
-            cardname = "A";
-            break;
-        case 12:
-            cardname = "K";
-            break;
-        case 11:
-            cardname = "Q";
-            break;
-        case 10:
-            cardname = "J";
-            break;
-        default:
-            cardname = cardNum + 1 + "";
-            break;
-    }
-    let el = document.createElement("span");
-    $(el).attr("class", "outerspan").attr("id", suit.toString(16) + cardNum.toString(16))
-    elMove(el);
-    if(fixed) {
-      elFix(el);
-    }
-    $(el).html(((red) ? '<mark class="red">' : '') + '<span class="innerspan">' + suitname + cardname + '</span>' + ((red) ? '</mark>' : ''));
-    return el;
-};
+function allowDrop(ev) {
+  ev.preventDefault();
+}
 
-nonCardString = function(suit, top, left) {
-    let red = suit == "hearts" || suit == "diams" ? 1 : 0;
-    let el = document.createElement("span");
-    $(el).attr("class", "outerspan").attr("style", "top:" + top + "px; left:" + left + "px");
-    if (suit === "") {
-        $(el).attr("onclick", "cycleStock()").attr("id", "stackoverturn");
-        $(el).html('<span class="innerspan" />');
+function drag(ev) {
+  ev.dataTransfer.setData("cardid", ev.target.id);
+  ev.dataTransfer.setData("hoff", parseInt($(ev.target).css("left")) + hDim/2 - ev.clientX);
+  ev.dataTransfer.setData("voff", parseInt($(ev.target).css("top")) + vDim/2 - ev.clientY);
+}
+
+function searchMain(id) {
+    for(let i = 0; i < 7; i++) {
+      const idx = main[i].idx(id);
+      if (idx !== -1) {
+        return [i, main[i].len() - idx];
+      }
+    }
+    return [-1, 0];
+}
+
+function move2cmd(from, hlane, vlane) {
+  function isSM(a) {
+    if(stack[0].last() && stack[0].last().id() === a) {
+      return [7, 1];
+    }
+    const inMain = searchMain(a);
+    if(inMain[0] !== - 1) {
+      return inMain;
+    }
+    return [-1, 1];
+  }
+  function isD(a) {
+    for(let i = 0; i < 4; i++) {
+      if (discard[i].idx(a) !== -1) {
+        return i;
+      }
+    }
+    return ["0", "1", "2", "3"].indexOf(a);
+  }
+  fromSM = isSM(from);
+  fromD = isD(from);
+  if(fromSM[0] > -1 && vlane === 1) {
+    procCmd('s ' + fromSM[0] + ' ' + hlane + ' ' + fromSM[1]); //howmany
+  }
+  if(fromSM[0] > -1 && vlane === 0) {
+    procCmd('r ' + fromSM[0] + ' ' + hlane);
+  }
+  if(fromD > -1 && vlane === 0) {
+    procCmd('u ' + fromD + ' ' + hlane);
+  }
+  if(fromD > -1 && vlane === 1) {
+    procCmd('b ' + fromD + ' ' + hlane);
+  }
+}
+
+function coord2move(id, hcoord, vcoord) {
+    const hlane = Math.floor(hcoord / (hGap + hDim));
+    let vlane;
+    if (vcoord > vGap && vcoord < (vGap + vDim)) {
+      vlane = 0;
+    }
+    if (vcoord > (2*vGap + vDim)) {
+      vlane = 1;
+    }
+    if ([0,1].includes(vlane) && (hcoord - hlane*(hGap + hDim) > 4) && (hlane > -1) && (hlane < 7) && (vlane === 0 ? (hlane < 4) : true)) {
+      move2cmd(id, hlane, vlane);
+    }
+    drawField();
+}
+
+function drop(ev) {
+  ev.preventDefault();
+  const data = ev.dataTransfer.getData("cardid");
+  const hoff = ev.dataTransfer.getData("hoff");
+  const voff = ev.dataTransfer.getData("voff");
+  if(ev.currentTarget.id === "main") {
+    const hcoord = parseFloat(hoff) + ev.clientX;
+    const vcoord = parseFloat(voff) + ev.clientY;
+    coord2move(data, hcoord, vcoord);
+    /*const hlane = Math.floor(hcoord / (hGap + hDim));
+    let vlane;
+    if (vcoord > vGap && vcoord < (vGap + vDim)) {
+      vlane = 0;
+    }
+    if (vcoord > (2*vGap + vDim)) {
+      vlane = 1;
+    }
+    if ([0,1].includes(vlane) && (hcoord - hlane*(hGap + hDim) > 4) && (hlane > -1) && (hlane < 7) && (vlane === 0 ? (hlane < 4) : true)) {
+      move2cmd(data, hlane, vlane);
+    }*/
+    return;
+  }
+}
+
+let drawStack = function(arr) {
+  let parentEl = null;
+  for(let j = 0; j < arr.el.length; j++) {
+    let currEl = arr.el[j].el();
+    if(parentEl == null) {
+      $("#main")[0].append(currEl);
+    }
+    else {
+      parentEl.append(currEl);
+    }
+    parentEl = currEl;
+  }
+}
+
+function laneToLeft(laneNo) {
+    return (hGap + (hDim + hGap) * laneNo);
+}
+
+let moveDnStack = function(lane) {
+  laneLen = main[lane].el.length;
+  for(let i = 0; i < laneLen; i++) {
+    let m = $(main[lane].el[i].el());
+    m.css("top", vGap * 2 + vDim + shft*i + "px").css("left", laneToLeft(lane) + "px").css("height", vDim - 2*border + "px");
+    main[lane].el[i].vis ? elMove(m) : elFix(m);
+    if(main[lane].el[i].vis) {
+      m.css("height", vDim + shft * (laneLen - 1 - i) - 2*border + "px");
+    }
+    dropTarget(m);
+  }
+}
+
+let moveUpStack = function(lane) {
+  if(lane === 6) {
+    for(let i = 0; i < stack[1].el.length; i++) {
+      let m = $(stack[1].el[i].el());
+      m.css("top", vGap + "px").css("left", laneToLeft(lane) + "px").css("height", vDim - 2*border + "px");
+      nonDropTarget(m);
+    }
+  } else {
+    for(let i = 0; i < discard[lane].el.length; i++) {
+      let m = $(discard[lane].el[i].el());
+      m.css("top", vGap + "px").css("left", laneToLeft(lane) + "px").css("height", vDim - 2*border +"px");
+      dropTarget(m);
+    }
+  }
+}
+
+let drawOpen = function() {
+  const stackLen = stack[0].el.length
+  for(let i = 0; i < stackLen; i++) {
+    let m = $(stack[0].el[i].el());
+    m.css("top", vGap + "px");
+    elFix(m);
+    nonDropTarget(m);
+    switch (i) {
+      case stackLen - 2:
+        $(m).css("left", hGap + (hDim + hGap) * 5 -1*hGap*8 + 'px');
+        break;
+      case stackLen - 1:
+        $(m).css("left", laneToLeft(5) + 'px');
+        elMove(m);
+        break;
+      default:
+        $(m).css("left", laneToLeft(5) -2*hGap*8 + 'px');
+        break;
+    }
+  }
+}
+
+let drawField = function() {
+  const deckCopy = [...deck];
+  while (deckCopy.length > 0) {
+    const card = deckCopy.pop();
+    $("#main")[0].append(card.el());
+  }
+  for(let i = 0; i < 7; i++) {
+    drawStack(main[i]);
+    moveDnStack(i);
+  }
+  for(let i = 0; i < 4; i++) {
+    drawStack(discard[i]);
+    moveUpStack(i);
+  }
+  for(let i = 0; i < 2; i++) {
+    drawStack(stack[i]);
+    i === 0 ? drawOpen() : moveUpStack(i+5);
+  }
+  $("#main")[0].append($("#stackoverturn")[0]);
+}
+
+lastMove = function(from, to) {
+  to.el.push(from.last());
+  from.el.splice(from.el.length-1);
+}
+
+moveToMain = function(from, to, howmany) {
+  let doMove = false;
+  if(from.el[from.el.length - howmany].vis) {
+    const neededFrom = [...from.el].slice(from.el.length - howmany);
+    if (to.el.length == 0 && neededFrom[0].no == 12) {
+      doMove = true;
     } else {
-        $(el).html('<span class="innerspan place ' + ((red) ? 'red' : '') + '">&' + suit + ';</span>');
+      if (to.len() > 0) {
+        if (to.last().no == neededFrom[0].no+1 && (neededFrom[0].color() != to.last().color())) {
+          doMove = true;
+        }
+      }
     }
-    return el;
-};
+    if(doMove) {
+      from.el.splice(from.el.length -howmany);
+      to.el=to.el.concat(neededFrom);
+    }
+  }
+  return doMove;
+}
 
-function placeCards() {
-    const deckCopy = [...deck];
-    for (let lane = 0; lane < 7; lane++) {
-        let parentEl = null;
-        //let topEl = null;
-        for (let level = 0; level < 7; level++) {
-            if (lane >= level) {
-                const card = deckCopy.pop();
-                el = $("#" + card.suit.toString(16) + card.no.toString(16))[0];
-                $(el).attr("currLane", lane).attr("currLevel", 'false');
-                //$("#main").append(el);
-                if (parentEl) {
-                    parentEl.append(el);
-                } else {
-                    $("#main")[0].append(el);
-                    //topEl = el;
-                }
-                if(level != lane) {
-                  elFix(el);
-                } else {
-                  elMove(el);
-                }
-                parentEl = el;
-            }
+procCmd = function(cmd) {
+  switch(cmd.substring(0,1)) {
+    case "a":
+      if(stack[1].el.length === 0) {
+        while(stack[0].el.length > 0) {
+          stack[1].el.push(stack[0].el[0]);
+          stack[0].el.splice(0,1);
         }
-        //prpgStack(topEl);
-    }
-    let parentEl = null;
-    let topEl = null;
-    while (deckCopy.length > 0) {
-        const card = deckCopy.pop();
-        el = $("#" + card.suit.toString(16) + card.no.toString(16))[0];
-        $(el).attr("currLane", 6).attr("currLevel", 'true');
-        //$("#main").append(el);
-        if (parentEl) {
-            parentEl.append(el);
-        } else {
-            $("#main")[0].append(el);
-            topEl = el;
+      } else {
+        for(let i = 0; i < 3; i++) {
+          if (stack[1].el.length > 0) {
+            stack[0].el.push(stack[1].el[0]);
+            stack[1].el.splice(0,1);
+          }
         }
-        parentEl = el;
-    }
-    prpgStack(topEl);
-    for (let lane = 0; lane < 7; lane++) {
-      prpgStack(stockDn(lane)[0]);
-    }
-    $("#main")[0].append($("#stackoverturn")[0]);
-    history = [];
-    pushHistory();
+      }
+      break;
+    case "s": //from to how many  (sm) (m)
+      const parm = (cmd.split(" ")).map(m => parseInt(m)).slice(1);
+      const doMove = moveToMain(parm[0] === 7 ? stack[0]: main[parm[0]], main[parm[1]], parm[0] === 7 ? 1: parm[2]);
+      if((parm[0] < 7) && doMove) {
+        main[parm[0]].visLast();
+      }
+      break;
+    case "r": //(sm) (d)
+      const fromPileNo = parseInt(cmd.split(" ")[1]);
+      const toPileNo = parseInt(cmd.split(" ")[2]);
+      let fromPile;
+      if(fromPileNo < 7) {
+        fromPile = main[fromPileNo];
+      } else {
+        fromPile = stack[0];
+      }
+      const fromLast = fromPile.last(); //getLast(arr);
+      const toLast = discard[toPileNo].last();
+      if(discard[toPileNo].el.length === 0 ? fromLast.no === 0 : (fromLast.no === toLast.no + 1) && (fromLast.suit === toLast.suit) ) {
+        lastMove(fromPile, discard[toPileNo]);
+        if(fromPileNo > 0) {
+          fromPile.visLast();
+        }
+      }
+      break;
+    case "u": //(d) (d)
+      const from = parseInt(cmd.split(" ")[1]);
+      const to = parseInt(cmd.split(" ")[2]);
+      if((from !== to) && (discard[from].last().no === 0) && (discard[to].el.length === 0)) {
+        lastMove(discard[from], discard[to]);
+      }
+      break;
+    case "b": //(d) (m)
+      const bparm1 = parseInt(cmd.split(" ")[1]);
+      const bparm2 = parseInt(cmd.split(" ")[2]);
+      moveToMain(discard[bparm1], main[bparm2], 1);
+      break;
+    default:
+      console.log("command " + cmd + " is not supported");
+  }
 }
 
 window.addEventListener('load', function() {
-    $("#main")[0].append(nonCardString("spades", vGap, hGap + (hGap + hDim) * 0));
-    $("#main")[0].append(nonCardString("hearts", vGap, hGap + (hGap + hDim) * 1));
-    $("#main")[0].append(nonCardString("diams", vGap, hGap + (hGap + hDim) * 2));
-    $("#main")[0].append(nonCardString("clubs", vGap, hGap + (hGap + hDim) * 3));
+    dropTarget($("#main")[0]);
+    $("#main")[0].append(nonCardString("spades", vGap, hGap + (hGap + hDim) * 0, 0));
+    $("#main")[0].append(nonCardString("hearts", vGap, hGap + (hGap + hDim) * 1, 1));
+    $("#main")[0].append(nonCardString("diams", vGap, hGap + (hGap + hDim) * 2, 2));
+    $("#main")[0].append(nonCardString("clubs", vGap, hGap + (hGap + hDim) * 3, 3));
     $("#main")[0].append(nonCardString("", vGap, hGap + (hGap + hDim) * 6));
-    const deckCopy = [...deck];
-    while (deckCopy.length > 0) {
-        const card = deckCopy.pop();
-        el = cardString(card.no, card.suit, false); //vGap, hGap + (hGap + hDim) * 6);
-            $("#main")[0].append(el);
+    for(let suits = 0; suits < 4; suits++) {
+      for(let nos = 0; nos < 13; nos++) {
+        $("#main")[0].append(cardString(new Card(suits, nos, false)));
+      }
     }
-    placeCards();
+    replay(false);
     let btn = document.createElement("button");
-    $(btn).css("top", "450px").html("start over").attr("onclick", "placeCards();");
+    const btnTop = vGap * 3 + vDim * 2 + shft * 18;
+    $("#main").css("width", hDim * 7 + hGap * 8 + "px").css("height", btnTop + "px");
+    $(btn).css("top", btnTop + "px").css("left", hGap +'px').html("start over").css("width", hDim*2 +hGap +"px")
+      .attr("onclick", "replay(true);");
     $("#main")[0].append(btn);
     btn = document.createElement("button");
-    $(btn).css("top", "450px").css("left", "110px").html("new").attr("onclick", "shuffle(); placeCards();");
+    $(btn).css("top", btnTop + "px").css("left", hDim*2 + 2*border + hGap*2 + "px").css("width", hDim + "px")
+      .html("new").attr("onclick", "replay(false);");
     $("#main")[0].append(btn);
-
     const onConfirmRefresh = function (event) {
         event.preventDefault();
         return event.returnValue = "Are you sure you want to leave the page?";
     }
-
     window.addEventListener("beforeunload", onConfirmRefresh, { capture: true });
-
 });
