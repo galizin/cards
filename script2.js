@@ -117,29 +117,12 @@ replay = function (isSame) {
   drawField();
 }
 
-//replay(false);
-//stack[1].el.forEach(m => m.vis = 1);
-
 var shft = 25;
 var hDim = 59;
 var vDim = 73;
 var vGap = 4;
 var hGap = 4;
 var border = 2;
-
-//cardId = function(cardNum, suit) {
-  //return cardNum.toString(16) + suit.toString(16);
-//}
-
-//cardCardId = function(card) {
-  //return cardId(card.no, card.suit);
-//}
-
-//cardEl = function(card) {
-  //return($("#" + cardCardId(card))[0]);
-//}
-
-
 
 function elMove(el) {
   $(el).attr("ontouchstart", "dragstart_handler(event)").attr("ontouchend", "drop_handler(event)")
@@ -172,10 +155,6 @@ cardString = function(card) {
     let cardname = ['A','2','3','4','5','6','7','8','9','10', 'J', 'Q', 'K'][card.no];
     let el = document.createElement("span");
     $(el).attr("class", "outerspan").attr("id", card.id()).css("height", vDim - border*2 + "px").css("width", hDim - border*2 + "px");
-    //elMove(el);
-    //if(fixed) {
-    ///elFix(el);
-    //}
     $(el).html((red ? '<mark class="red">' : '') + '<span class="innerspan">' + suitname + cardname + '</span>' + (red ? '</mark>' : ''));
     return el;
 };
@@ -188,7 +167,6 @@ nonCardString = function(suit, top, left, suitNo) {
     if (suit === "") {
         $(el).attr("onclick", "procCmd('a')").attr("id", "stackoverturn").html('<span class="innerspan" />');
     } else {
-        //$(el).html('<span class="innerspan place ' + ((red) ? 'red' : '') + '">&' + suit + ';</span>').attr("id", suitNo);
         $(el).attr("id", suitNo);
         dropTarget(el);
     }
@@ -201,12 +179,9 @@ function allowDrop(ev) {
 
 function drag(ev) {
   ev.dataTransfer.setData("cardid", ev.target.id);
-  //console.log("x:" + (parseInt($(ev.target).css("left")) + hDim/2 - ev.clientX) + " y:" +  (parseInt($(ev.target).css("top")) + vDim/2 - ev.clientY));
   ev.dataTransfer.setData("hoff", parseInt($(ev.target).css("left")) + hDim/2 - ev.clientX);
   ev.dataTransfer.setData("voff", parseInt($(ev.target).css("top")) + vDim/2 - ev.clientY);
 }
-
-
 
 function move2cmd(from, hlane, vlane) {
   function isSM(a) {
@@ -231,21 +206,6 @@ function move2cmd(from, hlane, vlane) {
   }
   fromSM = isSM(from);
   fromD = isD(from);
-  //toM = isSM(to);
-  //toD = isD(to);
-  //if(isUp(to) !== -1) {
-    //procCmd('r ' + isDown(from) + ' ' + isUp(to));
-  //} else {
-    //if (isDown(from) === -1) {
-      //procCmd('d ' + isDown(to));
-    //} else {
-
-    //}
-  //}
-  //s sm m
-  //r sm d
-  //u d d
-  //b d m
   if(fromSM[0] > -1 && vlane === 1) {
     procCmd('s ' + fromSM[0] + ' ' + hlane + ' ' + fromSM[1]); //howmany
   }
@@ -266,12 +226,9 @@ function drop(ev) {
   const hoff = ev.dataTransfer.getData("hoff");
   const voff = ev.dataTransfer.getData("voff");
   if(ev.currentTarget.id === "main") {
-    //console.log("dropped on main");
-    //console.log(ev);
     const hcoord = parseFloat(hoff) + ev.clientX;
     const vcoord = parseFloat(voff) + ev.clientY;
     const hlane = Math.floor(hcoord / (hGap + hDim));
-    //const vlane = Math.floor(vcoord / (vGap + vDim));
     let vlane;
     if (vcoord > vGap && vcoord < (vGap + vDim)) {
       vlane = 0;
@@ -281,17 +238,9 @@ function drop(ev) {
     }
     if ([0,1].includes(vlane) && (hcoord - hlane*(hGap + hDim) > 4) && (hlane > -1) && (hlane < 7) && (vlane === 0 ? (hlane < 4) : true)) {
       move2cmd(data, hlane, vlane);
-      //console.log("not in");
-    //} else {
-      //console.log(hlane);
     }
-    //console.log("x:" + hcoord + " y:" + vcoord);
-    //console.log(Math.floor(hcoord / (hGap + hDim)));
     return;
   }
-  //if(ev.currentTarget.id === ev.target.closest(".outerspan").id) {
-    //move2cmd(data, ev.target.closest(".outerspan").id);
-  //}
 }
 
 let drawStack = function(arr) {
@@ -396,14 +345,12 @@ moveToMain = function(from, to, howmany) {
     if (to.el.length == 0 && neededFrom[0].no == 12) {
       doMove = true;
     } else {
-      //const bottom = getLast(to);
       if (to.last().no == neededFrom[0].no+1 && (neededFrom[0].color() != to.last().color())) {
         doMove = true;
       }
     }
     if(doMove) {
       from.el.splice(from.el.length -howmany);
-      //from.el[from.el.length - 1].vis = true;
       to.el=to.el.concat(neededFrom);
     }
   }
@@ -434,10 +381,6 @@ procCmd = function(cmd) {
         main[parm[0]].visLast();
       }
       break;
-    //case "d":
-      //const cmdn = parseInt(cmd.split(" ")[1]);
-      //moveToMain(stack[0], main[cmdn], 1);
-      //break;
     case "r": //(sm) (d)
       const fromPileNo = parseInt(cmd.split(" ")[1]);
       const toPileNo = parseInt(cmd.split(" ")[2]);
@@ -481,17 +424,12 @@ window.addEventListener('load', function() {
     $("#main")[0].append(nonCardString("diams", vGap, hGap + (hGap + hDim) * 2, 2));
     $("#main")[0].append(nonCardString("clubs", vGap, hGap + (hGap + hDim) * 3, 3));
     $("#main")[0].append(nonCardString("", vGap, hGap + (hGap + hDim) * 6));
-    //const deckCopy = [...deck];
-    //while (deckCopy.length > 0) {
-        //const card = deckCopy.pop();
     for(let suits = 0; suits < 4; suits++) {
       for(let nos = 0; nos < 13; nos++) {
         $("#main")[0].append(cardString(new Card(suits, nos, false)));
       }
     }
-    //}
     replay(false);
-    //drawField();
     let btn = document.createElement("button");
     const btnTop = vGap * 3 + vDim * 2 + shft * 18;
     $("#main").css("width", hDim * 7 + hGap * 8 + "px").css("height", btnTop + "px");
