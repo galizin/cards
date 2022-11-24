@@ -165,7 +165,7 @@ nonCardString = function(suit, top, left, suitNo) {
     $(el).attr("class", "outerspan").attr("style", "top:" + top + "px; left:" + left + "px")
       .css("height", vDim - border*2 + "px").css("width", hDim - border*2 + "px");
     if (suit === "") {
-        $(el).attr("onclick", "procCmd('a')").attr("id", "stackoverturn").html('<span class="innerspan" />');
+        $(el).attr("onclick", "procCmd('a'); drawField();").attr("id", "stackoverturn").html('<span class="innerspan" />');
     } else {
         $(el).attr("id", suitNo);
         dropTarget(el);
@@ -179,7 +179,8 @@ function dragstart_handler(ev) {
     const el = ev.target.closest(".outerspan");
     if(el) {
       const viewportOffset = el.getBoundingClientRect();
-      $(el).attr("touchstartoffset", (-viewportOffset.top + touches[0].pageY) + ',' + (-viewportOffset.left + touches[0].pageX)).addClass("move");
+      $(el).attr("touchstartoffset", (-viewportOffset.top + touches[0].pageY) + ',' + (-viewportOffset.left + touches[0].pageX)) //.addClass("move")
+        .appendTo("#main");
     }
 }
 
@@ -187,10 +188,27 @@ function dragover_handler(ev) {
     ev.preventDefault();
     const touches = ev.changedTouches;
     let el = ev.target.closest(".outerspan");
-    if (el && $(el).hasClass("move")) {
+    if (el /*&& $(el).hasClass("move")*/) {
+      let sh = 0;
             let offs = $(el).attr("touchstartoffset");
             el.style.top = (touches[0].pageY - Number(offs.split(',')[0])) + 'px';
             el.style.left = (touches[0].pageX - Number(offs.split(',')[1])) + 'px';
+      for (let child of $(el).find('.outerspan')) {
+         //if (/*($(el).attr("retLevel") === 'false') ||*/ (level === 'false')) {
+             sh += shft;
+         //}
+         //if(move) {
+           //$(child).addClass("move");
+         //} else {
+           //$(child).removeClass("move");
+         //}
+         child.style.top = parseInt(el.style.top) + sh + 'px';
+         child.style.left = el.style.left;
+         //if (laneNo) {
+             //$(child).attr("currLane", laneNo);
+             //$(child).attr("currLevel", level);
+         //}
+      }
     }
 }
 
@@ -266,6 +284,7 @@ function coord2move(id, hcoord, vcoord) {
     if ([0,1].includes(vlane) && (hcoord - hlane*(hGap + hDim) > 4) && (hlane > -1) && (hlane < 7) && (vlane === 0 ? (hlane < 4) : true)) {
       move2cmd(id, hlane, vlane);
     }
+    drawField();
 }
 
 function drop(ev) {
@@ -463,7 +482,6 @@ procCmd = function(cmd) {
     default:
       console.log("command " + cmd + " is not supported");
   }
-  drawField();
 }
 
 window.addEventListener('load', function() {
