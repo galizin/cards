@@ -179,7 +179,13 @@ function dragstart_handler(ev) {
     const el = ev.target.closest(".outerspan");
     if(el) {
       const viewportOffset = el.getBoundingClientRect();
-      $(el).closest("span").closest("span").css("height", vDim - 2*border+ "px");
+      //const inMain = searchMain(el.id);
+      //if (inMain[0] !== -1) {
+        const parent = $(el).parent("span.outerspan");
+        if(parent) {
+          parent.css("height", vDim - 2*border+ "px");
+        }
+      //}
       $(el).attr("touchstartoffset", (-viewportOffset.top + touches[0].pageY) + ',' + (-viewportOffset.left + touches[0].pageX)) //.addClass("move")
         .appendTo("#main");
     }
@@ -236,16 +242,24 @@ function drag(ev) {
   ev.dataTransfer.setData("voff", parseInt($(ev.target).css("top")) + vDim/2 - ev.clientY);
 }
 
+function searchMain(id) {
+    for(let i = 0; i < 7; i++) {
+      const idx = main[i].idx(id);
+      if (idx !== -1) {
+        return [i, main[i].len() - idx];
+      }
+    }
+    return [-1, 0];
+}
+
 function move2cmd(from, hlane, vlane) {
   function isSM(a) {
     if(stack[0].last() && stack[0].last().id() === a) {
       return [7, 1];
     }
-    for(let i = 0; i < 7; i++) {
-      const idx = main[i].idx(a);
-      if (idx !== -1) {
-        return [i, main[i].len() - idx];
-      }
+    const inMain = searchMain(a);
+    if(inMain[0] !== - 1) {
+      return inMain;
     }
     return [-1, 1];
   }
