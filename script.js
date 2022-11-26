@@ -179,14 +179,7 @@ function dragstart_handler(ev) {
     const el = ev.target.closest(".outerspan");
     if(el) {
       const viewportOffset = el.getBoundingClientRect();
-      //const inMain = searchMain(el.id);
-      //if (inMain[0] !== -1) {
-        //const parents =
         $(el).parents("span.outerspan").css("height", vDim - 2*border+ "px");
-        //if(parents.length > 0) {
-          //parents.forEach(m => m.css("height", vDim - 2*border+ "px"));
-        //}
-      //}
       $(el).attr("touchstartoffset", (-viewportOffset.top + touches[0].pageY) + ',' + (-viewportOffset.left + touches[0].pageX)) //.addClass("move")
         .appendTo("#main");
     }
@@ -202,20 +195,9 @@ function dragover_handler(ev) {
             el.style.top = (touches[0].pageY - Number(offs.split(',')[0])) + 'px';
             el.style.left = (touches[0].pageX - Number(offs.split(',')[1])) + 'px';
       for (let child of $(el).find('.outerspan')) {
-         //if (/*($(el).attr("retLevel") === 'false') ||*/ (level === 'false')) {
              sh += shft;
-         //}
-         //if(move) {
-           //$(child).addClass("move");
-         //} else {
-           //$(child).removeClass("move");
-         //}
          child.style.top = parseInt(el.style.top) + sh + 'px';
          child.style.left = el.style.left;
-         //if (laneNo) {
-             //$(child).attr("currLane", laneNo);
-             //$(child).attr("currLevel", level);
-         //}
       }
     }
 }
@@ -225,8 +207,6 @@ function drop_handler(ev) {
     const touches = ev.changedTouches;
     let el = ev.target.closest(".outerspan");
     if (el) {
-        //const fromLaneNo = leftToLane(parseInt(el.style.left));
-        //const fromLevel = topToLevel(parseInt(el.style.top));
       const hcoord = parseInt(el.style.left) + hDim/2;
       const vcoord = parseInt(el.style.top) + vDim/2;
       coord2move(el.id, hcoord, vcoord);
@@ -312,17 +292,6 @@ function drop(ev) {
     const hcoord = parseFloat(hoff) + ev.clientX;
     const vcoord = parseFloat(voff) + ev.clientY;
     coord2move(data, hcoord, vcoord);
-    /*const hlane = Math.floor(hcoord / (hGap + hDim));
-    let vlane;
-    if (vcoord > vGap && vcoord < (vGap + vDim)) {
-      vlane = 0;
-    }
-    if (vcoord > (2*vGap + vDim)) {
-      vlane = 1;
-    }
-    if ([0,1].includes(vlane) && (hcoord - hlane*(hGap + hDim) > 4) && (hlane > -1) && (hlane < 7) && (vlane === 0 ? (hlane < 4) : true)) {
-      move2cmd(data, hlane, vlane);
-    }*/
     return;
   }
 }
