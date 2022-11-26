@@ -223,24 +223,16 @@ function drag(ev) {
   ev.dataTransfer.setData("voff", parseInt($(ev.target).css("top")) + vDim/2 - ev.clientY);
 }
 
-function searchMain(id) {
-    for(let i = 0; i < 7; i++) {
-      const idx = main[i].idx(id);
-      if (idx !== -1) {
-        return [i, main[i].len() - idx];
-      }
-    }
-    return [-1, 0];
-}
-
 function move2cmd(from, hlane, vlane) {
   function isSM(a) {
     if(stack[0].last() && stack[0].last().id() === a) {
       return [7, 1];
     }
-    const inMain = searchMain(a);
-    if(inMain[0] !== - 1) {
-      return inMain;
+    for(let i = 0; i < 7; i++) {
+      const idx = main[i].idx(id);
+      if (idx !== -1) {
+        return [i, main[i].len() - idx];
+      }
     }
     return [-1, 1];
   }
@@ -420,13 +412,17 @@ procCmd = function(cmd) {
           stack[1].el.push(stack[0].el[0]);
           stack[0].el.splice(0,1);
         }
+        //a r
       } else {
+        let turned = 0;
         for(let i = 0; i < 3; i++) {
           if (stack[1].el.length > 0) {
             stack[0].el.push(stack[1].el[0]);
             stack[1].el.splice(0,1);
+            turned++;
           }
         }
+        //a turned
       }
       break;
     case "s": //from to how many  (sm) (m)
