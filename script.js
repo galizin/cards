@@ -23,7 +23,7 @@ class Card {
 
 class Stack {
   constructor () {
-    this.el = [];
+    this.clear();
   }
   clear() {
     this.el = [];
@@ -51,6 +51,26 @@ class Stack {
   }
 }
 
+class History {
+  constructor() {
+    this.clear();
+  }
+  clear() {
+    this.h = [];
+    this.p = -1;
+  }
+  push(cmd) {
+    if (this.h.length !== (this.p + 1)) {
+      this.h.splice(this.p + 1);
+    }
+    this.h.push(cmd);
+    this.p++;
+  }
+  pop() {
+    this.p--;
+    return this.h[this.p + 1];
+  }
+}
 const shuffleDeck = function() {
   const initDeck = function(deck) {
     for(let suits = 0; suits < 4; suits++) {
@@ -72,7 +92,7 @@ const shuffleDeck = function() {
 
 let deck = [];
 
-let history = [];
+let history = new History();
 
 let histPoint = -1;
 
@@ -121,8 +141,7 @@ replay = function (isSame) {
   }
 
   stack[1].el.forEach(m => m.vis = true);
-  history = [];
-  histPoint = -1;
+  history.clear();
   drawField();
 }
 
@@ -238,7 +257,7 @@ function move2cmd(from, hlane, vlane) {
       return [7, 1];
     }
     for(let i = 0; i < 7; i++) {
-      const idx = main[i].idx(id);
+      const idx = main[i].idx(a);
       if (idx !== -1) {
         return [i, main[i].len() - idx];
       }
