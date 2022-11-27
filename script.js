@@ -432,6 +432,27 @@ moveToMain = function(from, to, howmany) {
   return doMove;
 }
 
+doTheMove = function (from, to, howmany) {
+  const neededFrom = [...from.el].slice(from.el.length - howmany);
+  from.el.splice(from.el.length -howmany);
+  to.el=to.el.concat(neededFrom);
+}
+
+undoCmd = function(cmd) {
+  switch(cmd.substring(0,1)) {
+    case "a":
+      break;
+    case "s": //from to how many  (sm) (m)
+      break;
+    case "r": //(sm) (d)
+      break;
+    case "u": //(d) (d)
+      break;
+    case "b": //(d) (m)
+      break;
+  }
+}
+
 procCmd = function(cmd) {
   switch(cmd.substring(0,1)) {
     case "a":
