@@ -40,8 +40,11 @@ class Stack {
   }
   visLast() {
     if (this.len() > 0) {
+      const chvis  = this.last().vis !== true;
       this.last().vis = true;
+      return chvis;
     }
+    return false;
   }
   idx(id) {
     return this.el.map(m => m.id()).indexOf(id);
@@ -68,6 +71,10 @@ const shuffleDeck = function() {
 }
 
 let deck = [];
+
+let history = [];
+
+let histPoint = -1;
 
 const main=[];
 
@@ -114,6 +121,8 @@ replay = function (isSame) {
   }
 
   stack[1].el.forEach(m => m.vis = true);
+  history = [];
+  histPoint = -1;
   drawField();
 }
 
@@ -412,7 +421,7 @@ procCmd = function(cmd) {
           stack[1].el.push(stack[0].el[0]);
           stack[0].el.splice(0,1);
         }
-        //a r
+        history.push("a r");
       } else {
         let turned = 0;
         for(let i = 0; i < 3; i++) {
@@ -422,14 +431,14 @@ procCmd = function(cmd) {
             turned++;
           }
         }
-        //a turned
+        history.push("a " + turned);
       }
       break;
     case "s": //from to how many  (sm) (m)
       const parm = (cmd.split(" ")).map(m => parseInt(m)).slice(1);
       const doMove = moveToMain(parm[0] === 7 ? stack[0]: main[parm[0]], main[parm[1]], parm[0] === 7 ? 1: parm[2]);
       if((parm[0] < 7) && doMove) {
-        main[parm[0]].visLast();
+        history.push(cmd + (main[parm[0]].visLast() ? " 1" : ""));
       }
       break;
     case "r": //(sm) (d)
@@ -446,7 +455,7 @@ procCmd = function(cmd) {
       if(discard[toPileNo].el.length === 0 ? fromLast.no === 0 : (fromLast.no === toLast.no + 1) && (fromLast.suit === toLast.suit) ) {
         lastMove(fromPile, discard[toPileNo]);
         if(fromPileNo > 0) {
-          fromPile.visLast();
+          history.push(cmd + (fromPile.visLast() ? " 1" : ""));
         }
       }
       break;
@@ -455,12 +464,15 @@ procCmd = function(cmd) {
       const to = parseInt(cmd.split(" ")[2]);
       if((from !== to) && (discard[from].last().no === 0) && (discard[to].el.length === 0)) {
         lastMove(discard[from], discard[to]);
+        history.push(cmd);
       }
       break;
     case "b": //(d) (m)
       const bparm1 = parseInt(cmd.split(" ")[1]);
       const bparm2 = parseInt(cmd.split(" ")[2]);
-      moveToMain(discard[bparm1], main[bparm2], 1);
+      if (moveToMain(discard[bparm1], main[bparm2], 1)) {
+        history.push(cmd);
+      }
       break;
     default:
       console.log("command " + cmd + " is not supported");
