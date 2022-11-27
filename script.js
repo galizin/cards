@@ -71,6 +71,7 @@ class History {
     return this.h[this.p + 1];
   }
 }
+
 const shuffleDeck = function() {
   const initDeck = function(deck) {
     for(let suits = 0; suits < 4; suits++) {
@@ -414,28 +415,27 @@ lastMove = function(from, to) {
 moveToMain = function(from, to, howmany) {
   let doMove = false;
   if(from.el[from.el.length - howmany].vis) {
-    const neededFrom = [...from.el].slice(from.el.length - howmany);
-    if (to.el.length == 0 && neededFrom[0].no == 12) {
+    if (to.el.length == 0 && neededFrom(from, howmany)[0].no == 12) {
       doMove = true;
     } else {
       if (to.len() > 0) {
-        if (to.last().no == neededFrom[0].no+1 && (neededFrom[0].color() != to.last().color())) {
+        if (to.last().no == neededFrom(from, howmany)[0].no+1 && (neededFrom(from, howmany)[0].color() != to.last().color())) {
           doMove = true;
         }
       }
     }
     if(doMove) {
-      from.el.splice(from.el.length -howmany);
-      to.el=to.el.concat(neededFrom);
+      doTheMove(from, to, howmany);
     }
   }
   return doMove;
 }
 
+const neededFrom = function(from, howmany) { return [...from.el].slice(from.el.length - howmany); }
+
 doTheMove = function (from, to, howmany) {
-  const neededFrom = [...from.el].slice(from.el.length - howmany);
+  to.el=to.el.concat(neededFrom(from, howmany));
   from.el.splice(from.el.length -howmany);
-  to.el=to.el.concat(neededFrom);
 }
 
 undoCmd = function(cmd) {
