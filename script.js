@@ -46,6 +46,14 @@ class Stack {
     }
     return false;
   }
+  invisLast() {
+    if (this.len() > 0) {
+      const chvis  = this.last().vis !== false;
+      this.last().vis = false;
+      return chvis;
+    }
+    return false;
+  }
   idx(id) {
     return this.el.map(m => m.id()).indexOf(id);
   }
@@ -59,16 +67,27 @@ class History {
     this.h = [];
     this.p = -1;
   }
-  push(cmd) {
+  push(cmd, redo) {
+    if(redo) {
+      return;
+    }
     if (this.h.length !== (this.p + 1)) {
       this.h.splice(this.p + 1);
     }
-    this.h.push(cmd);
+    if (this.p === (this.h.length - 1)) {
+      this.h.push(cmd);
+    }
     this.p++;
   }
   pop() {
     this.p--;
     return this.h[this.p + 1];
+  }
+  next() {
+    if(this.p < (this.h.length - 1)) {
+      this.p++;
+      return this.h[this.p];
+    }
   }
 }
 
@@ -438,11 +457,17 @@ doTheMove = function (from, to, howmany) {
   from.el.splice(from.el.length -howmany);
 }
 
-undoCmd = function(cmd) {
+undoCmd = function() {
+  const cmd = history.pop();
   switch(cmd.substring(0,1)) {
     case "a":
       break;
     case "s": //from to how many  (sm) (m)
+      const parm = (cmd.split(" ")).map(m => parseInt(m)).slice(1);
+      if(parm.length === 4) {
+        main[parm[0]].invisLast();
+      }
+      doTheMove(main[parm[1]], parm[0] === 7 ? stack[0]: main[parm[0]], parm[0] === 7 ? 1: parm[2]);
       break;
     case "r": //(sm) (d)
       break;
@@ -451,9 +476,15 @@ undoCmd = function(cmd) {
     case "b": //(d) (m)
       break;
   }
+  drawField();
 }
 
-procCmd = function(cmd) {
+redoCmd = function() {
+  procCmd(history.next(), true);
+  drawField();
+}
+
+procCmd = function(cmd, redo) {
   switch(cmd.substring(0,1)) {
     case "a":
       if(stack[1].el.length === 0) {
@@ -461,7 +492,7 @@ procCmd = function(cmd) {
           stack[1].el.push(stack[0].el[0]);
           stack[0].el.splice(0,1);
         }
-        history.push("a r");
+        history.push("a r", redo);
       } else {
         let turned = 0;
         for(let i = 0; i < 3; i++) {
@@ -471,14 +502,15 @@ procCmd = function(cmd) {
             turned++;
           }
         }
-        history.push("a " + turned);
+        history.push("a " + turned, redo);
       }
       break;
     case "s": //from to how many  (sm) (m)
       const parm = (cmd.split(" ")).map(m => parseInt(m)).slice(1);
       const doMove = moveToMain(parm[0] === 7 ? stack[0]: main[parm[0]], main[parm[1]], parm[0] === 7 ? 1: parm[2]);
       if((parm[0] < 7) && doMove) {
-        history.push(cmd + (main[parm[0]].visLast() ? " 1" : ""));
+        const visLast = main[parm[0]].visLast();
+        history.push(cmd + (parm.length < 4 ? (visLast ? " 1" : "") : ""), redo);
       }
       break;
     case "r": //(sm) (d)
@@ -495,7 +527,7 @@ procCmd = function(cmd) {
       if(discard[toPileNo].el.length === 0 ? fromLast.no === 0 : (fromLast.no === toLast.no + 1) && (fromLast.suit === toLast.suit) ) {
         lastMove(fromPile, discard[toPileNo]);
         if(fromPileNo > 0) {
-          history.push(cmd + (fromPile.visLast() ? " 1" : ""));
+          history.push(cmd + (fromPile.visLast() ? " 1" : ""), redo);
         }
       }
       break;
@@ -504,14 +536,14 @@ procCmd = function(cmd) {
       const to = parseInt(cmd.split(" ")[2]);
       if((from !== to) && (discard[from].last().no === 0) && (discard[to].el.length === 0)) {
         lastMove(discard[from], discard[to]);
-        history.push(cmd);
+        history.push(cmd, redo);
       }
       break;
     case "b": //(d) (m)
       const bparm1 = parseInt(cmd.split(" ")[1]);
       const bparm2 = parseInt(cmd.split(" ")[2]);
       if (moveToMain(discard[bparm1], main[bparm2], 1)) {
-        history.push(cmd);
+        history.push(cmd, redo);
       }
       break;
     default:
