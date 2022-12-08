@@ -5,7 +5,7 @@ span.outerspan[currLane = "5"][currLevel = "true"] {
     transition:transform 1s;
 }
 span.transparent {
-    opacity: 0.5;
+    opacity: 0.4;
 }
 span.innerspan.place {
     font-size: 40px;
@@ -28,7 +28,7 @@ span {
 }
 span.innerspan {
     display: flex;
-    margin-top: -5px;
+    margin-top: -4px;
     justify-content: left;
 }
 span.outerspan {
