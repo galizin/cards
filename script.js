@@ -203,10 +203,10 @@ function nonDropTarget(el) {
 cardString = function(card) {
     let red = card.color() === "red"; //suit == 1 || suit == 2 ? 1 : 0;
     let suitname = ["&spades;","&hearts;","&diams;","&clubs;"][card.suit];
-    let cardname = ['A','2','3','4','5','6','7','8','9','10', 'J', 'Q', 'K'][card.no];
+    let cardname = ['A','2','3','4','5','6','7','8','9','1', 'J', 'Q', 'K'][card.no];
     let el = document.createElement("span");
     $(el).attr("class", "outerspan").attr("id", card.id()).css("height", vDim - border*2 + "px").css("width", hDim - border*2 + "px");
-    $(el).html((red ? '<mark class="red">' : '') + '<span class="innerspan">' + suitname + cardname + '</span>' + (red ? '</mark>' : ''));
+    $(el).html((red ? '<mark class="red">' : '') + '<span class="innerspan">' + cardname + suitname + '</span>' + (red ? '</mark>' : ''));
     return el;
 };
 
