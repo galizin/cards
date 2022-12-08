@@ -153,8 +153,11 @@ replay = function (isSame) {
 
   for(let i = 0; i < 7; i++) {
     for(let j = i; j < 7; j++) {
-      if (j == i)
+      if (j == i) {
         stack[1].el[0].vis = true;
+      } else {
+        stack[1].el[0].vis = false;
+      }
      main[j].el.push(stack[1].el[0]);
      stack[1].el.splice(0, 1);
    }
