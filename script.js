@@ -463,20 +463,31 @@ doTheMove = function (from, to, howmany) {
 undoCmd = function() {
   const cmd = history.pop();
   switch(cmd.substring(0,1)) {
-    case "a":
-      break;
-    case "s": //from to how many  (sm) (m)
-      const parm = (cmd.split(" ")).map(m => parseInt(m)).slice(1);
-      if(parm.length === 4) {
-        main[parm[0]].invisLast();
+    case "a": {
       }
-      doTheMove(main[parm[1]], parm[0] === 7 ? stack[0]: main[parm[0]], parm[0] === 7 ? 1: parm[2]);
       break;
-    case "r": //(sm) (d)
+    case "s": { //from to how many  (sm) (m)
+        const parm = (cmd.split(" ")).map(m => parseInt(m)).slice(1);
+        if(parm.length === 4) {
+          main[parm[0]].invisLast();
+        }
+        doTheMove(main[parm[1]], parm[0] === 7 ? stack[0]: main[parm[0]], parm[0] === 7 ? 1: parm[2]);
+      }
       break;
-    case "u": //(d) (d)
+    case "r": { //(sm) (d)
+        const parm = (cmd.split(" ")).map(m => parseInt(m)).slice(1);
+        if(parm.length === 3) {
+          main[parm[0]].invisLast();
+        }
+        doTheMove(discard[parm[1]], parm[0] === 7 ? stack[0]: main[parm[0]], 1);
+      }
       break;
-    case "b": //(d) (m)
+    case "u": { //(d) (d)
+        doTheMove(discard[parm[1]], discard[parm[0]], 1);
+      }
+      break;
+    case "b": { //(d) (m)
+      }
       break;
   }
   drawField();
