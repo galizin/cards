@@ -487,6 +487,7 @@ undoCmd = function() {
       }
       break;
     case "b": { //(d) (m)
+        doTheMove(discard[parm[1]], main[parm[0]], 1);
       }
       break;
   }
@@ -540,9 +541,9 @@ procCmd = function(cmd, redo) {
       const toLast = discard[toPileNo].last();
       if(discard[toPileNo].el.length === 0 ? fromLast.no === 0 : (fromLast.no === toLast.no + 1) && (fromLast.suit === toLast.suit) ) {
         lastMove(fromPile, discard[toPileNo]);
-        if(fromPileNo > 0) {
-          history.push(cmd + (fromPile.visLast() ? " 1" : ""), redo);
-        }
+        //if(fromPileNo > 0) {
+        history.push(cmd + (fromPile.visLast() ? " 1" : ""), redo);
+        //}
       }
       break;
     case "u": //(d) (d)
