@@ -78,6 +78,7 @@ class History {
       this.h.push(cmd);
     }
     this.p++;
+    console.log("history step: " + this.p);
   }
   pop() {
     this.p--;
@@ -525,9 +526,13 @@ procCmd = function(cmd, redo) {
       break;
     case "s": //from to how many  (sm) (m)
       const parm = (cmd.split(" ")).map(m => parseInt(m)).slice(1);
-      const doMove = moveToMain(parm[0] === 7 ? stack[0]: main[parm[0]], main[parm[1]], parm[0] === 7 ? 1: parm[2]);
-      if((parm[0] < 7) && doMove) {
-        const visLast = main[parm[0]].visLast();
+      //const doMove = moveToMain(parm[0] === 7 ? stack[0]: main[parm[0]], main[parm[1]], parm[0] === 7 ? 1: parm[2]);
+      //if((parm[0] < 7) && doMove) {
+      if (moveToMain(parm[0] === 7 ? stack[0]: main[parm[0]], main[parm[1]], parm[0] === 7 ? 1: parm[2])) {
+        let visLast = false;
+        if(parm[0] < 7) {
+          visLast = main[parm[0]].visLast();
+        }
         history.push(cmd + (parm.length < 4 ? (visLast ? " 1" : "") : ""), redo);
       }
       break;
