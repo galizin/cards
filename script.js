@@ -462,33 +462,34 @@ doTheMove = function (from, to, howmany) {
 
 undoCmd = function() {
   const cmd = history.pop();
+  const parm = (cmd.split(" ")).map(m => parseInt(m)).slice(1);
   switch(cmd.substring(0,1)) {
-    case "a": {
-      }
-      break;
-    case "s": { //from to how many  (sm) (m)
-        const parm = (cmd.split(" ")).map(m => parseInt(m)).slice(1);
-        if(parm.length === 4) {
-          main[parm[0]].invisLast();
+    case "a":
+      if (parm[0] === 0) {
+        while(stack[1].el.length > 0) {
+          stack[0].el.push(stack[1].el[0]);
+          stack[1].el.splice(0,1);
         }
-        doTheMove(main[parm[1]], parm[0] === 7 ? stack[0]: main[parm[0]], parm[0] === 7 ? 1: parm[2]);
+      } else {
       }
       break;
-    case "r": { //(sm) (d)
-        const parm = (cmd.split(" ")).map(m => parseInt(m)).slice(1);
-        if(parm.length === 3) {
-          main[parm[0]].invisLast();
-        }
-        doTheMove(discard[parm[1]], parm[0] === 7 ? stack[0]: main[parm[0]], 1);
+    case "s": //from to how many  (sm) (m)
+      if(parm.length === 4) {
+        main[parm[0]].invisLast();
       }
+      doTheMove(main[parm[1]], parm[0] === 7 ? stack[0]: main[parm[0]], parm[0] === 7 ? 1: parm[2]);
       break;
-    case "u": { //(d) (d)
-        doTheMove(discard[parm[1]], discard[parm[0]], 1);
+    case "r": //(sm) (d)
+      if(parm.length === 3) {
+        main[parm[0]].invisLast();
       }
+      doTheMove(discard[parm[1]], parm[0] === 7 ? stack[0]: main[parm[0]], 1);
       break;
-    case "b": { //(d) (m)
-        doTheMove(discard[parm[1]], main[parm[0]], 1);
-      }
+    case "u": //(d) (d)
+      doTheMove(discard[parm[1]], discard[parm[0]], 1);
+      break;
+    case "b": //(d) (m)
+      doTheMove(discard[parm[1]], main[parm[0]], 1);
       break;
   }
   drawField();
@@ -507,7 +508,7 @@ procCmd = function(cmd, redo) {
           stack[1].el.push(stack[0].el[0]);
           stack[0].el.splice(0,1);
         }
-        history.push("a r", redo);
+        history.push("a 0", redo);
       } else {
         let turned = 0;
         for(let i = 0; i < 3; i++) {
@@ -517,7 +518,9 @@ procCmd = function(cmd, redo) {
             turned++;
           }
         }
-        history.push("a " + turned, redo);
+        if (turned > 0) {
+          history.push("a " + turned, redo);
+        }
       }
       break;
     case "s": //from to how many  (sm) (m)
