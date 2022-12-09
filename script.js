@@ -472,6 +472,7 @@ undoCmd = function() {
           stack[1].el.splice(0,1);
         }
       } else {
+        
       }
       break;
     case "s": //from to how many  (sm) (m)
@@ -510,7 +511,7 @@ procCmd = function(cmd, redo) {
           stack[0].el.splice(0,1);
         }
         history.push("a 0", redo);
-      } else {
+      } else if(stack[0].el.length > 3) {
         let turned = 0;
         for(let i = 0; i < 3; i++) {
           if (stack[1].el.length > 0) {
