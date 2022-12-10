@@ -472,7 +472,10 @@ undoCmd = function() {
           stack[1].el.splice(0,1);
         }
       } else {
-        
+        for(let i = 0; i < parm[0]; i++) {
+          stack[1].el.push(stack[0].el[0]);
+          stack[0].el.splice(0,1);
+        }
       }
       break;
     case "s": //from to how many  (sm) (m)
@@ -506,12 +509,14 @@ procCmd = function(cmd, redo) {
   switch(cmd.substring(0,1)) {
     case "a":
       if(stack[1].el.length === 0) {
-        while(stack[0].el.length > 0) {
-          stack[1].el.push(stack[0].el[0]);
-          stack[0].el.splice(0,1);
+        if(stack[0].el.length > 3) {
+          while(stack[0].el.length > 0) {
+            stack[1].el.push(stack[0].el[0]);
+            stack[0].el.splice(0,1);
+          }
+          history.push("a 0", redo);
         }
-        history.push("a 0", redo);
-      } else if(stack[0].el.length > 3) {
+      } else {
         let turned = 0;
         for(let i = 0; i < 3; i++) {
           if (stack[1].el.length > 0) {
