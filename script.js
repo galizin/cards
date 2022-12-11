@@ -497,7 +497,7 @@ undoCmd = function() {
         doTheMove(discard[parm[1]], discard[parm[0]], 1);
         break;
       case "b": //(d) (m)
-        doTheMove(discard[parm[1]], main[parm[0]], 1);
+        doTheMove(main[parm[1]], discard[parm[0]], 1);
         break;
     }
     drawField();
@@ -584,6 +584,13 @@ procCmd = function(cmd, redo) {
   }
 }
 
+const addBtn = function(btnTop, left, width, capt, func) {
+    let btn = document.createElement("button");
+    $(btn).css("top", btnTop + "px").css("left", left + "px").css("width", width + "px")
+      .html(capt).attr("onclick", func);
+    $("#main")[0].append(btn);
+}
+
 window.addEventListener('load', function() {
     dropTarget($("#main")[0]);
     $("#main")[0].append(nonCardString("spades", vGap, hGap + (hGap + hDim) * 0, 0));
@@ -597,16 +604,20 @@ window.addEventListener('load', function() {
       }
     }
     replay(false);
-    let btn = document.createElement("button");
     const btnTop = vGap * 3 + vDim * 2 + shft * 18;
     $("#main").css("width", hDim * 7 + hGap * 8 + "px").css("height", btnTop + "px");
-    $(btn).css("top", btnTop + "px").css("left", hGap +'px').html("start over").css("width", hDim*2 +hGap +"px")
-      .attr("onclick", "replay(true);");
-    $("#main")[0].append(btn);
-    btn = document.createElement("button");
-    $(btn).css("top", btnTop + "px").css("left", hDim*2 + 2*border + hGap*2 + "px").css("width", hDim + "px")
-      .html("new").attr("onclick", "replay(false);");
-    $("#main")[0].append(btn);
+    //let btn = document.createElement("button");
+    //$(btn).css("top", btnTop + "px").css("left", hGap +'px').css("width", hDim*2 +hGap +"px")
+      //.html("start over").attr("onclick", "replay(true);");
+    //$("#main")[0].append(btn);
+    addBtn(btnTop, hGap, hDim * 2 + hGap, "start over", "replay(true);");
+    //btn = document.createElement("button");
+    //$(btn).css("top", btnTop + "px").css("left", hDim*2 + 2*border + hGap*2 + "px").css("width", hDim + "px")
+      //.html("new").attr("onclick", "replay(false);");
+    //$("#main")[0].append(btn);
+    addBtn(btnTop, (hGap+hDim)*2 + border*2, hDim, "new", "replay(false);");
+    addBtn(btnTop, (hGap+hDim)*3 + border*2, hDim, "undo", "undoCmd();");
+    addBtn(btnTop, (hGap+hDim)*4 + border*2, hDim, "redo", "redoCmd();");
     const onConfirmRefresh = function (event) {
         event.preventDefault();
         return event.returnValue = "Are you sure you want to leave the page?";
