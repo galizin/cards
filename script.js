@@ -476,8 +476,8 @@ undoCmd = function() {
           }
         } else {
           for(let i = 0; i < parm[0]; i++) {
-            stack[1].el.push(stack[0].el[0]);
-            stack[0].el.splice(0,1);
+            stack[1].el.unshift(stack[0].last());
+            stack[0].el.pop();
           }
         }
         break;
