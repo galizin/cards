@@ -81,8 +81,10 @@ class History {
     console.log("history step: " + this.p);
   }
   pop() {
-    this.p--;
-    return this.h[this.p + 1];
+    if(this.p > -1) {
+      this.p--;
+      return this.h[this.p + 1];
+    }
   }
   next() {
     if(this.p < (this.h.length - 1)) {
@@ -463,41 +465,43 @@ doTheMove = function (from, to, howmany) {
 
 undoCmd = function() {
   const cmd = history.pop();
-  const parm = (cmd.split(" ")).map(m => parseInt(m)).slice(1);
-  switch(cmd.substring(0,1)) {
-    case "a":
-      if (parm[0] === 0) {
-        while(stack[1].el.length > 0) {
-          stack[0].el.push(stack[1].el[0]);
-          stack[1].el.splice(0,1);
+  if (cmd) {
+    const parm = (cmd.split(" ")).map(m => parseInt(m)).slice(1);
+    switch(cmd.substring(0,1)) {
+      case "a":
+        if (parm[0] === 0) {
+          while(stack[1].el.length > 0) {
+            stack[0].el.push(stack[1].el[0]);
+            stack[1].el.splice(0,1);
+          }
+        } else {
+          for(let i = 0; i < parm[0]; i++) {
+            stack[1].el.push(stack[0].el[0]);
+            stack[0].el.splice(0,1);
+          }
         }
-      } else {
-        for(let i = 0; i < parm[0]; i++) {
-          stack[1].el.push(stack[0].el[0]);
-          stack[0].el.splice(0,1);
+        break;
+      case "s": //from to how many  (sm) (m)
+        if(parm.length === 4) {
+          main[parm[0]].invisLast();
         }
-      }
-      break;
-    case "s": //from to how many  (sm) (m)
-      if(parm.length === 4) {
-        main[parm[0]].invisLast();
-      }
-      doTheMove(main[parm[1]], parm[0] === 7 ? stack[0]: main[parm[0]], parm[0] === 7 ? 1: parm[2]);
-      break;
-    case "r": //(sm) (d)
-      if(parm.length === 3) {
-        main[parm[0]].invisLast();
-      }
-      doTheMove(discard[parm[1]], parm[0] === 7 ? stack[0]: main[parm[0]], 1);
-      break;
-    case "u": //(d) (d)
-      doTheMove(discard[parm[1]], discard[parm[0]], 1);
-      break;
-    case "b": //(d) (m)
-      doTheMove(discard[parm[1]], main[parm[0]], 1);
-      break;
+        doTheMove(main[parm[1]], parm[0] === 7 ? stack[0]: main[parm[0]], parm[0] === 7 ? 1: parm[2]);
+        break;
+      case "r": //(sm) (d)
+        if(parm.length === 3) {
+          main[parm[0]].invisLast();
+        }
+        doTheMove(discard[parm[1]], parm[0] === 7 ? stack[0]: main[parm[0]], 1);
+        break;
+      case "u": //(d) (d)
+        doTheMove(discard[parm[1]], discard[parm[0]], 1);
+        break;
+      case "b": //(d) (m)
+        doTheMove(discard[parm[1]], main[parm[0]], 1);
+        break;
+    }
+    drawField();
   }
-  drawField();
 }
 
 redoCmd = function() {
