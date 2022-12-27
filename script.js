@@ -591,6 +591,14 @@ const addBtn = function(btnTop, left, width, capt, func) {
     $("#main")[0].append(btn);
 }
 
+
+const assessLayout = function() {
+//stack[0]
+//sm m
+//sm d
+//b: d m
+}
+
 window.addEventListener('load', function() {
     dropTarget($("#main")[0]);
     $("#main")[0].append(nonCardString("spades", vGap, hGap + (hGap + hDim) * 0, 0));
