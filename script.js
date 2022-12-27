@@ -437,7 +437,7 @@ lastMove = function(from, to) {
   from.el.splice(from.el.length-1);
 }
 
-moveToMain = function(from, to, howmany) {
+canMoveToMain = function(from, to, howmany) {
   let doMove = false;
   if(from.el[from.el.length - howmany].vis) {
     if (to.el.length == 0 && neededFrom(from, howmany)[0].no == 12) {
@@ -449,10 +449,29 @@ moveToMain = function(from, to, howmany) {
         }
       }
     }
+    //if(doMove) {
+      //doTheMove(from, to, howmany);
+    //}
+  }
+  return doMove;
+}
+
+moveToMain = function(from, to, howmany) {
+  let doMove = canMoveToMain(from, to, howmany);
+  //if(from.el[from.el.length - howmany].vis) {
+    //if (to.el.length == 0 && neededFrom(from, howmany)[0].no == 12) {
+      //doMove = true;
+    //} else {
+      //if (to.len() > 0) {
+        //if (to.last().no == neededFrom(from, howmany)[0].no+1 && (neededFrom(from, howmany)[0].color() != to.last().color())) {
+          //doMove = true;
+        //}
+      //}
+    //}
     if(doMove) {
       doTheMove(from, to, howmany);
     }
-  }
+  //}
   return doMove;
 }
 
