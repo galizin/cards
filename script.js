@@ -78,7 +78,7 @@ class History {
       this.h.push(cmd);
     }
     this.p++;
-    console.log("history step: " + this.p);
+    //console.log("history step: " + this.p);
   }
   pop() {
     if(this.p > -1) {
@@ -430,6 +430,7 @@ let drawField = function() {
     i === 0 ? drawOpen() : moveUpStack(i+5);
   }
   $("#main")[0].append($("#stackoverturn")[0]);
+  assessLayout();
 }
 
 lastMove = function(from, to) {
@@ -612,10 +613,29 @@ const addBtn = function(btnTop, left, width, capt, func) {
 
 
 const assessLayout = function() {
-//stack[0]
-//sm m
-//sm d
-//b: d m
+    console.log("assess");
+    for(let i = 0; i < 7; i++) {
+        for(let j = 0; j < 7; j++) {
+            if(i != j) {
+                for(let k = 0; k < main[j].el.length; k++) {
+                    if(main[j].el[k].vis) {
+                        if(canMoveToMain(main[j], main[i], main[j].el.length - k)) { //from to howmany
+                            console.log("s " + j + " " + i + " " + (main[j].el.length - k));
+                        }
+                    }
+                }
+            }
+        }
+        if(stack[0].el.length > 0) {
+            if(canMoveToMain(stack[0], main[i], 1)) {
+                console.log("s  7 " + i);
+            }
+        }
+    }
+    //stack[0]
+    //sm m
+    //sm d
+    //b: d m
 }
 
 window.addEventListener('load', function() {
