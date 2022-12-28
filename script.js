@@ -171,11 +171,11 @@ replay = function (isSame) {
   drawField();
 }
 
-var hGap = 4;
-var hDim = Math.min(Math.floor((window.innerWidth - hGap * 8) / 7),59);
-var shft = 25;
-var vGap = 4;
-var vDim = 60;
+var hGap = 3;
+var hDim = Math.min(Math.floor((window.innerWidth - hGap * 8) / 7),50);
+var vGap = 3;
+var vDim = 55;
+var shft = Math.min(Math.floor((document.documentElement.clientHeight - 2*(vGap + vDim))/18), 25);  //18;
 var border = 2;
 
 function elMove(el) {
@@ -631,13 +631,36 @@ window.addEventListener('load', function() {
       }
     }
     replay(false);
-    const btnTop = vGap * 3 + vDim * 2 + shft * 18;
+    /* test */
+    /*stack[0].el = [];
+    stack[1].el = [];
+    for(let i = 0; i < 7; i++) {
+      main[i].el = [];
+    }
+    for(let i = 12; i > -1; i--) {
+      //main[1].el = [];
+      main[0].el.push(new Card(0, i, 1));
+      main[1].el.push(new Card(2, i, 1));
+      if(i > 5) {
+        main[2].el.push(new Card(3, i, 1));
+      } else {
+        main[6].el.push(new Card(3, i, 1));
+      }
+      main[6].el.push(new Card(1, i, 1));
+    }
+    drawField();
+    */
+    /* test end */
+    const btnTop = vGap * 2 + vDim * 2 + shft * 17;
     $("#main").css("width", hDim * 7 + hGap * 8 + "px").css("height", btnTop + "px");
     //let btn = document.createElement("button");
     //$(btn).css("top", btnTop + "px").css("left", hGap +'px').css("width", hDim*2 +hGap +"px")
       //.html("start over").attr("onclick", "replay(true);");
     //$("#main")[0].append(btn);
     addBtn(btnTop, hGap, hDim * 2 + hGap, "start over", "replay(true);");
+    //addBtn(btnTop, hGap, hDim * 2 + hGap, "" + (btnTop + shft) /* + "start over" */, "replay(true);");
+    //addBtn(btnTop, hGap, hDim * 2 + hGap, "" + (document.documentElement.clientHeight) /* + "start over" */, "replay(true);");
+    //addBtn(btnTop, hGap, hDim * 2 + hGap, "" + hDim /* + "start over" */, "replay(true);");
     //btn = document.createElement("button");
     //$(btn).css("top", btnTop + "px").css("left", hDim*2 + 2*border + hGap*2 + "px").css("width", hDim + "px")
       //.html("new").attr("onclick", "replay(false);");
