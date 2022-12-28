@@ -171,11 +171,11 @@ replay = function (isSame) {
   drawField();
 }
 
-var shft = 25;
-var hDim = 59;
-var vDim = 73;
-var vGap = 4;
 var hGap = 4;
+var hDim = Math.min(Math.floor((window.innerWidth - hGap * 8) / 7),59);
+var shft = 25;
+var vGap = 4;
+var vDim = 60;
 var border = 2;
 
 function elMove(el) {
@@ -398,14 +398,14 @@ let drawOpen = function() {
     nonDropTarget(m);
     switch (i) {
       case stackLen - 2:
-        $(m).css("left", hGap + (hDim + hGap) * 5 -1*hGap*8 + 'px');
+        $(m).css("left", Math.floor((laneToLeft(5) + laneToLeft(4))/2) + 'px');
         break;
       case stackLen - 1:
         $(m).css("left", laneToLeft(5) + 'px');
         elMove(m);
         break;
       default:
-        $(m).css("left", laneToLeft(5) -2*hGap*8 + 'px');
+        $(m).css("left", laneToLeft(4) + 'px');
         break;
     }
   }

@@ -48,6 +48,7 @@ button {
 }
 body {
     margin: 0;
+    touch-action: pan-y;
 }
 div#main {
     font-size: 24px;
