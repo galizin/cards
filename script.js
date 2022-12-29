@@ -628,7 +628,7 @@ const assessLayout = function() {
         }
         if(stack[0].el.length > 0) {
             if(canMoveToMain(stack[0], main[i], 1)) {
-                console.log("s  7 " + i);
+                console.log("s 7 " + i);
             }
         }
         for(j = 0; j < 4; j++) {
