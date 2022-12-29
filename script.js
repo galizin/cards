@@ -631,6 +631,29 @@ const assessLayout = function() {
                 console.log("s  7 " + i);
             }
         }
+        for(j = 0; j < 4; j++) {
+            if(discard[j].el.length > 0) {
+                if(canMoveToMain(discard[j], main[i], 1)) {
+                    console.log("b " + j + " " + i);
+                }
+            }
+            if(main[i].last()) {
+                const fromLast = main[i].last(); //getLast(arr);
+                const toLast = discard[j].last();
+                if(discard[j].el.length === 0 ? fromLast.no === 0 : (fromLast.no === toLast.no + 1) && (fromLast.suit === toLast.suit) ) {
+                    console.log("r " + i + " " + j);
+                }
+            }
+        }
+    }
+    if(stack[0].el.length > 0) {
+        for(j = 0; j < 4; j++) {
+            const fromLast = stack[0].last(); //getLast(arr);
+            const toLast = discard[j].last();
+            if(discard[j].el.length === 0 ? fromLast.no === 0 : (fromLast.no === toLast.no + 1) && (fromLast.suit === toLast.suit) ) {
+                console.log("r 7 " + j);
+            }
+        }
     }
     //stack[0]
     //sm m
