@@ -441,7 +441,7 @@ lastMove = function(from, to) {
 canMoveToMain = function(from, to, howmany) {
   let doMove = false;
   if(from.el[from.el.length - howmany].vis) {
-    if (to.el.length == 0 && neededFrom(from, howmany)[0].no == 12 && howmany == 1) {
+    if (to.el.length == 0 && neededFrom(from, howmany)[0].no == 12) {
       doMove = true;
     } else {
       if (to.len() > 0) {

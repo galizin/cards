@@ -49,6 +49,7 @@ button {
 body {
     margin: 0;
     touch-action: pan-y;
+    overscroll-behavior-y: contain;
 }
 div#main {
     font-size: 24px;
