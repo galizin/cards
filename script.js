@@ -441,7 +441,7 @@ lastMove = function(from, to) {
 canMoveToMain = function(from, to, howmany) {
   let doMove = false;
   if(from.el[from.el.length - howmany].vis) {
-    if (to.el.length == 0 && neededFrom(from, howmany)[0].no == 12) {
+    if (to.el.length == 0 && neededFrom(from, howmany)[0].no == 12 && howmany == 1) {
       doMove = true;
     } else {
       if (to.len() > 0) {
@@ -614,12 +614,14 @@ const addBtn = function(btnTop, left, width, capt, func) {
 
 const assessLayout = function() {
     console.log("assess");
+    $(".clickfru")[0].innerHTML = "<br /><br /><br /><br /><br /><br /><br />";
     for(let i = 0; i < 7; i++) {
         for(let j = 0; j < 7; j++) {
             if(i != j) {
                 for(let k = 0; k < main[j].el.length; k++) {
                     if(main[j].el[k].vis) {
                         if(canMoveToMain(main[j], main[i], main[j].el.length - k)) { //from to howmany
+                            $(".clickfru")[0].innerHTML += "s " + j + " " + i + " " + (main[j].el.length - k) + "<br />";
                             console.log("s " + j + " " + i + " " + (main[j].el.length - k));
                         }
                     }
@@ -628,12 +630,14 @@ const assessLayout = function() {
         }
         if(stack[0].el.length > 0) {
             if(canMoveToMain(stack[0], main[i], 1)) {
+                $(".clickfru")[0].innerHTML += "s 7 " + i + "<br />";
                 console.log("s 7 " + i);
             }
         }
         for(j = 0; j < 4; j++) {
             if(discard[j].el.length > 0) {
                 if(canMoveToMain(discard[j], main[i], 1)) {
+                    $(".clickfru")[0].innerHTML += "b " + j + " " + i + "<br />";
                     console.log("b " + j + " " + i);
                 }
             }
@@ -641,6 +645,7 @@ const assessLayout = function() {
                 const fromLast = main[i].last(); //getLast(arr);
                 const toLast = discard[j].last();
                 if(discard[j].el.length === 0 ? fromLast.no === 0 : (fromLast.no === toLast.no + 1) && (fromLast.suit === toLast.suit) ) {
+                    $(".clickfru")[0].innerHTML += "r " + i + " " + j + "<br />";
                     console.log("r " + i + " " + j);
                 }
             }
@@ -651,6 +656,7 @@ const assessLayout = function() {
             const fromLast = stack[0].last(); //getLast(arr);
             const toLast = discard[j].last();
             if(discard[j].el.length === 0 ? fromLast.no === 0 : (fromLast.no === toLast.no + 1) && (fromLast.suit === toLast.suit) ) {
+                $(".clickfru")[0].innerHTML += "r 7 " + j + "<br />";
                 console.log("r 7 " + j);
             }
         }
@@ -695,7 +701,7 @@ window.addEventListener('load', function() {
     */
     /* test end */
     const btnTop = vGap * 2 + vDim * 2 + shft * 17;
-    $("#main").css("width", hDim * 7 + hGap * 8 + "px").css("height", btnTop + "px");
+    $("#container").css("width", hDim * 7 + hGap * 8 + "px").css("height", btnTop + "px");
     //let btn = document.createElement("button");
     //$(btn).css("top", btnTop + "px").css("left", hGap +'px').css("width", hDim*2 +hGap +"px")
       //.html("start over").attr("onclick", "replay(true);");
