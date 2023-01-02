@@ -640,8 +640,8 @@ const assessLayout = function() {
     //if (stack[0].el.length > 0) {
       //stackfilter.push(stack[0].last());
     //}
-    console.log([...new Set((stack[0].el.length > 0 ? [stack[0].last()] : []).concat(everyNthL(stack[1].el, 3))
-        .concat(everyNthL(stack[0].el.concat(stack[1].el), 3)))]);
+    //console.log([...new Set((stack[0].el.length > 0 ? [stack[0].last()] : []).concat(everyNthL(stack[1].el, 3))
+        //.concat(everyNthL(stack[0].el.concat(stack[1].el), 3)))]);
     //const stackfilter = [...new Set((stack[0].el.length > 0 ? [stack[0].last()] : []).concat(everyNthL(stack[1].el, 3))
         //.concat(everyNthL(stack[0].el.concat(stack[1].el), 3)))];
     const stackfilter = [...new Set([].concat(everyNthL(stack[1].el, 3))
@@ -669,7 +669,12 @@ const assessLayout = function() {
                 //console.log("s 7 " + i);
             }
         }
-        for(j = 0; j < 4; j++) {
+        for(let j = 0; j < stackfilter.length; j++) {
+            if(cardCanMoveToMain(stackfilter[j], main[i], 1)) {
+                $(".clickfru")[0].innerHTML += "" + j + " s 7 " + i + "<br />";
+            }
+        }
+        for(let j = 0; j < 4; j++) {
             if(discard[j].el.length > 0) {
                 if(canMoveToMain(discard[j], main[i], 1)) {
                     $(".clickfru")[0].innerHTML += "b " + j + " " + i + "<br />";
@@ -699,6 +704,21 @@ const assessLayout = function() {
         }
         if(fromLast && fromLast.no === 0) {
             $(".clickfru")[0].innerHTML += "r 7<br />";
+        }
+    }
+    for(let k = 0; k < stackfilter.length; k++) {
+        //if(canMoveToMain(stackfilter[j], main[i], 1)) {
+            //$(".clickfru")[0].innerHTML += "" + j + " s 7 " + i + "<br />";
+        //}
+        for(let j = 0; j < 4; j++) {
+            const toLast = discard[j].last();
+            if((discard[j].el.length !== 0) && (stackfilter[k].no === toLast.no + 1) && (stackfilter[k].suit === toLast.suit) ) {
+                $(".clickfru")[0].innerHTML += "" + j + " r 7 " + j + "<br />";
+                //console.log("r 7 " + j);
+            }
+        }
+        if(stackfilter[k].no === 0) {
+            $(".clickfru")[0].innerHTML += "" + j + " r 7<br />";
         }
     }
     //stack[0]
