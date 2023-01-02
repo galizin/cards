@@ -204,14 +204,20 @@ function nonDropTarget(el) {
 }
 
 cardString = function(card) {
-    let red = card.color() === "red"; //suit == 1 || suit == 2 ? 1 : 0;
-    let suitname = ["&spades;","&hearts;","&diams;","&clubs;"][card.suit];
-    let cardname = ['A','2','3','4','5','6','7','8','9','1', 'J', 'Q', 'K'][card.no];
-    let el = document.createElement("span");
+    const red = card.color() === "red"; //suit == 1 || suit == 2 ? 1 : 0;
+    const suitname = ["&spades;","&hearts;","&diams;","&clubs;"][card.suit];
+    const cardname = ['A','2','3','4','5','6','7','8','9','1', 'J', 'Q', 'K'][card.no];
+    const el = document.createElement("span");
     $(el).attr("class", "outerspan").attr("id", card.id()).css("height", vDim - border*2 + "px").css("width", hDim - border*2 + "px");
     $(el).html((red ? '<mark class="red">' : '') + '<span class="innerspan">' + cardname + suitname + '</span>' + (red ? '</mark>' : ''));
     return el;
 };
+
+cardSpan = function(card) {
+    const suitname = ["&spades;","&hearts;","&diams;","&clubs;"][card.suit];
+    const cardname = ['A','2','3','4','5','6','7','8','9','1', 'J', 'Q', 'K'][card.no];
+    return "<span style=\"font-family:Cards;color:" + card.color() + ";\">" + cardname + suitname +  "</span>";
+}
 
 nonCardString = function(suit, top, left, suitNo) {
     let red = suit == "hearts" || suit == "diams" ? 1 : 0;
@@ -438,18 +444,33 @@ lastMove = function(from, to) {
   from.el.splice(from.el.length-1);
 }
 
+cardCanMoveToMain = function(card, to) {
+  let doMove = false;
+  if (to.el.length == 0 && card.no == 12) {
+    doMove = true;
+  } else {
+    if (to.len() > 0) {
+      if (to.last().no == card.no+1 && (card.color() != to.last().color())) {
+        doMove = true;
+      }
+    }
+  }
+  return doMove;
+}
+
 canMoveToMain = function(from, to, howmany) {
   let doMove = false;
   if(from.el[from.el.length - howmany].vis) {
-    if (to.el.length == 0 && neededFrom(from, howmany)[0].no == 12) {
-      doMove = true;
-    } else {
-      if (to.len() > 0) {
-        if (to.last().no == neededFrom(from, howmany)[0].no+1 && (neededFrom(from, howmany)[0].color() != to.last().color())) {
-          doMove = true;
-        }
-      }
-    }
+    doMove = cardCanMoveToMain(neededFrom(from, howmany)[0], to);
+    //if (to.el.length == 0 && neededFrom(from, howmany)[0].no == 12) {
+      //doMove = true;
+    //} else {
+      //if (to.len() > 0) {
+        //if (to.last().no == neededFrom(from, howmany)[0].no+1 && (neededFrom(from, howmany)[0].color() != to.last().color())) {
+          //doMove = true;
+        //}
+      //}
+    //}
     //if(doMove) {
       //doTheMove(from, to, howmany);
     //}
@@ -621,9 +642,13 @@ const assessLayout = function() {
     //}
     console.log([...new Set((stack[0].el.length > 0 ? [stack[0].last()] : []).concat(everyNthL(stack[1].el, 3))
         .concat(everyNthL(stack[0].el.concat(stack[1].el), 3)))]);
-    const stackfilter = [...new Set((stack[0].el.length > 0 ? [stack[0].last()] : []).concat(everyNthL(stack[1].el, 3))
-        .concat(everyNthL(stack[0].el.concat(stack[1].el), 3)))];
-    $(".clickfru")[0].innerHTML = "<br /><br /><br /><br /><br /><br /><br />";
+    //const stackfilter = [...new Set((stack[0].el.length > 0 ? [stack[0].last()] : []).concat(everyNthL(stack[1].el, 3))
+        //.concat(everyNthL(stack[0].el.concat(stack[1].el), 3)))];
+    const stackfilter = [...new Set([].concat(everyNthL(stack[1].el, 3))
+        .concat(everyNthL(stack[0].el.concat(stack[1].el), 3)))].filter((elem) => stack[0].el.length === 0 ? true :
+        ((stack[0].last().no !== elem.no) || (stack[0].last().suit !== elem.suit)));
+    $(".clickfru")[0].innerHTML = "<div style=\"position:absolute;bottom:0;\">" + stackfilter.reduce((acc, curr) => acc += cardSpan(curr), "") +
+      "</div><br /><br /><br /><br /><br /><br /><br />";
     for(let i = 0; i < 7; i++) {
         const fromLast = main[i].last(); //getLast(arr);
         for(let j = 0; j < 7; j++) {
@@ -664,13 +689,16 @@ const assessLayout = function() {
         }
     }
     if(stack[0].el.length > 0) {
+        const fromLast = stack[0].last(); //getLast(arr);
         for(j = 0; j < 4; j++) {
-            const fromLast = stack[0].last(); //getLast(arr);
             const toLast = discard[j].last();
-            if(discard[j].el.length === 0 ? fromLast.no === 0 : (fromLast.no === toLast.no + 1) && (fromLast.suit === toLast.suit) ) {
+            if((discard[j].el.length !== 0) && (fromLast.no === toLast.no + 1) && (fromLast.suit === toLast.suit) ) {
                 $(".clickfru")[0].innerHTML += "r 7 " + j + "<br />";
                 //console.log("r 7 " + j);
             }
+        }
+        if(fromLast && fromLast.no === 0) {
+            $(".clickfru")[0].innerHTML += "r 7<br />";
         }
     }
     //stack[0]
