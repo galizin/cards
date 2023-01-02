@@ -611,18 +611,28 @@ const addBtn = function(btnTop, left, width, capt, func) {
     $("#main")[0].append(btn);
 }
 
+const everyNthL = (arr, nth) => arr.filter((e, i, a) => (i % nth === nth - 1) || (i === a.length - 1));
 
 const assessLayout = function() {
-    console.log("assess");
+    //console.log("assess");
+    //const stackfilter = [];
+    //if (stack[0].el.length > 0) {
+      //stackfilter.push(stack[0].last());
+    //}
+    console.log([...new Set((stack[0].el.length > 0 ? [stack[0].last()] : []).concat(everyNthL(stack[1].el, 3))
+        .concat(everyNthL(stack[0].el.concat(stack[1].el), 3)))]);
+    const stackfilter = [...new Set((stack[0].el.length > 0 ? [stack[0].last()] : []).concat(everyNthL(stack[1].el, 3))
+        .concat(everyNthL(stack[0].el.concat(stack[1].el), 3)))];
     $(".clickfru")[0].innerHTML = "<br /><br /><br /><br /><br /><br /><br />";
     for(let i = 0; i < 7; i++) {
+        const fromLast = main[i].last(); //getLast(arr);
         for(let j = 0; j < 7; j++) {
             if(i != j) {
                 for(let k = 0; k < main[j].el.length; k++) {
                     if(main[j].el[k].vis) {
                         if(canMoveToMain(main[j], main[i], main[j].el.length - k)) { //from to howmany
                             $(".clickfru")[0].innerHTML += "s " + j + " " + i + " " + (main[j].el.length - k) + "<br />";
-                            console.log("s " + j + " " + i + " " + (main[j].el.length - k));
+                            //console.log("s " + j + " " + i + " " + (main[j].el.length - k));
                         }
                     }
                 }
@@ -631,24 +641,26 @@ const assessLayout = function() {
         if(stack[0].el.length > 0) {
             if(canMoveToMain(stack[0], main[i], 1)) {
                 $(".clickfru")[0].innerHTML += "s 7 " + i + "<br />";
-                console.log("s 7 " + i);
+                //console.log("s 7 " + i);
             }
         }
         for(j = 0; j < 4; j++) {
             if(discard[j].el.length > 0) {
                 if(canMoveToMain(discard[j], main[i], 1)) {
                     $(".clickfru")[0].innerHTML += "b " + j + " " + i + "<br />";
-                    console.log("b " + j + " " + i);
+                    //console.log("b " + j + " " + i);
                 }
             }
             if(main[i].last()) {
-                const fromLast = main[i].last(); //getLast(arr);
                 const toLast = discard[j].last();
-                if(discard[j].el.length === 0 ? fromLast.no === 0 : (fromLast.no === toLast.no + 1) && (fromLast.suit === toLast.suit) ) {
+                if((discard[j].el.length !== 0) && (fromLast.no === toLast.no + 1) && (fromLast.suit === toLast.suit) ) {
                     $(".clickfru")[0].innerHTML += "r " + i + " " + j + "<br />";
-                    console.log("r " + i + " " + j);
+                    //console.log("r " + i + " " + j);
                 }
             }
+        }
+        if(fromLast && fromLast.no === 0) {
+            $(".clickfru")[0].innerHTML += "r " + i + "<br />";
         }
     }
     if(stack[0].el.length > 0) {
@@ -657,7 +669,7 @@ const assessLayout = function() {
             const toLast = discard[j].last();
             if(discard[j].el.length === 0 ? fromLast.no === 0 : (fromLast.no === toLast.no + 1) && (fromLast.suit === toLast.suit) ) {
                 $(".clickfru")[0].innerHTML += "r 7 " + j + "<br />";
-                console.log("r 7 " + j);
+                //console.log("r 7 " + j);
             }
         }
     }
