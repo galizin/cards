@@ -46,10 +46,14 @@ span.outerspan, button {
 button {
     border-color: black;
 }
+body, html {
+    /*overscroll-behavior-y: contain;*/
+    /*overscroll-behavior: none;*/
+    touch-action: pan-y;
+}
 body {
     margin: 0;
-    touch-action: pan-y;
-    overscroll-behavior-y: contain;
+    overflow: hidden;
 }
 div#main {
     font-size: 24px;
@@ -75,6 +79,8 @@ button {
     position: relative;
 }
 #main, .clickfru {
+    /*overscroll-behavior: none;*/
+    /*overscroll-behavior-y: contain;*/
     touch-action: pan-y;
     width: 100%;
     height: 100%;
