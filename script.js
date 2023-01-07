@@ -647,7 +647,23 @@ const assessLayout = function() {
     const stackfilter = [...new Set([].concat(everyNthL(stack[1].el, 3))
         .concat(everyNthL(stack[0].el.concat(stack[1].el), 3)))].filter((elem) => stack[0].el.length === 0 ? true :
         ((stack[0].last().no !== elem.no) || (stack[0].last().suit !== elem.suit)));
-    const stackpreview = [[], [], []]; 
+    const stackpreview = [[], [], []];
+    stack[1].el.forEach((val, idx, arr) => {stackpreview[idx % 3].push(cardSpan(val));});
+    if (stackpreview[0].length > stackpreview[1].length) {
+        stackpreview[1].push("");
+        stackpreview[2].push(stackpreview[0][stackpreview[0].length - 1]);
+        stackpreview[0][stackpreview[0].length - 1] = "";
+    }
+    if (stackpreview[1].length > stackpreview[2].length) {
+        stackpreview[1].push("");
+        stackpreview[2].push(stackpreview[0][stackpreview[0].length - 1]);
+        stackpreview[0][stackpreview[0].length - 1] = "";
+    }
+    stackpreview[0].push(" ");
+    stackpreview[1].push(" ");
+    stackpreview[2].push(" ");
+    stack[0].el.concat(stack[1].el).forEach((val, idx, arr) => {stackpreview[idx % 3].push(cardSpan(val));});
+    console.log(stackpreview);
     const mainarr = stackfilter.reduce((acc, curr) => {acc.push(""); return acc;}, []);
     const discarr = stackfilter.reduce((acc, curr) => {acc.push(""); return acc;}, []);
     let smove = "";
