@@ -647,14 +647,19 @@ const assessLayout = function() {
     const stackfilter = [...new Set([].concat(everyNthL(stack[1].el, 3))
         .concat(everyNthL(stack[0].el.concat(stack[1].el), 3)))].filter((elem) => stack[0].el.length === 0 ? true :
         ((stack[0].last().no !== elem.no) || (stack[0].last().suit !== elem.suit)));
+    const stackpreview = [[], [], []]; 
     const mainarr = stackfilter.reduce((acc, curr) => {acc.push(""); return acc;}, []);
     const discarr = stackfilter.reduce((acc, curr) => {acc.push(""); return acc;}, []);
     let smove = "";
     let rmove = "";
     let bmove = "";
     let sbackmove = "";
-    $(".clickfru")[0].innerHTML = "<div style=\"position:absolute;bottom:0;\">" + stackfilter.reduce((acc, curr) => acc += cardSpan(curr), "") +
-      "</div><br /><br /><br /><br /><br /><br /><br />";
+    $(".clickfru")[0].innerHTML =
+        "<div style=\"position:absolute;bottom:0;\">" +
+        "<table><tbody><tr>" +
+        stackfilter.reduce((acc, curr) => acc += "<td>" + cardSpan(curr) + "</td>", "") +
+        "</tr></tbody></table>" +
+        "</div><br /><br /><br /><br /><br /><br /><br />";
     for(let i = 0; i < 7; i++) {
         const fromLast = main[i].last(); //getLast(arr);
         for(let j = 0; j < 7; j++) {
