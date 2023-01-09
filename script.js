@@ -641,7 +641,21 @@ const addBtn = function(btnTop, left, width, capt, func) {
     $("#main")[0].append(btn);
 }
 
-const everyNthL = (arr, nth) => arr.filter((e, i, a) => (i % nth === nth - 1) || (i === a.length - 1));
+const everyNthL = (arr, nth) => arr.filter((e, i, a) => (i % nth === nth - 1) || (i === a.length - 1))
+
+const procEnd = (arr) => {
+    if (arr[2].length < arr[1].length) {
+        arr[2].push(arr[1].last());
+        arr[1].splice(-1, 1, arr[0].last());
+        arr[0].splice(-1, 1, " ");
+    }
+    if (arr[1].length < arr[0].length) {
+        arr[2].push(arr[0].last());
+        arr[1].push(" ");
+        arr[0].splice(-1, 1, " ");
+    }
+
+}
 
 const assessLayout = function() {
     //console.log("assess");
@@ -658,7 +672,7 @@ const assessLayout = function() {
         ((stack[0].last().no !== elem.no) || (stack[0].last().suit !== elem.suit)));
     const stackpreview = [[], [], []];
     stack[1].el.forEach((val, idx, arr) => {stackpreview[idx % 3].push(cardSpan(val));});
-    if (stackpreview[2].length < stackpreview[1].length) {
+    /*if (stackpreview[2].length < stackpreview[1].length) {
         stackpreview[2].push(stackpreview[1][stackpreview[1].length - 1]);
         stackpreview[1][stackpreview[1].length - 1] = stackpreview[0][stackpreview[0].length - 1];
         stackpreview[0][stackpreview[0].length - 1] = " ";
@@ -667,11 +681,14 @@ const assessLayout = function() {
         stackpreview[2].push(stackpreview[0][stackpreview[0].length - 1]);
         stackpreview[1].push(" ");
         stackpreview[0][stackpreview[0].length - 1] = " ";
-    }
-    stackpreview[0].push(" ");
-    stackpreview[1].push(" ");
-    stackpreview[2].push(" ");
+    }*/
+    procEnd(stackpreview);
+    stackpreview[0].push("&nbsp");
+    stackpreview[1].push("&nbsp");
+    stackpreview[2].push("&nbsp");
     stack[0].el.concat(stack[1].el).forEach((val, idx, arr) => {stackpreview[idx % 3].push(cardSpan(val));});
+    console.log(stackpreview);
+    procEnd(stackpreview);
     //stack[0].el.concat(stack[1].el).forEach((val, idx, arr) => {console.log(val);});
     console.log(stackpreview);
     const mainarr = stackfilter.reduce((acc, curr) => {acc.push(""); return acc;}, []);
@@ -682,9 +699,12 @@ const assessLayout = function() {
     let sbackmove = "";
     $(".clickfru")[0].innerHTML =
         "<div style=\"position:absolute;bottom:0;\">" +
-        "<table><tbody><tr>" +
-        stackfilter.reduce((acc, curr) => acc += "<td>" + cardSpan(curr) + "</td>", "") +
-        "</tr></tbody></table>" +
+        "<table><tbody>" +
+        //"<tr>" + stackfilter.reduce((acc, curr) => acc += "<td>" + cardSpan(curr) + "</td>", "") + "</tr>" +
+        "<tr class=\"dull\">" + stackpreview[0].reduce((acc, curr) => acc += "<td>" + curr + "</td>", "") + "</tr>" +
+        "<tr class=\"dull\">" + stackpreview[1].reduce((acc, curr) => acc += "<td>" + curr + "</td>", "") + "</tr>" +
+        "<tr>" + stackpreview[2].reduce((acc, curr) => acc += "<td>" + curr + "</td>", "") + "</tr>" +
+        "</tbody></table>" +
         "</div><br /><br /><br /><br /><br /><br /><br />";
     for(let i = 0; i < 7; i++) {
         const fromLast = main[i].last(); //getLast(arr);

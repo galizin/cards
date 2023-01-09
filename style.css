@@ -91,3 +91,9 @@ button {
 td {
     padding: 0;
 }
+tr {
+    line-height: 0.6;
+}
+tr.dull {
+    opacity: 0.4;
+}
