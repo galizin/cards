@@ -1,3 +1,12 @@
+if (!Array.prototype.last){
+    Array.prototype.last = function(){
+        if(this.length === 0)
+            return null;
+        else
+            return this[this.length - 1];
+    };
+};
+
 class Card {
   constructor(suit,no,vis) {
     this.suit = suit;
@@ -649,20 +658,21 @@ const assessLayout = function() {
         ((stack[0].last().no !== elem.no) || (stack[0].last().suit !== elem.suit)));
     const stackpreview = [[], [], []];
     stack[1].el.forEach((val, idx, arr) => {stackpreview[idx % 3].push(cardSpan(val));});
-    if (stackpreview[0].length > stackpreview[1].length) {
-        stackpreview[1].push("");
-        stackpreview[2].push(stackpreview[0][stackpreview[0].length - 1]);
-        stackpreview[0][stackpreview[0].length - 1] = "";
+    if (stackpreview[2].length < stackpreview[1].length) {
+        stackpreview[2].push(stackpreview[1][stackpreview[1].length - 1]);
+        stackpreview[1][stackpreview[1].length - 1] = stackpreview[0][stackpreview[0].length - 1];
+        stackpreview[0][stackpreview[0].length - 1] = " ";
     }
-    if (stackpreview[1].length > stackpreview[2].length) {
-        stackpreview[1].push("");
+    if (stackpreview[1].length < stackpreview[0].length) {
         stackpreview[2].push(stackpreview[0][stackpreview[0].length - 1]);
-        stackpreview[0][stackpreview[0].length - 1] = "";
+        stackpreview[1].push(" ");
+        stackpreview[0][stackpreview[0].length - 1] = " ";
     }
     stackpreview[0].push(" ");
     stackpreview[1].push(" ");
     stackpreview[2].push(" ");
     stack[0].el.concat(stack[1].el).forEach((val, idx, arr) => {stackpreview[idx % 3].push(cardSpan(val));});
+    //stack[0].el.concat(stack[1].el).forEach((val, idx, arr) => {console.log(val);});
     console.log(stackpreview);
     const mainarr = stackfilter.reduce((acc, curr) => {acc.push(""); return acc;}, []);
     const discarr = stackfilter.reduce((acc, curr) => {acc.push(""); return acc;}, []);
