@@ -657,6 +657,20 @@ const procEnd = (arr) => {
 
 }
 
+const doesntHaveLeftBlankOnMain = (cardNo, currPos) => {
+    if (cardNo === 0) {
+        return false;
+    }
+    if (cardNo === 12) {
+        for(let m = 0; m < currPos; m++) {
+            if(main[m].el.length === 0) {
+                return false;
+            }
+        }
+    }
+    return true;
+}
+
 const assessLayout = function() {
     //console.log("assess");
     //const stackfilter = [];
@@ -720,7 +734,9 @@ const assessLayout = function() {
                             //}
                             if(!((main[j].el[k].no === 12)&&(k === 0))) {
                                 if(firstvis) {
-                                    smove += "s " + j + " " + i + " " + (main[j].el.length - k) + "<br />";
+                                    if(doesntHaveLeftBlankOnMain(main[j].el[k].no, i)) {
+                                        smove += "s " + j + " " + i + " " + (main[j].el.length - k) + "<br />";
+                                    }
                                 } else {
                                     sbackmove += "*s " + j + " " + i + " " + (main[j].el.length - k) + "<br />";
                                 }
@@ -735,7 +751,9 @@ const assessLayout = function() {
         if(stack[0].el.length > 0) {
             if(canMoveToMain(stack[0], main[i], 1)) {
                 //$(".clickfru")[0].innerHTML += "s 7 " + i + "<br />";
-                smove += "s 7 " + i + "<br />";
+                if(doesntHaveLeftBlankOnMain(stack[0].last().no, i)) {
+                    smove += "s 7 " + i + "<br />";
+                }
                 //console.log("s 7 " + i);
             }
         }
@@ -743,7 +761,9 @@ const assessLayout = function() {
             if(stackfilter[j] !== "") {
                 if(cardCanMoveToMain(stackfilter[j], main[i], 1)) {
                     //$(".clickfru")[0].innerHTML += "" + j + " s 7 " + i + "<br />";
-                    mainarr[j] += "" + j + " s 7 " + i + "<br />";
+                    if(doesntHaveLeftBlankOnMain(stackfilter[j].no, i)) {
+                        mainarr[j] += "" + j + " s 7 " + i + "<br />";
+                    }
                 }
             }
         }
