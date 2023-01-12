@@ -667,7 +667,7 @@ const assessLayout = function() {
         //.concat(everyNthL(stack[0].el.concat(stack[1].el), 3)))]);
     //const stackfilter = [...new Set((stack[0].el.length > 0 ? [stack[0].last()] : []).concat(everyNthL(stack[1].el, 3))
         //.concat(everyNthL(stack[0].el.concat(stack[1].el), 3)))];
-    const stackfilter = [...new Set([].concat(everyNthL(stack[1].el, 3))
+    const stackfilter = [...new Set([].concat(everyNthL(stack[1].el, 3).concat([""]))
         .concat(everyNthL(stack[0].el.concat(stack[1].el), 3)))].filter((elem) => stack[0].el.length === 0 ? true :
         ((stack[0].last().no !== elem.no) || (stack[0].last().suit !== elem.suit)));
     const stackpreview = [[], [], []];
@@ -687,10 +687,10 @@ const assessLayout = function() {
     stackpreview[1].push("&nbsp");
     stackpreview[2].push("&nbsp");
     stack[0].el.concat(stack[1].el).forEach((val, idx, arr) => {stackpreview[idx % 3].push(cardSpan(val));});
-    console.log(stackpreview);
+    //console.log(stackpreview);
     procEnd(stackpreview);
     //stack[0].el.concat(stack[1].el).forEach((val, idx, arr) => {console.log(val);});
-    console.log(stackpreview);
+    //console.log(stackpreview);
     const mainarr = stackfilter.reduce((acc, curr) => {acc.push(""); return acc;}, []);
     const discarr = stackfilter.reduce((acc, curr) => {acc.push(""); return acc;}, []);
     let smove = "";
@@ -715,10 +715,15 @@ const assessLayout = function() {
                     if(main[j].el[k].vis) {
                         if(canMoveToMain(main[j], main[i], main[j].el.length - k)) { //from to howmany
                             //$(".clickfru")[0].innerHTML += (firstvis ? "" : "*") + "s " + j + " " + i + " " + (main[j].el.length - k) + "<br />";
-                            if(firstvis) {
-                                smove += "s " + j + " " + i + " " + (main[j].el.length - k) + "<br />";
-                            } else {
-                                sbackmove += "*s " + j + " " + i + " " + (main[j].el.length - k) + "<br />";
+                            //if(((main[j].el[k] === 12)&&((main[j].el.length - k) === 0))) {
+                                //console.log("king on " + j + "and is on top");
+                            //}
+                            if(!((main[j].el[k].no === 12)&&(k === 0))) {
+                                if(firstvis) {
+                                    smove += "s " + j + " " + i + " " + (main[j].el.length - k) + "<br />";
+                                } else {
+                                    sbackmove += "*s " + j + " " + i + " " + (main[j].el.length - k) + "<br />";
+                                }
                             }
                             //console.log("s " + j + " " + i + " " + (main[j].el.length - k));
                         }
@@ -735,9 +740,11 @@ const assessLayout = function() {
             }
         }
         for(let j = 0; j < stackfilter.length; j++) {
-            if(cardCanMoveToMain(stackfilter[j], main[i], 1)) {
-                //$(".clickfru")[0].innerHTML += "" + j + " s 7 " + i + "<br />";
-                mainarr[j] += "" + j + " s 7 " + i + "<br />";
+            if(stackfilter[j] !== "") {
+                if(cardCanMoveToMain(stackfilter[j], main[i], 1)) {
+                    //$(".clickfru")[0].innerHTML += "" + j + " s 7 " + i + "<br />";
+                    mainarr[j] += "" + j + " s 7 " + i + "<br />";
+                }
             }
         }
         for(let j = 0; j < 4; j++) {
@@ -781,17 +788,19 @@ const assessLayout = function() {
         //if(canMoveToMain(stackfilter[j], main[i], 1)) {
             //$(".clickfru")[0].innerHTML += "" + j + " s 7 " + i + "<br />";
         //}
-        for(let j = 0; j < 4; j++) {
-            const toLast = discard[j].last();
-            if((discard[j].el.length !== 0) && (stackfilter[k].no === toLast.no + 1) && (stackfilter[k].suit === toLast.suit) ) {
-                //$(".clickfru")[0].innerHTML += "" + k + " r 7 " + j + "<br />";
-                discarr[k] += "" + k + " r 7 " + j + "<br />";
-                //console.log("r 7 " + j);
+        if(stackfilter[k] !== "" ) {
+            for(let j = 0; j < 4; j++) {
+                const toLast = discard[j].last();
+                if((discard[j].el.length !== 0) && (stackfilter[k].no === toLast.no + 1) && (stackfilter[k].suit === toLast.suit) ) {
+                    //$(".clickfru")[0].innerHTML += "" + k + " r 7 " + j + "<br />";
+                    discarr[k] += "" + k + " r 7 " + j + "<br />";
+                    //console.log("r 7 " + j);
+                }
             }
-        }
-        if(stackfilter[k].no === 0) {
-            //$(".clickfru")[0].innerHTML += "" + k + " r 7<br />";
-            discarr[k] += "" + k + " r 7<br />";
+            if(stackfilter[k].no === 0) {
+                //$(".clickfru")[0].innerHTML += "" + k + " r 7<br />";
+                discarr[k] += "" + k + " r 7<br />";
+            }
         }
     }
     $(".clickfru")[0].innerHTML += smove + rmove + mainarr.reduce((acc, el, idx) => acc += el + discarr[idx], "") +
