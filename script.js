@@ -710,6 +710,7 @@ const assessLayout = function() {
     let smove = "";
     let rmove = "";
     let bmove = "";
+    const divider = " &nbsp;&nbsp; ";
     let sbackmove = "";
     $(".clickfru")[0].innerHTML =
         "<div style=\"position:absolute;bottom:0;\">" +
@@ -718,8 +719,8 @@ const assessLayout = function() {
         "<tr class=\"dull\">" + stackpreview[0].reduce((acc, curr) => acc += "<td>" + curr + "</td>", "") + "</tr>" +
         "<tr class=\"dull\">" + stackpreview[1].reduce((acc, curr) => acc += "<td>" + curr + "</td>", "") + "</tr>" +
         "<tr>" + stackpreview[2].reduce((acc, curr) => acc += "<td>" + curr + "</td>", "") + "</tr>" +
-        "</tbody></table>" +
-        "</div><br /><br /><br /><br /><br /><br /><br />";
+        "</tbody></table></div>"; // +
+        //"</div><br /><br /><br /><br /><br /><br /><br />";
     for(let i = 0; i < 7; i++) {
         const fromLast = main[i].last(); //getLast(arr);
         for(let j = 0; j < 7; j++) {
@@ -735,10 +736,10 @@ const assessLayout = function() {
                             if(!((main[j].el[k].no === 12)&&(k === 0))) {
                                 if(firstvis) {
                                     if(doesntHaveLeftBlankOnMain(main[j].el[k].no, i)) {
-                                        smove += "s " + j + " " + i + " " + (main[j].el.length - k) + "<br />";
+                                        smove += "s " + j + " " + i + " " + (main[j].el.length - k) + divider; //<br />";
                                     }
                                 } else {
-                                    sbackmove += "*s " + j + " " + i + " " + (main[j].el.length - k) + "<br />";
+                                    sbackmove += "*s " + j + " " + i + " " + (main[j].el.length - k) + divider; //<br />";
                                 }
                             }
                             //console.log("s " + j + " " + i + " " + (main[j].el.length - k));
@@ -752,7 +753,7 @@ const assessLayout = function() {
             if(canMoveToMain(stack[0], main[i], 1)) {
                 //$(".clickfru")[0].innerHTML += "s 7 " + i + "<br />";
                 if(doesntHaveLeftBlankOnMain(stack[0].last().no, i)) {
-                    smove += "s 7 " + i + "<br />";
+                    smove += "s 7 " + i + divider; //<br />";
                 }
                 //console.log("s 7 " + i);
             }
@@ -762,7 +763,7 @@ const assessLayout = function() {
                 if(cardCanMoveToMain(stackfilter[j], main[i], 1)) {
                     //$(".clickfru")[0].innerHTML += "" + j + " s 7 " + i + "<br />";
                     if(doesntHaveLeftBlankOnMain(stackfilter[j].no, i)) {
-                        mainarr[j] += "" + j + " s 7 " + i + "<br />";
+                        mainarr[j] += "" + j + " s 7 " + i + divider; //<br />";
                     }
                 }
             }
@@ -771,7 +772,7 @@ const assessLayout = function() {
             if(discard[j].el.length > 0) {
                 if(canMoveToMain(discard[j], main[i], 1)) {
                     //$(".clickfru")[0].innerHTML += "b " + j + " " + i + "<br />";
-                    bmove += "b " + j + " " + i + "<br />";
+                    bmove += "b " + j + " " + i + divider; //<br />";
                     //console.log("b " + j + " " + i);
                 }
             }
@@ -779,14 +780,14 @@ const assessLayout = function() {
                 const toLast = discard[j].last();
                 if((discard[j].el.length !== 0) && (fromLast.no === toLast.no + 1) && (fromLast.suit === toLast.suit) ) {
                     //$(".clickfru")[0].innerHTML += "r " + i + " " + j + "<br />";
-                    rmove += "r " + i + " " + j + "<br />";
+                    rmove += "r " + i + " " + j + divider; //<br />";
                     //console.log("r " + i + " " + j);
                 }
             }
         }
         if(fromLast && fromLast.no === 0) {
             //$(".clickfru")[0].innerHTML += "r " + i + "<br />";
-            rmove += "r " + i + "<br />";
+            rmove += "r " + i + divider; //<br />";
         }
     }
     if(stack[0].el.length > 0) {
@@ -795,13 +796,13 @@ const assessLayout = function() {
             const toLast = discard[j].last();
             if((discard[j].el.length !== 0) && (fromLast.no === toLast.no + 1) && (fromLast.suit === toLast.suit) ) {
                 //$(".clickfru")[0].innerHTML += "r 7 " + j + "<br />";
-                rmove += "r 7 " + j + "<br />";
+                rmove += "r 7 " + j + divider; //<br />";
                 //console.log("r 7 " + j);
             }
         }
         if(fromLast && fromLast.no === 0) {
             //$(".clickfru")[0].innerHTML += "r 7<br />";
-            rmove += "r 7<br />";
+            rmove += "r 7" + divider; // <br />";
         }
     }
     for(let k = 0; k < stackfilter.length; k++) {
@@ -813,19 +814,20 @@ const assessLayout = function() {
                 const toLast = discard[j].last();
                 if((discard[j].el.length !== 0) && (stackfilter[k].no === toLast.no + 1) && (stackfilter[k].suit === toLast.suit) ) {
                     //$(".clickfru")[0].innerHTML += "" + k + " r 7 " + j + "<br />";
-                    discarr[k] += "" + k + " r 7 " + j + "<br />";
+                    discarr[k] += "" + k + " r 7 " + j + divider; // + "<br />";
                     //console.log("r 7 " + j);
                 }
             }
             if(stackfilter[k].no === 0) {
                 //$(".clickfru")[0].innerHTML += "" + k + " r 7<br />";
-                discarr[k] += "" + k + " r 7<br />";
+                discarr[k] += "" + k + " r 7" + divider; //<br />";
             }
         }
     }
-    $(".clickfru")[0].innerHTML += smove + rmove + mainarr.reduce((acc, el, idx) => acc += el + discarr[idx], "") +
+    $(".clickfru")[0].innerHTML += "<div style=\"position:absolute;bottom:0;\">" +
+      smove + rmove + mainarr.reduce((acc, el, idx) => acc += el + discarr[idx], "") +
       //discarr.reduce((acc, el) => acc + el, "") +
-      sbackmove + bmove;
+      sbackmove + bmove + "<br /><br /><br /><br /></div>";
     //mainarr
     //discarr
     //smove
